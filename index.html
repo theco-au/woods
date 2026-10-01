@@ -658,9 +658,124 @@ function checks(){
     <tr class="tot"><td>Total excluded</td><td></td><td></td><td>${F(exT)}</td><td></td></tr></tbody></table></div></section>`;
 }
 
+/* ---------- North America (billings and Xero only; no payroll source yet) ---------- */
+const U=()=>DATA.usa;
+const FU=n=>(n<0?'-':'')+'US$'+Math.abs(Math.round(n||0)).toLocaleString('en-AU');
+function uMonths(){
+  const u=U(), ms=u.months, cur=u.current;
+  if(PER==='YTD') return ms.map(m=>m.key);
+  if(PER==='QTD'){ const q=ms.find(m=>m.key===cur).q; return ms.filter(m=>m.q===q).map(m=>m.key); }
+  if(PER==='CUR') return [cur];
+  return ms.some(m=>m.key===PER)?[PER]:[cur];
+}
+function uPerName(){
+  const u=U(), k=uMonths(), lab=kk=>u.months.find(m=>m.key===kk).label;
+  if(PER==='YTD') return u.year+' year to date';
+  if(PER==='QTD') return 'Quarter to date ('+lab(k[0])+(k.length>1?' to '+lab(k[k.length-1]):'')+')';
+  return lab(k[0])+(k[0]===u.current?' to date':'');
+}
+function uRecs(ks){
+  const u=U(), S=(o)=>ks.reduce((s,k)=>s+(o[k]||0),0);
+  return Object.keys(u.recs).map(n=>{const r=u.recs[n];return {name:n,perm:S(r.perm),temp:S(r.temp),n:S(r.n),coordN:u.place.filter(p=>p.coord===n&&p.rec!==n&&ks.includes(p.m)).length};})
+    .map(r=>Object.assign(r,{tot:r.perm+r.temp}));
+}
+function uBars(rows){
+  const mx=Math.max(...rows.map(r=>r.tot),1);
+  return `<div class="beb"><div class="lg"><span><i class="g"></i>Permanent fees</span><span><i class="c"></i>Temp margin</span><span>Credited to the recruiter in column A, in the month of the start date.</span></div>
+  ${rows.map(r=>`<div class="row"><div class="who"><div class="nm">${esc(r.name)}</div><div class="rl">${r.n} placement${r.n===1?'':'s'}${r.coordN?' · coordinated '+r.coordN:''}</div></div>
+    <div class="track"><div class="base"></div><div class="seg gain" style="left:0;width:${r.perm/mx*100}%"></div><div class="seg cost" style="left:${r.perm/mx*100}%;width:${r.temp/mx*100}%"></div></div>
+    <div class="amt">${FU(r.tot)}<small>${r.temp?'temp '+FU(r.temp):'perm only'}</small></div>
+    <div class="mx zero">${r.n?FU(r.perm/r.n):'—'}<small>avg perm fee</small></div></div>`).join('')}</div>`;
+}
+function uMonthTable(){
+  const u=U(), names=Object.keys(u.recs);
+  const val=(n,k)=>(u.recs[n].perm[k]||0)+(u.recs[n].temp[k]||0);
+  const X=u.xero||{}, cur=u.current;
+  const tot=k=>names.reduce((s,n)=>s+val(n,k),0);
+  return `<div class="tbl cmp"><table><thead><tr><th>Recruiter</th>${u.months.map(m=>`<th>${m.short.split(' ')[0]}</th>`).join('')}<th>${u.year} YTD</th></tr></thead><tbody>
+    ${names.map(n=>`<tr><td><b style="color:var(--ink)">${esc(n)}</b></td>${u.months.map(m=>{const v=val(n,m.key);return `<td class="${v?'':'mut'}">${v?F(v):'—'}</td>`;}).join('')}<td style="font-weight:700">${F(u.months.reduce((s,m)=>s+val(n,m.key),0))}</td></tr>`).join('')}
+    <tr class="tot"><td>Billing sheet</td>${u.months.map(m=>`<td>${F(tot(m.key))}</td>`).join('')}<td>${F(u.months.reduce((s,m)=>s+tot(m.key),0))}</td></tr>
+    ${XON&&Object.keys(X).length?`<tr class="sub"><td>Xero revenue</td>${u.months.map(m=>`<td>${X[m.key]?F(X[m.key].rev)+(m.key===cur?'*':''):'—'}</td>`).join('')}<td></td></tr>
+    <tr class="sub"><td>Xero net profit</td>${u.months.map(m=>`<td class="${X[m.key]&&m.key!==cur?(X[m.key].np<0?'neg':'pos'):'mut'}">${X[m.key]?F(X[m.key].np):'—'}</td>`).join('')}<td></td></tr>`:''}
+  </tbody></table></div>`;
+}
+function uXero(){
+  if(!XON) return '';
+  const u=U(), X=u.xero||{}, cur=u.current, ks=uMonths(), closed=ks.filter(k=>k!==cur&&X[k]);
+  if(!Object.keys(X).length) return `<section class="blk"><div class="hd"><h2>Xero profit and loss</h2></div>
+    <div class="flag"><div><div class="ft">Xero North America is not connected yet</div><div class="fd">Figures appear here once the North America Xero organisation is authorised and the nightly sync has run.</div></div></div></section>`;
+  const S=f=>closed.reduce((s,k)=>s+(X[k][f]||0),0);
+  const L=[['Revenue','rev',1,''],['Cost of sales','cos',-1,''],['Gross profit','gp',1,''],['Other income','oth',1,''],['Operating expenses','opex',-1,''],['Net profit','np',1,'tot']];
+  const bill=uRecs(closed).reduce((s,r)=>s+r.tot,0);
+  return `<section class="blk"><div class="hd"><h2>Xero profit and loss</h2><div class="rt">Unreviewed ledger figures · synced ${esc((DATA.xero||{}).syncedAt||'')}</div></div>
+    <p class="note">Straight from the North America Xero file, in its base currency, before month-end review. The month in progress is left out of totals.</p>
+    <div class="tbl"><table><thead><tr><th>${closed.length?closed.map(k=>u.months.find(m=>m.key===k).short).join(', '):esc(uPerName())}</th><th>Xero</th></tr></thead><tbody>
+      ${closed.length?L.map(([l,f,sg,cl])=>{const v=S(f)*sg;return `<tr class="${cl}"><td>${l}</td><td class="${v<0?'neg':''}">${F(v)}</td></tr>`}).join('')
+        +`<tr class="sub"><td>Billing sheet, same months</td><td>${F(bill)}</td></tr><tr class="sub"><td>Xero revenue less billing sheet</td><td class="${S('rev')-bill<0?'neg':''}">${F(S('rev')-bill)}</td></tr>`
+        :'<tr><td colspan="2" class="tx mut">No closed month in this period yet</td></tr>'}
+    </tbody></table></div></section>`;
+}
+function uSummary(){
+  const u=U(), ks=uMonths(), rows=uRecs(ks).filter(r=>r.tot||r.n||r.coordN).sort((a,b)=>b.tot-a.tot);
+  const pl=u.place.filter(p=>ks.includes(p.m)), tot=rows.reduce((s,r)=>s+r.tot,0), perm=rows.reduce((s,r)=>s+r.perm,0), n=rows.reduce((s,r)=>s+r.n,0);
+  const unpaid=pl.filter(p=>!p.paid&&p.fee).reduce((s,p)=>s+p.fee,0), repl=pl.filter(p=>p.repl).length;
+  return `<div class="kpis">
+    <div class="kpi"><div class="lab">Billings</div><div class="val">${F(tot)}</div><div class="sub">Permanent ${F(perm)}, temp margin ${F(tot-perm)}. US dollars.</div></div>
+    <div class="kpi"><div class="lab">Placements</div><div class="val">${n}</div><div class="sub">Fee-earning permanent starts.${repl?' Plus '+repl+' free replacement'+(repl>1?'s':'')+'.':''}</div></div>
+    <div class="kpi"><div class="lab">Average permanent fee</div><div class="val">${n?F(perm/n):'—'}</div><div class="sub">Permanent fees ÷ placements.</div></div>
+    <div class="kpi"><div class="lab">Not yet received</div><div class="val ${unpaid?'amb':''}">${F(unpaid)}</div><div class="sub">Lines marked UNPAID in the billing sheet for this period.</div></div>
+  </div>
+  <div class="flag"><div><div class="ft">Billings only for now</div><div class="fd">There is no payroll connection for North America yet, so cost of employment, multiples and contribution are not shown. Figures are in US dollars and are not converted.</div></div></div>
+  <section class="blk"><div class="hd"><h2>Billings by recruiter, ${esc(uPerName())}</h2><div class="rt">Sorted by billings</div></div>${rows.length?uBars(rows):'<p class="note">Nothing billed in this period yet.</p>'}</section>
+  <section class="blk"><div class="hd"><h2>Month by month</h2><div class="rt">${u.year}, calendar year</div></div>${uMonthTable()}</section>
+  ${uXero()}`;
+}
+function uPlacements(){
+  const u=U(), ks=uMonths(), pl=u.place.filter(p=>ks.includes(p.m)).slice().sort((a,b)=>a.d<b.d?1:-1);
+  const dt=d=>{const [y,m,dd]=d.split('-');return +dd+' '+u.months[+m-1].label.split(' ')[0].slice(0,3)+' '+y;};
+  return `<section class="blk"><div class="hd"><h2>Placements, ${esc(uPerName())}</h2><div class="rt">${pl.length} lines</div></div>
+    <p class="note">From the billing sheet's Confirmed tab. Candidate names are not brought into the dashboard.</p>
+    <div class="tbl"><table><thead><tr><th>Start</th><th>Recruiter</th><th>Coordinator</th><th>Client</th><th>Role</th><th>Fee</th><th>Type</th><th>Received</th></tr></thead><tbody>
+    ${pl.length?pl.map(p=>`<tr><td>${dt(p.d)}</td><td class="tx">${esc(p.rec)}</td><td class="tx mut">${esc(p.coord||'')}</td><td class="tx">${esc(p.client)}</td><td class="tx">${esc(p.role)}${p.note?`<br><span class="mut" style="font-size:12px">${esc(p.note)}</span>`:''}</td>
+      <td>${p.fee?F(p.fee):'<span class="mut">nil</span>'}</td><td class="tx mut">${p.temp?'Temp':p.repl?'Replacement':'Perm'}</td><td class="tx ${p.paid?'pos':p.fee?'neg':'mut'}">${p.paid?'Paid':p.fee?'Unpaid':'—'}</td></tr>`).join('')
+      :'<tr><td colspan="8" class="mut">None</td></tr>'}
+    <tr class="tot"><td>Total</td><td colspan="4"></td><td>${F(pl.reduce((s,p)=>s+p.fee,0))}</td><td colspan="2"></td></tr></tbody></table></div></section>`;
+}
+function uChecks(){
+  const c=U().checks||[];
+  return `<section class="blk"><div class="hd"><h2>Checks</h2><div class="rt">${c.length} items</div></div>
+    <div class="flag ok"><div><div class="ft">Reconciled to the billing sheet</div><div class="fd">Each recruiter's monthly total is compared with the sheet's own Team Member Summary tab. Any difference is listed below.</div></div></div>
+    ${c.map(r=>`<div class="flag ${r.lvl==='high'?'hi':r.lvl==='low'?'ok':''}"><div><div class="ft">${esc(r.t)}</div><div class="fd">${esc(r.d)}</div></div></div>`).join('')}</section>`;
+}
+function paintUSA(){
+  const u=U(), e=DATA.ents.U;
+  document.getElementById('mTitle').textContent='Billings by recruiter, live';
+  document.getElementById('mName').textContent=e.name;
+  document.getElementById('mBasis').textContent='US dollars · calendar year '+(u?u.year:'');
+  document.getElementById('mLede').innerHTML='Billings by recruiter from the North America billing sheet, with the North America Xero profit and loss. No payroll source yet, so no cost or multiples.';
+  document.getElementById('asat').textContent='Live at '+DATA.generated+(DATA.cached?' (cached)':'');
+  if(!u||!u.ok){ document.getElementById('seg').innerHTML=''; document.getElementById('tabs').innerHTML='';
+    document.getElementById('content').innerHTML=`<div class="err">North America figures are not available.${u&&u.checks&&u.checks[0]?' '+esc(u.checks[0].t)+'.':''}</div>`; return; }
+  if(!(PER==='CUR'||PER==='QTD'||PER==='YTD'||u.months.some(m=>m.key===PER))) PER='CUR';
+  const cm=u.months.find(m=>m.key===u.current);
+  const opts=[{p:'CUR',t:cm.short+' to date'}].concat(u.months.filter(m=>m.key!==u.current).slice().reverse().map(m=>({p:m.key,t:m.short})))
+    .concat([{p:'QTD',t:'Quarter to date'},{p:'YTD',t:u.year+' YTD'}]);
+  document.getElementById('seg').innerHTML=opts.map(o=>`<button class="${o.p===PER?'on':''}" data-p="${o.p}">${o.t}</button>`).join('');
+  const ks=uMonths(), tot=uRecs(ks).reduce((s,r)=>s+r.tot,0);
+  const tabs=[{id:'sum',t:'Summary',s:F(tot)+' billed'},{id:'upl',t:'Placements',s:u.place.filter(p=>ks.includes(p.m)).length+' lines'},{id:'uchk',t:'Checks',s:(u.checks||[]).length+' items'}];
+  if(!tabs.some(x=>x.id===TAB)) TAB='sum';
+  document.getElementById('tabs').innerHTML=tabs.map(p=>`<button class="tab${p.id===TAB?' on':''}" role="tab" data-p="${esc(p.id)}">${esc(p.t)}<span class="sub">${p.s}</span></button>`).join('');
+  TIPS.length=0;
+  document.getElementById('content').innerHTML=TAB==='upl'?uPlacements():TAB==='uchk'?uChecks():uSummary();
+  bindTips();
+}
+
 /* ---------- shell ---------- */
 function paint(){
   if(!DATA) return;
+  if(ENT==='U'){ paintUSA(); return; }
+  document.getElementById('mTitle').textContent='Billings against cost, live';
+  if(!DATA.months.some(m=>m.key===PER)&&!['CUR','QTD','YTD'].includes(PER)) PER='CUR';
   const e=DATA.ents[ENT], mm=M();
   document.getElementById('mName').textContent=e.name;
   document.getElementById('mBasis').textContent='Multiples '+DATA.mult.BASIS;
@@ -678,7 +793,7 @@ function paint(){
   const ds=deptsOf(ENT).filter(d=>{const a=deptAgg(d.name);return a.c||a.b;});
   const tabs=[{id:'sum',t:'Summary',s:F(entAgg().b)+' billed'}]
     .concat(ds.map(d=>{const a=deptAgg(d.name);return {id:d.name,t:d.label,s:d.fee?F(a.b)+' · '+X(a.mult):F(a.c)+' cost'}}))
-    .concat(Object.keys(DATA.ents).length>1?[{id:'chk',t:'Data checks',s:(DATA.warnings||[]).length+' items'}]:[]);
+    .concat(DATA.ents.R&&DATA.ents.S?[{id:'chk',t:'Data checks',s:(DATA.warnings||[]).length+' items'}]:[]);
   if(!tabs.some(x=>x.id===TAB)) TAB='sum';
   document.getElementById('tabs').innerHTML=tabs.map(p=>`<button class="tab${p.id===TAB?' on':''}" role="tab" data-p="${esc(p.id)}">${esc(p.t)}<span class="sub">${p.s}</span></button>`).join('');
   TIPS.length=0;
@@ -771,7 +886,7 @@ function start(){
 }
 document.getElementById('tabs').addEventListener('click',ev=>{const b=ev.target.closest('.tab');if(!b)return;TAB=b.dataset.p;paint();window.scrollTo({top:0});});
 document.getElementById('seg').addEventListener('click',ev=>{const b=ev.target.closest('button');if(!b)return;PER=b.dataset.p;paint();});
-document.getElementById('entsel').addEventListener('change',ev=>{ENT=ev.target.value;TAB='sum';paint();window.scrollTo({top:0});});
+document.getElementById('entsel').addEventListener('change',ev=>{ENT=ev.target.value;TAB='sum';PER='CUR';paint();window.scrollTo({top:0});});
 document.getElementById('refresh').addEventListener('click',()=>load(true));
 {const xo=document.getElementById('xon'); xo.checked=XON;
  xo.addEventListener('change',()=>{XON=xo.checked; try{localStorage.setItem('woodsXero',XON?'on':'off');}catch(e){} if(DATA) paint();});}
