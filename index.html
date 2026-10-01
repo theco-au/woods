@@ -659,7 +659,10 @@ function checks(){
 }
 
 /* ---------- North America (billings and Xero only; no payroll source yet) ---------- */
-const U=()=>DATA.usa;
+const U=()=>{const u=DATA.usa;
+  /* the US Xero file reports all overheads under "Other Income and Expense": show them as operating expenses */
+  if(u&&u.xero&&!u._n){Object.keys(u.xero).forEach(k=>{const x=u.xero[k];if(!x.opex&&x.oth<0){x.opex=-x.oth;x.oth=0;}});u._n=1;}
+  return u;};
 const FU=n=>(n<0?'-':'')+'US$'+Math.abs(Math.round(n||0)).toLocaleString('en-AU');
 function uMonths(){
   const u=U(), ms=u.months, cur=u.current;
@@ -695,8 +698,10 @@ function uMonthTable(){
   return `<div class="tbl cmp"><table><thead><tr><th>Recruiter</th>${u.months.map(m=>`<th>${m.short.split(' ')[0]}</th>`).join('')}<th>${u.year} YTD</th></tr></thead><tbody>
     ${names.map(n=>`<tr><td><b style="color:var(--ink)">${esc(n)}</b></td>${u.months.map(m=>{const v=val(n,m.key);return `<td class="${v?'':'mut'}">${v?F(v):'—'}</td>`;}).join('')}<td style="font-weight:700">${F(u.months.reduce((s,m)=>s+val(n,m.key),0))}</td></tr>`).join('')}
     <tr class="tot"><td>Billing sheet</td>${u.months.map(m=>`<td>${F(tot(m.key))}</td>`).join('')}<td>${F(u.months.reduce((s,m)=>s+tot(m.key),0))}</td></tr>
-    ${XON&&Object.keys(X).length?`<tr class="sub"><td>Xero revenue</td>${u.months.map(m=>`<td>${X[m.key]?F(X[m.key].rev)+(m.key===cur?'*':''):'—'}</td>`).join('')}<td></td></tr>
-    <tr class="sub"><td>Xero net profit</td>${u.months.map(m=>`<td class="${X[m.key]&&m.key!==cur?(X[m.key].np<0?'neg':'pos'):'mut'}">${X[m.key]?F(X[m.key].np):'—'}</td>`).join('')}<td></td></tr>`:''}
+    ${XON&&Object.keys(X).length?(()=>{const pm=k=>names.reduce((s,n)=>s+(u.recs[n].perm[k]||0),0), xf=k=>X[k]?(X[k].fees||0):0, cl=u.months.filter(m=>m.key!==cur&&X[m.key]);
+      return `<tr class="sub"><td>Xero permanent fees</td>${u.months.map(m=>`<td>${X[m.key]?F(xf(m.key)):'—'}</td>`).join('')}<td>${F(cl.reduce((s,m)=>s+xf(m.key),0))}</td></tr>
+    <tr class="sub"><td>Less sheet permanent fees</td>${u.months.map(m=>{const d=xf(m.key)-pm(m.key);return `<td class="${!X[m.key]||m.key===cur?'mut':Math.abs(d)<1?'mut':'amb'}">${X[m.key]&&m.key!==cur?F(d):'—'}</td>`;}).join('')}<td>${F(cl.reduce((s,m)=>s+xf(m.key)-pm(m.key),0))}</td></tr>`;})()+`
+    <tr class="sub"><td>Xero net profit</td>${u.months.map(m=>`<td class="${X[m.key]&&m.key!==cur?(X[m.key].np<0?'neg':'pos'):'mut'}">${X[m.key]?F(X[m.key].np):'—'}</td>`).join('')}<td>${F(u.months.filter(m=>m.key!==cur&&X[m.key]).reduce((s,m)=>s+X[m.key].np,0))}</td></tr>`:''}
   </tbody></table></div>`;
 }
 function uXero(){
@@ -705,13 +710,13 @@ function uXero(){
   if(!Object.keys(X).length) return `<section class="blk"><div class="hd"><h2>Xero profit and loss</h2></div>
     <div class="flag"><div><div class="ft">Xero North America is not connected yet</div><div class="fd">Figures appear here once the North America Xero organisation is authorised and the nightly sync has run.</div></div></div></section>`;
   const S=f=>closed.reduce((s,k)=>s+(X[k][f]||0),0);
-  const L=[['Revenue','rev',1,''],['Cost of sales','cos',-1,''],['Gross profit','gp',1,''],['Other income','oth',1,''],['Operating expenses','opex',-1,''],['Net profit','np',1,'tot']];
-  const bill=uRecs(closed).reduce((s,r)=>s+r.tot,0);
+  const L=[['Revenue','rev',1,''],['of which permanent fees (Recruitment Fees)','fees',1,'sub'],['Cost of sales','cos',-1,''],['Gross profit','gp',1,''],['Other income','oth',1,''],['Operating expenses','opex',-1,''],['Net profit','np',1,'tot']];
+  const bill=uRecs(closed).reduce((s,r)=>s+r.perm,0);
   return `<section class="blk"><div class="hd"><h2>Xero profit and loss</h2><div class="rt">Unreviewed ledger figures · synced ${esc((DATA.xero||{}).syncedAt||'')}</div></div>
-    <p class="note">Straight from the North America Xero file, in its base currency, before month-end review. The month in progress is left out of totals.</p>
+    <p class="note">Straight from Woods &amp; Co Recruitment LLC in Xero, in its base currency, before month-end review. The month in progress is left out of totals. The file reports overheads, payroll and payroll taxes under "Other Income and Expense"; they are shown here as operating expenses. Revenue also includes temp billings at their gross amount, so the tie to the billing sheet uses permanent fees only.</p>
     <div class="tbl"><table><thead><tr><th>${closed.length?closed.map(k=>u.months.find(m=>m.key===k).short).join(', '):esc(uPerName())}</th><th>Xero</th></tr></thead><tbody>
       ${closed.length?L.map(([l,f,sg,cl])=>{const v=S(f)*sg;return `<tr class="${cl}"><td>${l}</td><td class="${v<0?'neg':''}">${F(v)}</td></tr>`}).join('')
-        +`<tr class="sub"><td>Billing sheet, same months</td><td>${F(bill)}</td></tr><tr class="sub"><td>Xero revenue less billing sheet</td><td class="${S('rev')-bill<0?'neg':''}">${F(S('rev')-bill)}</td></tr>`
+        +`<tr class="sub"><td>Billing sheet permanent fees, same months</td><td>${F(bill)}</td></tr><tr class="sub"><td>Xero permanent fees less billing sheet</td><td class="${S('fees')-bill<0?'neg':''}">${F(S('fees')-bill)}</td></tr>`
         :'<tr><td colspan="2" class="tx mut">No closed month in this period yet</td></tr>'}
     </tbody></table></div></section>`;
 }
