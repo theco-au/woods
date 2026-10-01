@@ -56,8 +56,10 @@
   .gcard .brand{justify-content:center;margin-bottom:26px}
   .gcard h1{font-size:26px;color:#fff;font-weight:800;letter-spacing:-.02em;margin-bottom:8px}
   .gcard p{font-size:14px;color:#a7a197;margin-bottom:22px}
-  #gbtn{display:flex;justify-content:center;min-height:44px}
+  #gbtn{display:flex;justify-content:center;margin-top:12px}
   #gmsg{margin-top:18px;font-size:13.5px;color:#e88c78;min-height:1em}
+  #gmsg.ok{color:#9fd3b6}
+  .gfine{font-size:12px;color:#78736a;margin-top:6px}
   .entbar label.xtog{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:600;letter-spacing:0;
     text-transform:none;color:#bdb7ab;cursor:pointer;user-select:none}
   .xtog input{appearance:none;width:30px;height:17px;border-radius:9px;background:#35312c;position:relative;cursor:pointer;margin:0;transition:.15s}
@@ -190,7 +192,6 @@
   footer b{color:#ddd8cd;font-weight:600}
   footer p{max-width:92ch;margin-top:9px}
 </style>
-<script src="https://accounts.google.com/gsi/client" async></script>
 </head>
 <body>
 
@@ -216,7 +217,7 @@
 <path d="M101.5 4.2H91.6V30.2H101.5C109.6 30.2 114.4 25.3 114.4 17.2C114.4 9.1 109.6 4.2 101.5 4.2ZM107.3 17.2C107.3 21.9 105.3 24.3 101.3 24.3H98.3V10.1H101.3C105.3 10.1 107.3 12.5 107.3 17.2Z"/>
 </svg></div>
   <h1 id="gt">Woods Group Live Dashboard</h1>
-  <p>Sign in with your Google account. Access is limited to people approved by The Co.</p>
+  <p>Access is limited to people approved by The Co. You stay signed in on this device for 30 days.</p>
   <div id="gbtn"></div>
   <div id="gmsg" role="status"></div>
 </div></section>
@@ -691,55 +692,82 @@ function setEnts(){
   sel.disabled=ks.length<2;
 }
 const CFG={API:'https://script.google.com/macros/s/AKfycbzCsVX8lzipOX6Hpui-nXtsqjCnO_MmoPi5SS6HG4_McB2Q8juYUeN78XZPX9Rpc3JO/exec',CLIENT_ID:'705103533614-2s1q015k6lnknrd14dt0rlqksp8d0bnn.apps.googleusercontent.com'};
-let TOKEN=null, TOKEN_EXP=0, ME=null;
-function jwtBody(t){try{let p=t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');p+='==='.slice((p.length+3)%4);
-  return JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(p),c=>c.charCodeAt(0))));}catch(e){return null;}}
-function lock(msg){
-  TOKEN=null; DATA=null; document.body.classList.add('locked');
-  document.getElementById('content').innerHTML=''; document.getElementById('who').hidden=true;
-  document.getElementById('gmsg').textContent=msg||'';
+const SKEY='woodsSession', DKEY='woodsData', FRESH_MS=10*60*1000;
+let SESSION=null, ME=null;
+const ls={get:k=>{try{return JSON.parse(localStorage.getItem(k)||'null');}catch(e){return null;}},set:(k,v)=>{try{v==null?localStorage.removeItem(k):localStorage.setItem(k,JSON.stringify(v));}catch(e){}}};
+const ss={get:k=>{try{return JSON.parse(sessionStorage.getItem(k)||'null');}catch(e){return null;}},set:(k,v)=>{try{v==null?sessionStorage.removeItem(k):sessionStorage.setItem(k,JSON.stringify(v));}catch(e){}}};
+const $=id=>document.getElementById(id);
+function msg(t,ok){const m=$('gmsg');m.textContent=t||'';m.className=ok?'ok':'';}
+function lock(t){
+  SESSION=null; DATA=null; ls.set(SKEY,null); ss.set(DKEY,null); document.body.classList.add('locked');
+  $('content').innerHTML=''; $('who').hidden=true; msg(t); useGoogle();
 }
 function showWho(){
-  const w=document.getElementById('who'), pic=document.getElementById('whoPic');
-  document.getElementById('whoName').textContent=ME.name;
+  const w=$('who'), pic=$('whoPic');
+  $('whoName').textContent=ME.name||ME.email;
   pic.innerHTML='';
   if(/^https:\/\/lh3\.googleusercontent\.com\//.test(ME.pic||'')){const i=document.createElement('img');i.src=ME.pic;i.alt='';i.referrerPolicy='no-referrer';pic.appendChild(i);}
-  else{const s=document.createElement('span');s.className='ini';s.textContent=(ME.name||'?').trim().charAt(0).toUpperCase();pic.appendChild(s);}
+  else{const s=document.createElement('span');s.className='ini';s.textContent=(ME.name||ME.email||'?').trim().charAt(0).toUpperCase();pic.appendChild(s);}
   w.hidden=false;
 }
-function onCred(resp){
-  const t=resp&&resp.credential, p=t&&jwtBody(t);
-  if(!p){lock('Sign-in did not complete. Try again.');return;}
-  TOKEN=t; TOKEN_EXP=(p.exp||0)*1000; ME={name:p.given_name||p.name||p.email,email:p.email,pic:p.picture};
-  document.getElementById('gmsg').textContent='Checking access…';
-  load(false);
-}
 function api(body){
-  return fetch(CFG.API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(Object.assign({idToken:TOKEN},body)),
+  return fetch(CFG.API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body),
     credentials:'omit',cache:'no-store',redirect:'follow',referrerPolicy:'no-referrer'})
     .then(r=>r.ok?r.json():{ok:false,error:'unavailable'}).catch(()=>({ok:false,error:'unavailable'}));
 }
-function load(force){
-  if(!TOKEN||Date.now()>TOKEN_EXP-60000){ lock(TOKEN?'Your sign-in has expired. Sign in again.':''); try{google.accounts.id.prompt();}catch(e){} return; }
-  const btn=document.getElementById('refresh'); btn.disabled=true; btn.textContent='Refreshing…';
+/* a sign-in response carries a 30-day session and the first data load */
+function signedIn(r,pic){
+  SESSION={t:r.session,x:r.exp*1000,n:r.name,e:r.email,p:pic||''}; ls.set(SKEY,SESSION);
+  ME={name:SESSION.n,email:SESSION.e,pic:SESSION.p}; msg('');
+  got(r.data);
+}
+function got(d){
+  DATA=d; ss.set(DKEY,{at:Date.now(),e:SESSION&&SESSION.e,d:d});
+  document.body.classList.remove('locked'); showWho(); setEnts(); paint();
+  const btn=$('refresh'); btn.disabled=false; btn.textContent='Refresh data';
+}
+function load(force,quiet){
+  if(!SESSION||Date.now()>SESSION.x-60000){ lock(SESSION?'Your 30-day sign-in has ended. Sign in again.':''); return; }
+  const btn=$('refresh'); btn.disabled=true; btn.textContent=quiet?'Updating…':'Refreshing…';
   const done=d=>{DATA=d; setEnts(); btn.disabled=false; btn.textContent='Refresh data'; paint();};
   const fail=err=>{btn.disabled=false; btn.textContent='Refresh data';
     document.getElementById('content').innerHTML=`<div class="err">${esc(err&&err.message||'The dashboard could not load.')}</div>`+(DATA?'':'');
     if(DATA) paint();};
-  api({action:'data',force:!!force}).then(r=>{
-    if(r.ok){ document.body.classList.remove('locked'); document.getElementById('gmsg').textContent=''; showWho(); done(r.data); return; }
+  api({action:'data',session:SESSION.t,force:!!force}).then(r=>{
+    if(r.ok){ got(r.data); return; }
     btn.disabled=false; btn.textContent='Refresh data';
-    if(r.error==='denied'){ const em=ME&&ME.email; lock((em?em+' is':'This account is')+' not on the list for this dashboard. Contact The Co if you need access.'); try{google.accounts.id.disableAutoSelect();}catch(e){} return; }
-    if(!DATA){ lock(r.error==='busy'?'The dashboard is busy. Try again in a minute.':'The dashboard is unavailable right now. Try again shortly.'); return; }
-    fail({message:r.error==='busy'?'Too many refreshes. Showing the last load; try again in a minute.':'Could not refresh. Showing the last load.'});
+    if(r.error==='denied'){ lock('Your access has ended or your sign-in is no longer valid. Sign in again, or contact The Co.'); return; }
+    if(!DATA){ $('content').innerHTML=`<div class="err">${r.error==='busy'?'The dashboard is busy. Try again in a minute.':'The dashboard is unavailable right now. Try again shortly.'}</div>`; return; }
+    if(!quiet) $('asat').textContent=r.error==='busy'?'Too many refreshes: showing the last load, try again in a minute':'Could not refresh: showing the last load';
   });
 }
-document.getElementById('signout').addEventListener('click',()=>{ try{google.accounts.id.disableAutoSelect();}catch(e){} lock('Signed out.'); });
-function startSignIn(n){
-  if(!(window.google&&google.accounts&&google.accounts.id)){ if(n>100){document.getElementById('gmsg').textContent='Google sign-in could not load. Check your connection and reload.';return;} setTimeout(()=>startSignIn(n+1),100); return; }
-  google.accounts.id.initialize({client_id:CFG.CLIENT_ID,callback:onCred,auto_select:true,cancel_on_tap_outside:false,itp_support:true,use_fedcm_for_prompt:true,context:'signin'});
-  google.accounts.id.renderButton(document.getElementById('gbtn'),{theme:'filled_black',size:'large',shape:'pill',text:'signin_with',logo_alignment:'left'});
-  google.accounts.id.prompt();
+$('signout').addEventListener('click',()=>{ try{google.accounts.id.disableAutoSelect();}catch(e){} lock('Signed out.'); });
+function onCred(resp){
+  const t=resp&&resp.credential; if(!t){msg('Google sign-in did not complete. Try again.');return;}
+  let pic=''; try{pic=JSON.parse(atob(t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))).picture||'';}catch(e){}
+  msg('Signing in and loading the dashboard…',true);
+  api({action:'google',idToken:t}).then(r=>{
+    if(r.ok){ signedIn(r,pic); return; }
+    if(r.error==='denied'){ msg('That Google account is not on the list for this dashboard. Contact The Co if you need access.'); try{google.accounts.id.disableAutoSelect();}catch(e){} return; }
+    msg('Could not sign in right now. Try again shortly.');
+  });
+}
+function useGoogle(){
+  const go=()=>{ if($('gbtn').childElementCount) return; google.accounts.id.initialize({client_id:CFG.CLIENT_ID,callback:onCred,auto_select:false,itp_support:true,use_fedcm_for_prompt:true,context:'signin'});
+    google.accounts.id.renderButton($('gbtn'),{theme:'filled_black',size:'large',shape:'pill',text:'signin_with',logo_alignment:'left'}); };
+  if(window.google&&google.accounts&&google.accounts.id){go();return;}
+  const sc=document.createElement('script'); sc.src='https://accounts.google.com/gsi/client'; sc.async=true;
+  sc.onload=go; sc.onerror=()=>msg('Google sign-in could not load. Check your connection and reload the page.');
+  document.head.appendChild(sc);
+}
+/* start: a saved session opens straight away, from this tab's saved data if it has any */
+function start(){
+  const s=ls.get(SKEY);
+  if(!(s&&s.t&&s.x>Date.now()+60000)){ ls.set(SKEY,null); document.body.classList.add('locked'); useGoogle(); return; }
+  SESSION=s; ME={name:s.n,email:s.e,pic:s.p};
+  const c=ss.get(DKEY);
+  if(c&&c.d&&c.e===s.e){ got(c.d); if(Date.now()-c.at>FRESH_MS) load(false,true); return; }
+  document.body.classList.remove('locked'); showWho(); load(false);
 }
 document.getElementById('tabs').addEventListener('click',ev=>{const b=ev.target.closest('.tab');if(!b)return;TAB=b.dataset.p;paint();window.scrollTo({top:0});});
 document.getElementById('seg').addEventListener('click',ev=>{const b=ev.target.closest('button');if(!b)return;PER=b.dataset.p;paint();});
@@ -747,8 +775,7 @@ document.getElementById('entsel').addEventListener('change',ev=>{ENT=ev.target.v
 document.getElementById('refresh').addEventListener('click',()=>load(true));
 {const xo=document.getElementById('xon'); xo.checked=XON;
  xo.addEventListener('change',()=>{XON=xo.checked; try{localStorage.setItem('woodsXero',XON?'on':'off');}catch(e){} if(DATA) paint();});}
-document.body.classList.add('locked');
-startSignIn(0);
+start();
 })();
 </script>
 </body>
