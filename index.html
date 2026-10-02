@@ -989,10 +989,19 @@ function showWho(){
   else{const s=document.createElement('span');s.className='ini';s.textContent=(ME.name||ME.email||'?').trim().charAt(0).toUpperCase();pic.appendChild(s);}
   w.hidden=false;
 }
+/* the API gzips the data when asked (z:1): smaller, and keeps the reply well inside Apps Script's limits */
+const ZOK=typeof DecompressionStream==='function'&&typeof Response==='function';
+function inflate(b64){
+  const bin=atob(b64), u=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) u[i]=bin.charCodeAt(i);
+  return new Response(new Blob([u]).stream().pipeThrough(new DecompressionStream('gzip'))).text().then(t=>JSON.parse(t));
+}
 function api(body){
+  if(ZOK) body=Object.assign({z:1},body);
   return fetch(CFG.API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body),
     credentials:'omit',cache:'no-store',redirect:'follow',referrerPolicy:'no-referrer'})
-    .then(r=>r.ok?r.json():{ok:false,error:'unavailable'}).catch(()=>({ok:false,error:'unavailable'}));
+    .then(r=>r.ok?r.json():{ok:false,error:'unavailable'})
+    .then(r=>r&&r.dz?inflate(r.dz).then(d=>{r.data=d; delete r.dz; return r;}):r)
+    .catch(()=>({ok:false,error:'unavailable'}));
 }
 /* a sign-in response carries a 30-day session and the first data load */
 function signedIn(r,pic){
