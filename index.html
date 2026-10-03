@@ -168,26 +168,48 @@
         border:1px solid var(--line);border-left:3px solid var(--bench);margin-bottom:9px;align-items:flex-start}
   .flag.hi{border-left-color:var(--loss)}
   .flag.ok{border-left-color:var(--gain)}
+  .flag+.blk{margin-top:30px}
   .flag .ft{font-size:13.5px;color:var(--ink);font-weight:600}
   .flag .fd{font-size:13px;color:var(--body);margin-top:2px}
   .load{font-family:var(--mono);color:var(--mid);font-size:13px}
   .loading{padding:80px 0;text-align:center;color:var(--mid);font-size:15px}
   .err{background:var(--loss-bg);color:var(--loss);border-radius:10px;padding:14px 18px;margin-bottom:20px;font-size:14px}
 
-  .tip{position:fixed;z-index:999;display:none;background:#171613;color:#e9e5dc;border:1px solid #35312c;
-    border-radius:10px;padding:12px 14px;font-size:12.5px;line-height:1.5;max-width:330px;box-shadow:0 10px 28px rgba(0,0,0,.3);pointer-events:none}
+  .tip{position:fixed;z-index:999;display:none;background:#171613;color:#e9e5dc;border:1px solid #35312c;border-radius:10px;
+    padding:12px 14px;font-size:12.5px;line-height:1.5;width:max-content;max-width:min(430px,calc(100vw - 16px));
+    box-shadow:0 10px 28px rgba(0,0,0,.3);pointer-events:none}
   .tip .th{font-size:13px;font-weight:700;color:#fff;margin-bottom:2px}
   .tip .ts{font-size:11.5px;color:#8f8a80;margin-bottom:9px}
-  .tip table{width:100%;border-collapse:collapse;font-size:12px;background:transparent}
-  .tip{width:max-content;max-width:min(400px,calc(100vw - 16px))}
-  .tip td:first-child{min-width:0;white-space:normal;font-weight:400;color:#bdb7ab}
-  .tip td{padding:3px 0;border:none;color:#bdb7ab;text-align:left;white-space:nowrap;font-family:var(--sans)}
-  .tip td:last-child{text-align:right;font-family:var(--mono);color:#e9e5dc;padding-left:16px}
+  .tip .tx{max-width:340px;white-space:normal;color:#ddd8cd;font-size:12.5px;line-height:1.55}
+  .tip .tn{margin-top:8px;font-size:11.5px;color:#8f8a80;max-width:340px;white-space:normal}
+  .tip table{width:100%;border-collapse:collapse;font-size:12px;background:transparent;border:none}
+  .tip td{padding:3px 0;border:none;background:transparent;color:#bdb7ab;text-align:left;font-family:var(--sans);font-weight:400;
+    vertical-align:top;white-space:normal;min-width:0}
+  .tip td:first-child{padding-right:18px;min-width:110px;font-weight:400;color:#bdb7ab}
+  .tip td:last-child{text-align:right;font-family:var(--mono);color:#e9e5dc;white-space:nowrap}
+  .tip tr.w td{white-space:normal;text-align:left;font-family:var(--sans);color:#bdb7ab;padding-right:0}
+  .tip tr.w .tv{color:#e9e5dc;font-size:12px}
+  .tip .tsub{display:block;font-size:11px;color:#8f8a80;line-height:1.35}
   .tip tr.s td{border-top:1px solid #3a352e;padding-top:6px;color:#fff;font-weight:600}
   .tip tr.g td{border-top:1px solid #3a352e;padding-top:6px}
+  .tip tr.h td{padding-top:8px;color:#8f8a80;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
   .tip .up{color:#7fc4a2}.tip .dn{color:#e88c78}
   [data-tip]{cursor:help}
   [data-tip]:focus-visible{outline:2px solid var(--bench);outline-offset:1px}
+  td[data-tip]:hover{background:#f6f3ec;box-shadow:inset 0 -2px 0 #e3d3a8}
+  tr.tot td[data-tip]:hover{background:#ebe6da}
+  .kpi .val[data-tip]:hover,.kpi .chip[data-tip]:hover,.kpi .sub [data-tip]:hover,.flag [data-tip]:not(.info):hover{text-decoration:underline dotted #b9b2a4;text-underline-offset:5px}
+  .info{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;border:1.4px solid currentColor;
+    color:var(--faint);font:italic 700 10.5px/1 Georgia,'Times New Roman',serif;margin-left:7px;vertical-align:2px;cursor:help;flex:none;
+    user-select:none;text-decoration:none!important}
+  .info:hover,.info:focus-visible{color:var(--ink);outline:none}
+  header.top .info{color:#78736a}
+  header.top .info:hover,header.top .info:focus-visible{color:#fff}
+  .kpi .lab{display:flex;align-items:center}
+  header.top .lede{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:13px;margin-bottom:24px}
+  .lchip{display:inline-flex;gap:6px;align-items:baseline;background:#1d1b18;border:1px solid #2e2b27;border-radius:20px;
+    padding:4px 12px;font-size:12.5px;color:#a7a197}
+  .lchip b{font-family:var(--mono);color:#fff;font-weight:700}
 
   footer{background:var(--black);color:#b6b1a6;padding:30px 0 36px;font-size:12.5px;line-height:1.65}
   footer .logo{height:22px;margin-bottom:14px}footer .logo path{fill:#e4e0d6}
@@ -336,10 +358,44 @@ function entAgg(){
 }
 const mvc=m=>m>=M().tg?'ok':m>=M().be?'mid':'bad';
 
-/* ---------- tooltips ---------- */
+/* ---------- tooltips, breakdowns and info icons ---------- */
 const TIPS=[];
 const TIP=h=>{TIPS.push(h);return ` data-tip="${TIPS.length-1}"`;};
-const r2=(a,b,c)=>`<tr class="${c||''}"><td>${a}</td><td>${b}</td></tr>`;
+const strip=s=>String(s==null?'':s).replace(/<[^>]+>/g,'');
+const NUMV=/^[-+]?(US)?\$?[\d,.]+[×%*]?$|^×[\d.,]+$/;
+/* tooltip row: a text value too long to sit beside its label goes underneath it, so nothing is cut off */
+const r2=(a,b,c)=>{const t=strip(b).trim();
+  return t.length>14&&!NUMV.test(t)?`<tr class="w ${c||''}"><td colspan="2">${a}<div class="tv">${b}</div></td></tr>`
+    :`<tr class="${c||''}"><td>${a}</td><td>${b}</td></tr>`;};
+const tipHead=(t,s)=>`<div class="th">${t}</div>${s?`<div class="ts">${s}</div>`:''}`;
+/* (i) icon: explanations sit here rather than on the page */
+const INFO=(txt,ttl)=>`<span class="info" role="note" aria-label="${esc(strip(txt))}"${TIP((ttl?`<div class="th">${ttl}</div>`:'')+`<div class="tx">${txt}</div>`)}>i</span>`;
+const SG=(v,f)=>`<span class="${v>=0?'up':'dn'}">${v>=0?'+':''}${(f||F)(v)}</span>`;
+const PCT=v=>(v*100).toFixed(Math.abs(v)<0.1&&v!==0?1:0)+'%';
+const CNT=n=>String(Math.round(n||0));
+/* breakdown of a figure. items: {l: label, v: value, s: sub-label, f: formatted value}. Largest first unless keepOrder/sort. */
+function BD(title,sub,items,opt){
+  opt=opt||{}; const fmt=opt.fmt||F, fv=x=>x.f!=null?x.f:opt.signed?SG(x.v,fmt):fmt(x.v);
+  let its=items.filter(x=>x&&(opt.keepZero||x.f!=null||Math.abs(x.v||0)>=0.5));
+  if(opt.sort==='val') its=its.slice().sort((a,b)=>(b.v||0)-(a.v||0));
+  else if(!opt.keepOrder) its=its.slice().sort((a,b)=>Math.abs(b.v||0)-Math.abs(a.v||0));
+  const MAX=opt.max||14, cut=its.length>MAX, show=cut?its.slice(0,MAX-1):its, rest=cut?its.slice(MAX-1):[];
+  let t=tipHead(title,sub)+'<table>';
+  (opt.before||[]).forEach(r=>{if(r) t+=r2(r[0],r[1],r[2]);});
+  if(!its.length) t+=r2(opt.empty||'Nothing in this period','');
+  show.forEach(x=>{t+=r2(esc(x.l)+(x.s?`<span class="tsub">${esc(x.s)}</span>`:''),fv(x),x.c);});
+  if(rest.length){const rv=rest.reduce((s,x)=>s+(x.v||0),0); t+=r2(rest.length+' others',opt.signed?SG(rv,fmt):fmt(rv));}
+  if(opt.total!=null) t+=r2(opt.totLab||'Total',opt.signed?SG(opt.total,fmt):fmt(opt.total),'s');
+  (opt.after||[]).forEach(r=>{if(r) t+=r2(r[0],r[1],r[2]);});
+  return TIP(t+'</table>'+(opt.note?`<div class="tn">${opt.note}</div>`:''));
+}
+/* a calculation: rows [label, value, class] */
+const CALC=(title,sub,rows,note)=>TIP(tipHead(title,sub)+'<table>'+rows.filter(Boolean).map(r=>r2(r[0],r[1],r[2])).join('')+'</table>'+(note?`<div class="tn">${note}</div>`:''));
+const flag=(title,info,cls)=>`<div class="flag ${cls||''}"><div class="ft">${title}${info?INFO(info):''}</div></div>`;
+const mShort=k=>{const m=allMonths().concat(DATA.fwd||[]).find(x=>x.key===k);return m?m.short:k;};
+const pc=(e,k,f)=>((e.cost||{})[k]||{})[f]||0;
+const xMult=(be,tg)=>[['Break-even',be.toFixed(2)+'×','g'],tg>be+1e-9?['Target',tg.toFixed(2)+'×']:null];
+
 function empTip(e){
   const a=e.a, mm=M(), ks=perMonths(), one=ks.length===1?ks[0]:null, x1=one&&e.cost[one];
   let t=`<div class="th">${esc(e.name)}</div><div class="ts">${esc(e.role||e.type||'')}${e.salesName?' · sheet "'+esc(e.salesName)+'"':''}${e.alloc<1?' · '+Math.round(e.alloc*100)+'% allocated':''}</div><table>`;
@@ -361,17 +417,24 @@ function empTip(e){
   const r=roll3(e); if(r.c&&!e.agg) t+=r2('Last 3 closed months','×'+r.mult.toFixed(2)+' ('+F(r.b)+' on '+F(r.c)+')','g');
   return t+'</table>';
 }
-let tipEl=null;
+let tipEl=null, tipY=0;
 function bindTips(){
-  if(!tipEl){tipEl=document.createElement('div');tipEl.className='tip';document.body.appendChild(tipEl);}
-  const show=el=>{const h=TIPS[+el.dataset.tip]; if(h==null) return; tipEl.innerHTML=h;tipEl.style.display='block';
-    const r=el.getBoundingClientRect(),t=tipEl.getBoundingClientRect();
-    let x=r.left+r.width/2-t.width/2,y=r.top-t.height-10; if(y<8)y=r.bottom+10;
-    x=Math.max(8,Math.min(x,window.innerWidth-t.width-8)); tipEl.style.left=x+'px';tipEl.style.top=y+'px';};
+  if(!tipEl){tipEl=document.createElement('div');tipEl.className='tip';tipEl.setAttribute('role','tooltip');document.body.appendChild(tipEl);
+    window.addEventListener('scroll',()=>{if(Math.abs(window.scrollY-tipY)>4) tipEl.style.display='none';},{passive:true});}
+  const show=(el,ev)=>{const h=TIPS[+el.dataset.tip]; if(h==null) return; tipY=window.scrollY;
+    tipEl.innerHTML=h; tipEl.style.left='0px'; tipEl.style.top='0px'; tipEl.style.display='block';
+    const r=el.getBoundingClientRect(), t=tipEl.getBoundingClientRect(), W=window.innerWidth, H=window.innerHeight;
+    const cx=(ev&&ev.clientX!=null&&r.width>420)?ev.clientX:r.left+r.width/2;
+    let x=cx-t.width/2, y=r.top-t.height-10;
+    if(y<8){ y=r.bottom+10;
+      if(y+t.height>H-8){ y=Math.max(8,Math.min(r.top+r.height/2-t.height/2,H-t.height-8));
+        const wide=ev&&ev.clientX!=null&&r.width>420, L=wide?ev.clientX:r.left, R=wide?ev.clientX:r.right;
+        x=R+16+t.width<=W-8?R+16:L-t.width-16; } }
+    x=Math.max(8,Math.min(x,W-t.width-8)); tipEl.style.left=x+'px'; tipEl.style.top=y+'px';};
   const hide=()=>{tipEl.style.display='none';};
   document.querySelectorAll('[data-tip]').forEach(el=>{ if(el.dataset.tb)return; el.dataset.tb='1';
     if(!el.hasAttribute('tabindex'))el.tabIndex=0;
-    el.addEventListener('mouseenter',()=>show(el)); el.addEventListener('mouseleave',hide);
+    el.addEventListener('mouseenter',ev=>show(el,ev)); el.addEventListener('mouseleave',hide);
     el.addEventListener('focus',()=>show(el)); el.addEventListener('blur',hide); });
 }
 
@@ -380,6 +443,15 @@ function teamRowFor(d,a){
   if(!a.team) return null; const mm=M(), c=a.billed?0:a.c;
   return {name:d.label+' team',role:a.billed?'Sales sheet line not split by person':'Sales sheet bills as a team; cost is the whole department',team:true,
     a:{c:c,b:a.team,bev:c*mm.be,tgt:c*mm.tg,gap:a.team-c*mm.tg,mult:c?a.team/c:0}};
+}
+function teamTip(r){
+  const a=r.a, mm=M(), ks=perMonths(), dn=(DATA.depts.find(d=>d.label+' team'===r.name)||{}).name, t=DATA.team[dn]||{};
+  let h=tipHead(esc(r.name),esc(r.role))+'<table>';
+  if(ks.length>1) ks.forEach(k=>{h+=r2(esc(mShort(k)),F(t[k]||0));});
+  h+=r2('Billings (GP), team line',F(a.b),ks.length>1?'s':'');
+  if(a.c){ h+=r2('Department cost',F(a.c),'g')+r2('Break-even ×'+mm.be.toFixed(2),F(a.bev)); if(goal()) h+=r2('Target ×'+mm.tg.toFixed(2),F(a.tgt));
+    h+=r2('Billings per $1 of cost','×'+a.mult.toFixed(2),'s'); }
+  return h+'</table>';
 }
 /* ---------- bars ---------- */
 function bars(rows,teamRow){
@@ -393,7 +465,7 @@ function bars(rows,teamRow){
    ${all.map(r=>{const a=r.a,c=a.c,b=a.b,cw=c/mx*100,bw=b/mx*100,bev=a.bev/mx*100,tg=a.tgt/mx*100,sup=!r.team&&isSup(r)&&!(b>0&&!r.agg);
      const seg=b>=c?`<div class="seg cost" style="left:0;width:${cw}%"></div><div class="seg gain" style="left:${cw}%;width:${Math.max(bw-cw,0)}%"></div>`
                    :`<div class="seg cost" style="left:0;width:${bw}%"></div><div class="seg short" style="left:${bw}%;width:${Math.max(cw-bw,0)}%"></div>`;
-     return `<div class="row"${r.team?'':TIP(empTip(r))}>
+     return `<div class="row"${TIP(r.team?teamTip(r):empTip(r))}>
        <div class="who"><div class="nm">${esc(r.name)}${a.est?'<span class="est">est.</span>':''}</div><div class="rl">${esc(r.role||'')}</div></div>
        <div class="track"><div class="base"></div>${seg}
          ${c?`${two?`<div class="bevm" style="left:${Math.min(bev,99.5)}%"></div>`:''}<div class="bench" style="left:${Math.min(tg,99.4)}%"><b>${F(a.tgt)}</b></div>`:''}</div>
@@ -404,251 +476,354 @@ function bars(rows,teamRow){
 }
 
 /* ---------- summary ---------- */
+const word=()=>goal()?'target':'break-even';
+const refMult=()=>goal()?M().tg:M().be;
 function monthTable(){
-  const mm=M(), fee=deptsOf(ENT).filter(d=>d.fee);
-  const save=PER; const rows=DATA.months.map(m=>{PER=m.key;const a=entAgg();return {m,a};}); PER=save;
-  const T=rows.reduce((s,r)=>({b:s.b+r.a.b,c:s.c+r.a.c}),{b:0,c:0});
+  const mm=M(), g=goal(), fee=deptsOf(ENT).filter(d=>d.fee), save=PER;
+  const rows=DATA.months.map(m=>{PER=m.key;
+    const a=entAgg(), D=fee.map(d=>({d,a:deptAgg(d.name)})).filter(x=>x.a.c||x.a.b), lab=m.label, ref=g?a.tgt:a.bev, gp=a.b-ref;
+    const days=new Date(+m.key.slice(0,4),+m.key.slice(5,7),0).getDate(), pays=(DATA.pays||{})[m.key];
+    return {m,a,ref,gp,
+      tb:BD('Billings (GP), '+lab,'By department',D.map(x=>({l:x.d.label,v:x.a.b})),{total:a.b}),
+      tc:BD('Fee-team cost, '+lab,'By department',D.map(x=>({l:x.d.label,v:x.a.c})),{total:a.c,after:[['Base pay, leave and allowances',F(D.reduce((s,x)=>s+x.a.g,0)),'g'],['Superannuation',F(D.reduce((s,x)=>s+x.a.s,0))],['Payroll tax and WorkCover',F(D.reduce((s,x)=>s+x.a.pt+x.a.wc,0))]]}),
+      tbe:CALC('Break-even, '+lab,'',[['Fee-team cost',F(a.c)],['× Break-even multiple',mm.be.toFixed(2)+'×'],['= Break-even billings',F(a.bev),'s']]),
+      ttg:CALC('Target, '+lab,'',[['Fee-team cost',F(a.c)],['× Target multiple',mm.tg.toFixed(2)+'×'],['= Target billings',F(a.tgt),'s']]),
+      tgp:BD('Gap to '+word()+', '+lab,'By department',D.map(x=>({l:x.d.label,v:x.a.b-(g?x.a.tgt:x.a.bev)})),{signed:true,sort:'val',keepZero:true,total:gp}),
+      tm:CALC('Multiple, '+lab,'',[['Billings (GP)',F(a.b)],['÷ Fee-team cost',F(a.c)],['= Billings per $1 of cost',X(a.mult),'s']].concat(xMult(mm.be,mm.tg))),
+      tk:m.key===DATA.current.key?CALC('Cost basis, '+lab,'',[['Estimated to day',DATA.current.day+' of '+DATA.current.days],['From','each person\'s FoundU pay rate for the days employed']])
+        :CALC('Cost basis, '+lab,'',[['FoundU weekly pays in the month',String(pays||'?')],['Normalised to',(days/7).toFixed(2)+' weeks ('+days+' days ÷ 7)']])};});
+  PER=save;
+  const T=rows.reduce((s,r)=>({b:s.b+r.a.b,c:s.c+r.a.c}),{b:0,c:0}), Tref=g?T.c*mm.tg:T.c*mm.be;
+  const byM=(ttl,f,signed)=>BD(ttl+', '+DATA.fy+' to date','By month',rows.map(r=>({l:r.m.short,v:f(r)})),{keepOrder:true,keepZero:true,signed,total:rows.reduce((s,r)=>s+f(r),0)});
   return `<div class="tbl"><table><thead><tr><th>Month</th><th>Billings (GP)</th><th>Fee-team cost</th><th>Break-even</th>
-    ${goal()?'<th>Target</th>':''}<th>Gap to ${goal()?'target':'break-even'}</th><th>Multiple</th><th>Cost basis</th></tr></thead><tbody>
-    ${rows.map(({m,a})=>{const ref=goal()?a.tgt:a.bev, gp=a.b-ref;return `<tr><td>${m.label}</td><td>${F(a.b)}</td><td>${F(a.c)}</td><td class="mut">${F(a.bev)}</td>
-      ${goal()?`<td>${F(a.tgt)}</td>`:''}<td class="${gp>=0?'pos':'neg'}">${gp>=0?'+'+F(gp):F(gp)}</td>
-      <td class="${mvc(a.mult)}" style="font-weight:700">${X(a.mult)}</td>
-      <td class="tx mut">${m.key===DATA.current.key?'Estimate to day '+DATA.current.day:'FoundU, '+((DATA.pays||{})[m.key]||'?')+' pays normalised'}</td></tr>`}).join('')}
-    <tr class="tot"><td>${DATA.fy} to date</td><td>${F(T.b)}</td><td>${F(T.c)}</td><td>${F(T.c*mm.be)}</td>${goal()?`<td>${F(T.c*mm.tg)}</td>`:''}
-      <td class="${T.b-(goal()?T.c*mm.tg:T.c*mm.be)>=0?'pos':'neg'}">${F(T.b-(goal()?T.c*mm.tg:T.c*mm.be))}</td><td>${X(T.c?T.b/T.c:0)}</td><td></td></tr>
+    ${g?'<th>Target</th>':''}<th>Gap to ${word()}</th><th>Multiple</th><th>Cost basis</th></tr></thead><tbody>
+    ${rows.map(r=>{const a=r.a;return `<tr><td>${r.m.label}</td><td${r.tb}>${F(a.b)}</td><td${r.tc}>${F(a.c)}</td><td class="mut"${r.tbe}>${F(a.bev)}</td>
+      ${g?`<td${r.ttg}>${F(a.tgt)}</td>`:''}<td class="${r.gp>=0?'pos':'neg'}"${r.tgp}>${r.gp>=0?'+'+F(r.gp):F(r.gp)}</td>
+      <td class="${mvc(a.mult)}" style="font-weight:700"${r.tm}>${X(a.mult)}</td>
+      <td class="tx mut"${r.tk}>${r.m.key===DATA.current.key?'Estimate to day '+DATA.current.day:'FoundU, '+((DATA.pays||{})[r.m.key]||'?')+' pays'}</td></tr>`}).join('')}
+    <tr class="tot"><td>${DATA.fy} to date</td><td${byM('Billings (GP)',r=>r.a.b)}>${F(T.b)}</td><td${byM('Fee-team cost',r=>r.a.c)}>${F(T.c)}</td>
+      <td${CALC('Break-even, '+DATA.fy+' to date','',[['Fee-team cost',F(T.c)],['× Break-even multiple',mm.be.toFixed(2)+'×'],['= Break-even billings',F(T.c*mm.be),'s']])}>${F(T.c*mm.be)}</td>
+      ${g?`<td${CALC('Target, '+DATA.fy+' to date','',[['Fee-team cost',F(T.c)],['× Target multiple',mm.tg.toFixed(2)+'×'],['= Target billings',F(T.c*mm.tg),'s']])}>${F(T.c*mm.tg)}</td>`:''}
+      <td class="${T.b-Tref>=0?'pos':'neg'}"${byM('Gap to '+word(),r=>r.gp,true)}>${F(T.b-Tref)}</td>
+      <td${CALC('Multiple, '+DATA.fy+' to date','',[['Billings (GP)',F(T.b)],['÷ Fee-team cost',F(T.c)],['= Billings per $1 of cost',X(T.c?T.b/T.c:0),'s']])}>${X(T.c?T.b/T.c:0)}</td><td></td></tr>
   </tbody></table></div>`;
 }
 function tempGP(dn){const ks=perMonths();return (DATA.excluded||[]).filter(x=>/Temp/.test(x.why)&&x.dept===dn&&ks.includes(x.month)).reduce((s,x)=>s+x.amt,0);}
+/* tooltips for one department's figures in the selected period */
+function deptTips(d,a,pn){
+  const mm=M(), g=goal(), lab=esc(d.label), team=a.team?[{l:'Team line (sales sheet)',v:a.team}]:[], tg=tempGP(d.name);
+  const P=f=>a.mem.map(e=>({l:e.name,s:isSup(e)&&!e.a.b?'desk support':'',v:f(e.a,e)}));
+  const gapOf=x=>x.b-(g?x.tgt:x.bev);
+  return {
+    b:BD(lab+': billings (GP)',pn,P(x=>x.b).concat(team),{total:a.b,after:[tg?['Temp GP not counted',F(tg),'g']:null]}),
+    c:BD(lab+': cost',pn,P(x=>x.c),{total:a.c,after:[['Base pay, leave and allowances',F(a.g),'g'],['Superannuation',F(a.s)],['Payroll tax',F(a.pt)],['WorkCover',F(a.wc)]]}),
+    be:BD(lab+': break-even',pn+' · each person\'s cost × '+mm.be.toFixed(2),P(x=>x.bev),{total:a.bev}),
+    tg:BD(lab+': target',pn+' · each person\'s cost × '+mm.tg.toFixed(2),P(x=>x.tgt),{total:a.tgt}),
+    gap:BD(lab+': gap to '+word(),pn+' · billings less each person\'s '+word(),P(gapOf).concat(team),{signed:true,sort:'val',total:gapOf(a)}),
+    m:CALC(lab+': multiple',pn,[['Billings (GP)',F(a.b)],['÷ Cost',F(a.c)],['= Billings per $1 of cost',X(a.mult),'s']].concat(xMult(mm.be,mm.tg))),
+    h:BD(lab+': on payroll',pn+' · cost in the period',a.mem.filter(e=>e.a.c>0&&!e.agg).map(e=>({l:e.name,s:e.role||'',v:e.a.c})),{total:a.c}),
+    bl:BD(lab+': billed',pn,a.mem.filter(e=>e.a.b>0).map(e=>({l:e.name,v:e.a.b})).concat(team),{total:a.b}),
+    ct:CALC(lab+': contribution',pn,[['Billings (GP)',F(a.b)],['Less commission accrued (sheet)',F(-a.ca)],['Less cost of employment',F(-a.c)],['Less share of overhead',F(-a.oh)],['= Contribution',SG(a.ct),'s']],
+      'Overhead is non-payroll Xero operating expenses per head, shared by everyone on payroll.')};
+}
 function scorecard(){
-  const fee=deptsOf(ENT).filter(d=>d.fee), non=deptsOf(ENT).filter(d=>!d.fee), t=entAgg();
+  const fee=deptsOf(ENT).filter(d=>d.fee), non=deptsOf(ENT).filter(d=>!d.fee), t=entAgg(), mm=M(), g=goal(), pn=esc(perName());
   const rows=fee.map(d=>({d,a:deptAgg(d.name)})).filter(x=>x.a.c||x.a.b).sort((x,y)=>y.a.gap-x.a.gap);
-  return `<div class="tbl"><table><thead><tr><th>Department</th><th>Billings (GP)</th><th>Cost</th><th>Break-even</th>${goal()?'<th>Target</th>':''}
+  const D=(ttl,f,o)=>BD(ttl+', fee departments',pn,rows.map(x=>({l:x.d.label,v:f(x.a)})),Object.assign({total:rows.reduce((s,x)=>s+f(x.a),0)},o||{}));
+  const tg=t.b-(g?t.tgt:t.bev);
+  return `<div class="tbl"><table><thead><tr><th>Department</th><th>Billings (GP)</th><th>Cost</th><th>Break-even</th>${g?'<th>Target</th>':''}
     <th>Gap</th><th>Multiple</th><th>Heads</th><th>Billed</th></tr></thead><tbody>
-    ${rows.map(({d,a})=>`<tr><td><b style="color:var(--ink)">${d.label}</b>${a.est?'<span class="est">est.</span>':''}${tempGP(d.name)?`<br><span class="mut" style="font-size:12px">Temp GP not counted: ${F(tempGP(d.name))}</span>`:''}</td><td>${F(a.b)}</td><td>${F(a.c)}</td>
-      <td class="mut">${F(a.bev)}</td>${goal()?`<td>${F(a.tgt)}</td>`:''}
-      <td class="${(goal()?a.gap:a.b-a.bev)>=0?'pos':'neg'}">${F(goal()?a.gap:a.b-a.bev)}</td>
-      <td class="${mvc(a.mult)}" style="font-weight:700">${X(a.mult)}</td><td>${a.heads}</td><td>${a.billed}${a.team?' + team':''}</td></tr>`).join('')}
-    <tr class="tot"><td>Fee departments</td><td>${F(t.b)}</td><td>${F(t.c)}</td><td class="mut">${F(t.bev)}</td>${goal()?`<td>${F(t.tgt)}</td>`:''}
-      <td class="${(goal()?t.gap:t.b-t.bev)>=0?'pos':'neg'}">${F(goal()?t.gap:t.b-t.bev)}</td><td class="${mvc(t.mult)}">${X(t.mult)}</td><td>${t.heads}</td><td>${t.billed}</td></tr>
-    ${non.map(d=>{const a=deptAgg(d.name);return a.c?`<tr class="sub"><td>${d.label}: no billing target, recovered through the multiple</td><td class="mut">—</td><td>${F(a.c)}</td>
-      <td colspan="${goal()?6:5}" class="tx mut">Inside the operating cost base the multiple covers</td></tr>`:''}).join('')}
+    ${rows.map(({d,a})=>{const T=deptTips(d,a,pn), gp=g?a.gap:a.b-a.bev;return `<tr><td><b style="color:var(--ink)">${esc(d.label)}</b>${a.est?'<span class="est">est.</span>':''}</td>
+      <td${T.b}>${F(a.b)}</td><td${T.c}>${F(a.c)}</td><td class="mut"${T.be}>${F(a.bev)}</td>${g?`<td${T.tg}>${F(a.tgt)}</td>`:''}
+      <td class="${gp>=0?'pos':'neg'}"${T.gap}>${F(gp)}</td>
+      <td class="${mvc(a.mult)}" style="font-weight:700"${T.m}>${X(a.mult)}</td><td${T.h}>${a.heads}</td><td${T.bl}>${a.billed}${a.team?' + team':''}</td></tr>`;}).join('')}
+    <tr class="tot"><td>Fee departments</td><td${D('Billings (GP)',a=>a.b)}>${F(t.b)}</td><td${D('Cost',a=>a.c)}>${F(t.c)}</td><td class="mut"${D('Break-even',a=>a.bev)}>${F(t.bev)}</td>${g?`<td${D('Target',a=>a.tgt)}>${F(t.tgt)}</td>`:''}
+      <td class="${tg>=0?'pos':'neg'}"${D('Gap to '+word(),a=>a.b-(g?a.tgt:a.bev),{signed:true,sort:'val'})}>${F(tg)}</td>
+      <td class="${mvc(t.mult)}"${CALC('Multiple, fee departments',pn,[['Billings (GP)',F(t.b)],['÷ Cost',F(t.c)],['= Billings per $1 of cost',X(t.mult),'s']].concat(xMult(mm.be,mm.tg)))}>${X(t.mult)}</td>
+      <td${D('People on payroll',a=>a.heads,{fmt:CNT})}>${t.heads}</td><td${D('People billed',a=>a.billed,{fmt:CNT})}>${t.billed}</td></tr>
+    ${non.map(d=>{const a=deptAgg(d.name);return a.c?`<tr class="sub"><td>${esc(d.label)}${INFO('No billing target. Its cost is inside the operating cost base that the fee departments\' multiple recovers, so a separate target would count it twice.')}</td><td class="mut">—</td>
+      <td${BD(esc(d.label)+': cost',pn,a.mem.map(e=>({l:e.name,s:e.role||'',v:e.a.c})),{total:a.c})}>${F(a.c)}</td><td colspan="${g?6:5}"></td></tr>`:''}).join('')}
   </tbody></table></div>`;
 }
-function quarterTable(){
+function quarterSection(){
   const ms=DATA.months, qk=ms.find(m=>m.key===(PER==='YTD'||PER==='QTD'||PER==='CUR'?DATA.current.key:PER)).q;
-  const qm=ms.filter(m=>m.q===qk).map(m=>m.key);
+  const qm=ms.filter(m=>m.q===qk).map(m=>m.key), started=qm.filter(k=>k<=DATA.current.key);
   const rows=[];
   deptsOf(ENT).filter(d=>d.fee).forEach(d=>DATA.emps.filter(e=>e.dept===d.name&&e.qtr&&e.qtr[qk]).forEach(e=>{
     const q=e.qtr[qk], qtd=qm.reduce((s,k)=>s+(e.bill[k]||0),0); rows.push({e,d,q,qtd});}));
-  if(!rows.length) return `<div class="flag"><div><div class="ft">No quarterly targets recorded for this entity</div>
-    <div class="fd">The sales sheet has no per-person quarter lines for ${esc(DATA.ents[ENT].name)}.</div></div></div>`;
+  const info=`Targets by role and commission come from the sales sheet: ${Object.keys(DATA.roleTargets).map(k=>title(k)+' '+F(DATA.roleTargets[k])).join(', ')} a quarter. ${started.length} of 3 months have started. Commission is indicative and not in cost.`;
+  const head=`<section class="blk"><div class="hd"><h2>Quarterly targets and commission${INFO(info)}</h2><div class="rt">Quarter ${esc(qk)}</div></div>`;
+  if(!rows.length) return head+flag('No quarterly targets recorded for '+esc(DATA.ents[ENT].name),'The sales sheet has no per-person quarter lines for this entity.')+'</section>';
   rows.sort((a,b)=>b.qtd-a.qtd);
   const T=rows.reduce((s,r)=>({t:s.t+(r.q.target||0),b:s.b+r.qtd,c:s.c+(r.q.comm||0)}),{t:0,b:0,c:0});
-  return `<p class="note">Quarter ${esc(qk)}. Targets by role and commission come from the sales sheet: ${Object.keys(DATA.roleTargets).map(k=>title(k)+' '+F(DATA.roleTargets[k])).join(', ')} a quarter.
-    ${qm.filter(k=>k<=DATA.current.key).length} of 3 months have started. Commission is indicative and not in cost.</p>
-    <div class="tbl"><table><thead><tr><th>Person</th><th>Role per sheet</th><th>Q target</th><th>Quarter to date</th><th>% of target</th><th>Still to bill</th><th>Commission (sheet)</th></tr></thead><tbody>
-    ${rows.map(r=>{const p=r.q.target?r.qtd/r.q.target*100:null;return `<tr><td><b style="color:var(--ink)">${esc(r.e.name)}</b><br><span class="mut" style="font-size:12px">${r.d.label}</span></td>
-      <td class="tx mut">${esc(r.q.role)}</td><td>${r.q.target?F(r.q.target):'<span class="mut">none</span>'}</td><td style="font-weight:700">${F(r.qtd)}</td>
-      <td class="${p===null?'mut':p>=100?'pos':'neg'}">${p===null?'—':p.toFixed(0)+'%'}</td>
-      <td class="${!r.q.target?'mut':r.q.target-r.qtd>0?'neg':'pos'}">${!r.q.target?'—':(r.q.target-r.qtd>0?F(r.q.target-r.qtd):'+'+F(r.qtd-r.q.target))}</td>
-      <td class="${r.q.comm>0?'pos':'mut'}">${r.q.noComm?'<span class="mut">no comms</span>':r.q.comm>0?F(r.q.comm):'—'}</td></tr>`}).join('')}
-    <tr class="tot"><td>Total</td><td></td><td>${F(T.t)}</td><td>${F(T.b)}</td><td>${T.t?(T.b/T.t*100).toFixed(0)+'%':'—'}</td><td>${F(Math.max(T.t-T.b,0))}</td><td>${F(T.c)}</td></tr>
-    </tbody></table></div>`;
+  const left=Math.max(qm.filter(k=>k>=DATA.current.key).length,1), qn=esc(qk);
+  const P=(ttl,f,o)=>BD(ttl,'Quarter '+qn,rows.map(r=>({l:r.e.name,s:r.d.label,v:f(r)})),Object.assign({total:rows.reduce((s,r)=>s+f(r),0)},o||{}));
+  return head+`<div class="tbl"><table><thead><tr><th>Person</th><th>Role per sheet</th><th>Q target</th><th>Quarter to date</th><th>% of target</th><th>Still to bill</th><th>Commission (sheet)</th></tr></thead><tbody>
+    ${rows.map(r=>{const p=r.q.target?r.qtd/r.q.target:null, nm=esc(r.e.name), still=(r.q.target||0)-r.qtd;return `<tr><td><b style="color:var(--ink)">${nm}</b><br><span class="mut" style="font-size:12px">${esc(r.d.label)}</span></td>
+      <td class="tx mut">${esc(r.q.role)}</td>
+      <td${r.q.target?CALC(nm+': quarterly target','Quarter '+qn,[['Role per sales sheet',esc(title(r.q.role))],['Quarterly target',F(r.q.target),'s']]):''}>${r.q.target?F(r.q.target):'<span class="mut">none</span>'}</td>
+      <td style="font-weight:700"${BD(nm+': quarter to date','Quarter '+qn,qm.map(k=>({l:mShort(k)+(k===DATA.current.key?' to date':k>DATA.current.key?' (not started)':''),v:r.e.bill[k]||0})),{keepOrder:true,keepZero:true,total:r.qtd})}>${F(r.qtd)}</td>
+      <td class="${p===null?'mut':p>=1?'pos':'neg'}"${p===null?'':CALC(nm+': % of target','Quarter '+qn,[['Quarter to date',F(r.qtd)],['÷ Quarterly target',F(r.q.target)],['= % of target',PCT(p),'s'],['Months started',started.length+' of 3','g']])}>${p===null?'—':(p*100).toFixed(0)+'%'}</td>
+      <td class="${!r.q.target?'mut':still>0?'neg':'pos'}"${r.q.target?CALC(nm+': still to bill','Quarter '+qn,[['Quarterly target',F(r.q.target)],['Less quarter to date',F(-r.qtd)],[still>0?'= Still to bill':'= Over target by',F(Math.abs(still)),'s'],still>0?['Per month left ('+left+')',F(still/left),'g']:null]):''}>${!r.q.target?'—':(still>0?F(still):'+'+F(-still))}</td>
+      <td class="${r.q.comm>0?'pos':'mut'}"${r.q.comm>0?BD(nm+': commission','Quarter '+qn+' · spread by billings in each month',qm.map(k=>({l:mShort(k),v:commAcc(r.e,k)})),{keepOrder:true,total:r.q.comm,note:'Indicative, per the sales sheet. Not in cost.'}):''}>${r.q.noComm?'<span class="mut">no comms</span>':r.q.comm>0?F(r.q.comm):'—'}</td></tr>`}).join('')}
+    <tr class="tot"><td>Total</td><td></td><td${P('Quarterly targets',r=>r.q.target||0)}>${F(T.t)}</td><td${P('Quarter to date',r=>r.qtd)}>${F(T.b)}</td>
+      <td${T.t?CALC('% of target, everyone','Quarter '+qn,[['Quarter to date',F(T.b)],['÷ Quarterly targets',F(T.t)],['= % of target',PCT(T.b/T.t),'s']]):''}>${T.t?(T.b/T.t*100).toFixed(0)+'%':'—'}</td>
+      <td${P('Still to bill',r=>Math.max((r.q.target||0)-r.qtd,0))}>${F(rows.reduce((s,r)=>s+Math.max((r.q.target||0)-r.qtd,0),0))}</td><td${P('Commission (sheet)',r=>r.q.comm||0)}>${F(T.c)}</td></tr>
+    </tbody></table></div></section>`;
 }
 function summary(){
-  const t=entAgg(), mm=M(), c=DATA.current;
-  const fee=deptsOf(ENT).filter(d=>d.fee);
+  const t=entAgg(), mm=M(), c=DATA.current, g=goal(), pn=esc(perName());
+  const fee=deptsOf(ENT).filter(d=>d.fee), DA=fee.map(d=>({d,a:deptAgg(d.name)})).filter(x=>x.a.c||x.a.b);
   const rows=[]; let teamRows=[];
-  fee.forEach(d=>{const a=deptAgg(d.name); a.mem.forEach(e=>{if(e.a.c>0||e.a.b>0) rows.push(e);});
-    const tr=teamRowFor(d,a); if(tr) teamRows.push(tr);});
+  DA.forEach(({d,a})=>{a.mem.forEach(e=>{if(e.a.c>0||e.a.b>0) rows.push(e);}); const tr=teamRowFor(d,a); if(tr) teamRows.push(tr);});
   rows.sort((a,b)=>b.a.b-a.a.b);
-  const ref=goal()?t.tgt:t.bev, gp=t.b-ref;
+  const ref=g?t.tgt:t.bev, gp=t.b-ref, mult=refMult();
+  const S=(f)=>DA.reduce((s,x)=>s+f(x.a),0);
+  const byD=(ttl,f,o)=>BD(ttl,pn+' · by department',DA.map(x=>({l:x.d.label,v:f(x.a)})),Object.assign({total:S(f)},o||{}));
+  const billers=rows.filter(e=>e.a.c>0&&!isSup(e)&&!e.agg);
   return `<div class="kpis">
-    <div class="kpi"><div class="lab">Billings (GP)</div><div class="val">${F(t.b)}</div><div class="sub">Sales sheet, fee departments.</div></div>
-    <div class="kpi"><div class="lab">Fee-team cost</div><div class="val">${F(t.c)}</div>
-      <div class="sub">${t.heads} people, fully loaded.${hasEst()?' Current month estimated to day '+c.day+'.':''}</div></div>
-    <div class="kpi"><div class="lab">${goal()?'Target billings':'Break-even billings'}</div><div class="val">${F(ref)}</div>
-      <div class="chip ${gp>=0?'up':'dn'}">${gp>=0?F(gp)+' ahead':F(-gp)+' behind'}</div>
-      <div class="sub">Cost × ${(goal()?mm.tg:mm.be).toFixed(2)}.${goal()?' Break-even '+F(t.bev)+'.':''}</div></div>
-    <div class="kpi"><div class="lab">Billings per $1 of cost</div><div class="val ${t.mult>=mm.tg?'pos':t.mult>=mm.be?'amb':'neg'}">${X(t.mult)}</div>
-      <div class="sub">Break-even ${mm.be.toFixed(2)}×${goal()?', target '+mm.tg.toFixed(2)+'×':''}.</div></div>
-    ${t.billed===0&&t.b>0?`<div class="kpi"><div class="lab">How billings are recorded</div><div class="val" style="font-size:22px">As a team</div>
-      <div class="sub">The sales sheet has one line for the whole team, so there is no per-person split.</div></div>`
-    :`<div class="kpi"><div class="lab">At or above ${goal()?'target':'break-even'}</div><div class="val">${t.clears} <span class="mut" style="font-size:18px">of ${t.billers}</span></div>
-      <div class="sub">${t.billed} billed at all. Coordinators are counted as desk support, not individually.</div></div>`}
+    <div class="kpi"><div class="lab">Billings (GP)${INFO('Billings (GP) per the Woods &amp; Co Financial Performance sheet for the fee departments. Temp (labour hire) GP is excluded.')}</div>
+      <div class="val"${byD('Billings (GP)',a=>a.b)}>${F(t.b)}</div><div class="sub">${t.billed} billed</div></div>
+    <div class="kpi"><div class="lab">Fee-team cost${INFO('Fully loaded cost of employment in the fee departments: base pay, leave and allowances, super, payroll tax and WorkCover. Commission is not in cost.'+(hasEst()?' The current month is estimated from pay rates to day '+c.day+'.':''))}</div>
+      <div class="val"${byD('Fee-team cost',a=>a.c,{after:[['Base pay, leave and allowances',F(S(a=>a.g)),'g'],['Superannuation',F(S(a=>a.s))],['Payroll tax',F(S(a=>a.pt))],['WorkCover',F(S(a=>a.wc))]]})}>${F(t.c)}</div>
+      <div class="sub">${t.heads} people${hasEst()?' · est. to day '+c.day:''}</div></div>
+    <div class="kpi"><div class="lab">${g?'Target billings':'Break-even billings'}${INFO(g?'Fee-team cost × the target multiple '+mm.tg.toFixed(2)+', which covers cost, overheads and the profit goal. Break-even is cost × '+mm.be.toFixed(2)+'.':'Fee-team cost × the break-even multiple '+mm.be.toFixed(2)+'. No profit goal is set.')}</div>
+      <div class="val"${byD(g?'Target billings':'Break-even billings',a=>g?a.tgt:a.bev)}>${F(ref)}</div>
+      <div class="chip ${gp>=0?'up':'dn'}"${CALC((gp>=0?'Ahead of ':'Behind ')+word(),pn,[['Billings (GP)',F(t.b)],['Less '+word()+' (cost × '+mult.toFixed(2)+')',F(-ref)],['= '+(gp>=0?'Ahead':'Behind'),SG(gp),'s']])}>${gp>=0?F(gp)+' ahead':F(-gp)+' behind'}</div>
+      ${g?`<div class="sub"><span${byD('Break-even billings',a=>a.bev)}>Break-even ${F(t.bev)}</span></div>`:''}</div>
+    <div class="kpi"><div class="lab">Billings per $1 of cost${INFO('Billings ÷ fully loaded cost. At the break-even multiple the fee departments cover their own cost and the overheads; at the target multiple they also make the profit goal.')}</div>
+      <div class="val ${t.mult>=mm.tg?'pos':t.mult>=mm.be?'amb':'neg'}"${CALC('Billings per $1 of cost',pn,[['Billings (GP)',F(t.b)],['÷ Fee-team cost',F(t.c)],['= Multiple',X(t.mult),'s']].concat(xMult(mm.be,mm.tg)))}>${X(t.mult)}</div>
+      <div class="sub">Break-even ${mm.be.toFixed(2)}×${g?' · target '+mm.tg.toFixed(2)+'×':''}</div></div>
+    ${t.billed===0&&t.b>0?`<div class="kpi"><div class="lab">How billings are recorded${INFO('The sales sheet has one line for the whole team, so there is no per-person split.')}</div><div class="val" style="font-size:22px">As a team</div></div>`
+    :`<div class="kpi"><div class="lab">At or above ${word()}${INFO('Fee earners whose billings are at or above their own '+word()+' (their cost × '+mult.toFixed(2)+'). Coordinators are desk support and are not counted individually.')}</div>
+      <div class="val"${BD('Against '+word(),pn+' · billings less each person\'s '+word(),billers.map(e=>({l:e.name,s:dep(e.dept)?dep(e.dept).label:'',v:e.a.b-(g?e.a.tgt:e.a.bev)})),{signed:true,sort:'val',keepZero:true,max:18})}>${t.clears} <span class="mut" style="font-size:18px">of ${t.billers}</span></div>
+      <div class="sub">${t.billed} billed</div></div>`}
   </div>
-  ${hasEst()?`<div class="flag"><div><div class="ft">${esc(DATA.months.find(m=>m.key===c.key).label)} is in progress</div>
-    <div class="fd">Cost is estimated for ${c.day} of ${c.days} days from salaries. Billings are whatever the sales sheet holds today, so the month will look short of target until placements are entered.</div></div></div>`:''}
-  ${DATA.viewer&&DATA.viewer.level==='summary'?`<div class="flag"><div><div class="ft">Department view</div><div class="fd">Individual pay is not shown at your access level. Each department's payroll appears as one line.</div></div></div>`:''}
+  ${hasEst()?flag(esc(DATA.months.find(m=>m.key===c.key).label)+' is in progress','Cost is estimated for '+c.day+' of '+c.days+' days from salaries. Billings are whatever the sales sheet holds today, so the month will look short of target until placements are entered.'):''}
+  ${DATA.viewer&&DATA.viewer.level==='summary'?flag('Department view','Individual pay is not shown at your access level. Each department\'s payroll appears as one line.'):''}
   ${PER==='CUR'?fwdNote(fee):''}
   ${PER==='CUR'?trackSection(fee):''}
-  <section class="blk"><div class="hd"><h2>Every fee earner, ${esc(perName())}</h2><div class="rt">Sorted by billings</div></div>
-    <p class="note">Each person's billings against their fully loaded cost. Everyone carries the same multiple: break-even is cost × ${mm.be.toFixed(2)}${goal()?' and target is cost × '+mm.tg.toFixed(2):''}, ${esc(DATA.mult.BASIS)}. Coordinators are desk support: their cost counts in the department, not as an individual target. Hover a row for the cost build.</p>
+  <section class="blk"><div class="hd"><h2>Every fee earner, ${pn}${INFO('Each person\'s billings against their fully loaded cost. Everyone carries the same multiple: break-even is cost × '+mm.be.toFixed(2)+(g?' and target is cost × '+mm.tg.toFixed(2):'')+', '+esc(DATA.mult.BASIS)+'. Coordinators are desk support: their cost counts in the department, not as an individual target. Hover a row for the cost build.')}</h2><div class="rt">Sorted by billings</div></div>
     ${teamRows.map(tr=>`<div style="margin-bottom:12px">${bars([],tr)}</div>`).join('')}${bars(rows)}
   </section>
-  <section class="blk"><div class="hd"><h2>Department scorecard</h2><div class="rt">${esc(perName())}</div></div>${scorecard()}</section>
+  <section class="blk"><div class="hd"><h2>Department scorecard${INFO('Each fee department\'s billings against its people\'s fully loaded cost. Hover any figure for the breakdown by person.')}</h2><div class="rt">${pn}</div></div>${scorecard()}</section>
   ${xeroSection()}
-  <section class="blk"><div class="hd"><h2>Month by month</h2><div class="rt">${DATA.fy}</div></div>${monthTable()}</section>
-  <section class="blk"><div class="hd"><h2>Quarterly targets and commission</h2><div class="rt">Per the sales sheet</div></div>${quarterTable()}</section>`;
+  <section class="blk"><div class="hd"><h2>Month by month${INFO('Each month\'s billings and fee-team cost against the current multiples. Closed months use FoundU pays normalised to a calendar month; the current month is estimated.')}</h2><div class="rt">${DATA.fy}</div></div>${monthTable()}</section>
+  ${quarterSection()}`;
 }
-
+function deptBill(d,keys){const t=DATA.team[d.name]||{};return DATA.emps.filter(e=>e.dept===d.name).reduce((a,e)=>a+keys.reduce((b,k)=>b+(e.bill[k]||0),0),0)+keys.reduce((b,k)=>b+(t[k]||0),0);}
 function fwdNote(fee){
-  const f=DATA.fwdBill||{}, ks=(DATA.fwd||[]).map(m=>m.key);
+  const ks=(DATA.fwd||[]).map(m=>m.key), f=DATA.fwdBill||{};
   const tot=ks.map(k=>({k,v:fee.reduce((s,d)=>s+((f[d.name]||{})[k]||0),0)})).filter(x=>x.v);
   if(!tot.length) return '';
-  return `<div class="flag ok"><div><div class="ft">Already on the sales sheet for coming months</div><div class="fd">${tot.map(x=>esc(monthLab(x.k))+' '+F(x.v)).join(' · ')}. Not counted in any figure until the month starts.</div></div></div>`;
+  return flag('Already on the sales sheet for coming months: '+tot.map(x=>`<span${BD(esc(monthLab(x.k)),'Entered on the sales sheet',fee.map(d=>({l:d.label,v:(f[d.name]||{})[x.k]||0})),{total:x.v})}>${esc(mShort(x.k))} ${F(x.v)}</span>`).join(' · '),
+    'Billings already entered for months that have not started. They are not counted in any figure until the month starts.','ok');
 }
 /* ---------- on track for the month ---------- */
 function monthCost(e,k){const x=e.cost[k]; if(!x) return 0; return x.m!=null?x.m:(x.b==='E'&&DATA.current.fraction?x.c/DATA.current.fraction:x.c);}
 function trackSection(depts){
   const c=DATA.current, k=c.key, fw=c.fullWeeks||0, mo=DATA.months.find(m=>m.key===k);
-  const mm=M(), mult=goal()?mm.tg:mm.be, word=goal()?'target':'break-even';
+  const mm=M(), mult=refMult(), wd=word();
   const mName=mo.label.split(' ')[0];
   if(!fw) return `<section class="blk"><div class="hd"><h2>On track for ${esc(mo.label)}?</h2></div>
-    <div class="flag"><div><div class="ft">No full week has passed yet</div><div class="fd">Weekly pace starts from 8 ${esc(mName)}, once 1 to 7 ${esc(mName)} is complete.</div></div></div></section>`;
+    ${flag('No full week has passed yet','Weekly pace starts from 8 '+esc(mName)+', once 1 to 7 '+esc(mName)+' is complete.')}</section>`;
   const bdM=c.bdMonth||c.days, bdF=c.bdFull!=null?c.bdFull:fw*7;
-  const share=bdF/bdM, remDays=c.days-fw*7, remW=remDays/7;
+  const share=bdF/bdM, remDays=c.days-fw*7, remW=remDays/7, pctS=Math.round(share*100)+'%';
   const st=(b,t,be,team,sup)=>{ if(team) return '<span class="st na">Billed as a team</span>'; if(sup) return '<span class="st na">Desk support</span>'; if(!t) return '<span class="st na">No cost</span>';
     if(b>=t*share) return '<span class="st ok">On track</span>';
     if(goal()&&b>=be*share) return '<span class="st mid">Above break-even pace</span>';
     return '<span class="st bad">Behind</span>'; };
-  const line=(lab,sub,t,b,be,cls,team,sup)=>{const exp=t*share, gap=b-exp, still=Math.max(t-b,0);
-    if(sup) return `<tr class="${cls||''}"><td>${lab}${sub?`<br><span class="mut" style="font-size:12px">${sub}</span>`:''}</td>
-      <td class="mut">${F(t)}</td><td class="mut">—</td><td>${b?F(b):'<span class="mut">nil</span>'}</td><td class="mut">—</td><td style="text-align:left">${st(b,t,be,team,true)}</td><td class="mut">—</td><td class="mut">—</td></tr>`;
-    return `<tr class="${cls||''}"><td>${lab}${sub?`<br><span class="mut" style="font-size:12px">${sub}</span>`:''}</td>
-      <td>${F(t)}</td><td class="mut">${F(exp)}</td><td>${team?'<span class="mut">team</span>':F(b)}</td>
-      <td class="${team?'mut':gap>=0?'pos':'neg'}">${team?'—':(gap>=0?'+'+F(gap):F(gap))}</td>
-      <td style="text-align:left">${st(b,t,be,team)}</td>
-      <td>${team?'—':still?F(still):'<span class="pos">Met</span>'}</td>
-      <td class="mut">${team||!still||!remW?'—':F(still/remW)}</td></tr>`;};
-  let body='', T={t:0,b:0,be:0};
+  /* person-level tooltips, or by-person breakdowns for department and total lines */
+  const line=(nm,sub,o,cls,team,sup)=>{const t=o.t, b=o.b, be=o.be, exp=t*share, gap=b-exp, still=Math.max(t-b,0), n=esc(nm), parts=o.parts;
+    const P=(ttl,f,signed)=>BD(n+': '+ttl,esc(mo.label),parts.map(p=>({l:p.n,v:f(p)})),{signed,sort:signed?'val':null,total:parts.reduce((s,p)=>s+f(p),0)});
+    const tT=parts?P('monthly '+wd,p=>p.t):CALC(n+': monthly '+wd,esc(mo.label),[['Full-month cost',F(o.mc)],['× '+title(wd)+' multiple',mult.toFixed(2)+'×'],['= Monthly '+wd,F(t),'s']]);
+    const tE=parts?P('expected by now',p=>p.t*share):CALC(n+': expected by now',esc(mo.label),[['Monthly '+wd,F(t)],['× Share of the month',pctS+' ('+bdF+' of '+bdM+' business days)'],['= Expected by now',F(exp),'s']]);
+    const tB=parts?P('billed',p=>p.b):'';
+    const tG=parts?P('ahead / behind',p=>p.b-p.t*share,true):CALC(n+': ahead / behind',esc(mo.label),[['Billed',F(b)],['Less expected by now',F(-exp)],['= '+(gap>=0?'Ahead':'Behind'),SG(gap),'s']]);
+    const tS=CALC(n+': status',esc(mo.label),[['Billed',F(b)],['On-track mark ('+pctS+' of '+wd+')',F(exp)],goal()?['Break-even pace ('+pctS+' of break-even)',F(be*share)]:null]);
+    const tL=parts?P('still to bill',p=>Math.max(p.t-p.b,0)):CALC(n+': still to bill',esc(mo.label),[['Monthly '+wd,F(t)],['Less billed',F(-b)],['= Still to bill',F(still),'s']]);
+    const tW=CALC(n+': per week left',esc(mo.label),[['Still to bill',F(still)],['÷ Weeks left',remW.toFixed(1)+' ('+remDays+' days)'],['= Per week',F(remW?still/remW:0),'s']]);
+    const lab=`${cls?n:`<b style="color:var(--ink)">${n}</b>`}${sub?`<br><span class="mut" style="font-size:12px">${esc(sub)}</span>`:''}`;
+    if(sup) return `<tr class="${cls||''}"><td>${lab}</td>
+      <td class="mut"${tT}>${F(t)}</td><td class="mut">—</td><td>${b?F(b):'<span class="mut">nil</span>'}</td><td class="mut">—</td><td style="text-align:left">${st(b,t,be,team,true)}</td><td class="mut">—</td><td class="mut">—</td></tr>`;
+    return `<tr class="${cls||''}"><td>${lab}</td>
+      <td${tT}>${F(t)}</td><td class="mut"${tE}>${F(exp)}</td><td${team?'':tB}>${team?'<span class="mut">team</span>':F(b)}</td>
+      <td class="${team?'mut':gap>=0?'pos':'neg'}"${team?'':tG}>${team?'—':(gap>=0?'+'+F(gap):F(gap))}</td>
+      <td style="text-align:left"${team?'':tS}>${st(b,t,be,team)}</td>
+      <td${team?'':tL}>${team?'—':still?F(still):'<span class="pos">Met</span>'}</td>
+      <td class="mut"${team||!still||!remW?'':tW}>${team||!still||!remW?'—':F(still/remW)}</td></tr>`;};
+  let body=''; const all=[];
   depts.forEach(d=>{
     const rows=DATA.emps.filter(e=>e.dept===d.name).map(e=>({e,mc:monthCost(e,k),b:e.bill[k]||0})).filter(r=>r.mc>0||r.b>0)
       .sort((x,y)=>(y.b/(y.mc||1))-(x.b/(x.mc||1)));
     const team=(DATA.team[d.name]||{})[k]||0, asTeam=team>0&&rows.every(r=>!r.b);
-    const D={t:0,b:team,be:0};
-    rows.forEach(r=>{const t=r.mc*mult, be=r.mc*mm.be; D.t+=t; D.b+=r.b; D.be+=be;
-      body+=line(`<b style="color:var(--ink)">${esc(r.e.name)}</b>`, esc(r.e.role||''), t, r.b, be, '', asTeam, isSup(r.e)&&!r.b);});
-    if(team&&!asTeam) body+=`<tr class="sub"><td>Team line in the sales sheet</td><td></td><td></td><td>${F(team)}</td><td colspan="4"></td></tr>`;
-    if(depts.length>1||team) body+=line(esc(d.label)+' total','',D.t,D.b,D.be,'sub',false);
-    T.t+=D.t; T.b+=D.b; T.be+=D.be;
+    const parts=[];
+    rows.forEach(r=>{const o={n:r.e.name,mc:r.mc,t:r.mc*mult,b:r.b,be:r.mc*mm.be}; parts.push(o);
+      body+=line(r.e.name,r.e.role||'',o,'',asTeam,isSup(r.e)&&!r.b);});
+    if(team){ parts.push({n:'Team line (sales sheet)',t:0,b:team,be:0});
+      if(!asTeam) body+=`<tr class="sub"><td>Team line in the sales sheet</td><td></td><td></td><td>${F(team)}</td><td colspan="4"></td></tr>`; }
+    const D={t:parts.reduce((s,p)=>s+p.t,0),b:parts.reduce((s,p)=>s+p.b,0),be:parts.reduce((s,p)=>s+p.be,0),parts};
+    if(depts.length>1||team) body+=line(d.label+' total','',D,'sub',false);
+    all.push(...parts.map(p=>Object.assign({},p,{n:p.n==='Team line (sales sheet)'?d.label+' team line':p.n})));
   });
-  if(depts.length>1) body+=line(esc(DATA.ents[ENT].short)+' fee departments','',T.t,T.b,T.be,'tot',false);
-  return `<section class="blk"><div class="hd"><h2>On track for ${esc(mo.label)}?</h2>
-    <div class="rt">${fw} full week${fw>1?'s':''} gone · 1 to ${fw*7} ${esc(mName)} · ${bdF} of ${bdM} business days</div></div>
-    <p class="note">Each person's monthly ${word} is their full-month cost × ${mult.toFixed(2)}. After ${fw} full week${fw>1?'s':''}
-      (${bdF} of ${bdM} business days, ${Math.round(share*100)}% of the month, public holidays excluded) they are on track if billings to date are at least ${Math.round(share*100)}% of that.
-      Coordinators show as desk support: their cost is in the department total, not an individual target.
-      Billings include anything entered for the week in progress. The last column is what is still needed each week for the
-      remaining ${remDays} days.${goal()?' Above break-even pace means covering cost, but not yet the profit target.':''}</p>
-    <div class="tbl"><table><thead><tr><th>Name</th><th>Monthly ${word}</th><th>Expected by now</th><th>Billed</th><th>Ahead / behind</th>
+  if(depts.length>1) body+=line(DATA.ents[ENT].short+' fee departments','',{t:all.reduce((s,p)=>s+p.t,0),b:all.reduce((s,p)=>s+p.b,0),be:all.reduce((s,p)=>s+p.be,0),parts:all},'tot',false);
+  const info=`Each person's monthly ${wd} is their full-month cost × ${mult.toFixed(2)}. After ${fw} full week${fw>1?'s':''} (${bdF} of ${bdM} business days, ${pctS} of the month, public holidays excluded) they are on track if billings to date are at least ${pctS} of that. Coordinators show as desk support: their cost is in the department total, not an individual target. Billings include anything entered for the week in progress. The last column is what is still needed each week for the remaining ${remDays} days.${goal()?' Above break-even pace means covering cost, but not yet the profit target.':''}`;
+  return `<section class="blk"><div class="hd"><h2>On track for ${esc(mo.label)}?${INFO(info)}</h2>
+    <div class="rt">${fw} full week${fw>1?'s':''} gone · ${bdF} of ${bdM} business days</div></div>
+    <div class="tbl"><table><thead><tr><th>Name</th><th>Monthly ${wd}</th><th>Expected by now</th><th>Billed</th><th>Ahead / behind</th>
       <th style="text-align:left">Status</th><th>Still to bill</th><th>Per week left</th></tr></thead><tbody>${body}</tbody></table></div></section>`;
 }
 
 /* ---------- Xero ---------- */
-function billFor(keys){
-  return deptsOf(ENT).filter(d=>d.fee).reduce((s,d)=>{
-    const t=DATA.team[d.name]||{};
-    return s+DATA.emps.filter(e=>e.dept===d.name).reduce((a,e)=>a+keys.reduce((b,k)=>b+(e.bill[k]||0),0),0)
-      +keys.reduce((b,k)=>b+(t[k]||0),0);},0);
+function billFor(keys){ return deptsOf(ENT).filter(d=>d.fee).reduce((s,d)=>s+deptBill(d,keys),0); }
+/* account lines of one P&L section summed over months, signed as shown on the page */
+function xLines(X,ks,f,sg){const m={}; ks.forEach(k=>{(((X[k]||{}).lines||{})[f]||[]).forEach(([l,a])=>{m[l]=(m[l]||0)+a*(sg||1);});}); return Object.keys(m).map(l=>({l,v:m[l]}));}
+/* a section total: by account where the lines came through, otherwise by month */
+function xTip(X,ks,f,sg,ttl,sub,labf){
+  const has=ks.some(k=>X[k]&&X[k].lines&&(X[k].lines[f]||[]).length), tot=ks.reduce((s,k)=>s+((X[k]||{})[f]||0),0)*(sg||1);
+  if(has) return BD(ttl,sub+' · by account',xLines(X,ks,f,sg),{total:tot,max:18});
+  if(ks.length>1) return BD(ttl,sub+' · by month',ks.map(k=>({l:labf(k),v:((X[k]||{})[f]||0)*(sg||1)})),{keepOrder:true,keepZero:true,total:tot});
+  return '';
 }
+const xGP=(ttl,sub,v)=>CALC(ttl,sub,[['Revenue',F(v.rev)],['Less cost of sales',F(-v.cos)],['= Gross profit',F(v.gp),'s']]);
+const xNP=(ttl,sub,v)=>CALC(ttl,sub,[['Gross profit',F(v.gp)],['Plus other income',F(v.oth)],['Less operating expenses',F(-v.opex)],['= Net profit',SG(v.np),'s']]);
 function xeroSection(){
   if(!XON) return '';
   const XD=DATA.xero, X=XD&&XD[ENT], cur=DATA.current.key;
   if(!XD||!XD.connected||!X||!Object.keys(X).length) return `<section class="blk"><div class="hd"><h2>Xero profit and loss</h2></div>
-    <div class="flag"><div><div class="ft">No Xero figures yet</div><div class="fd">They appear here once the Xero connection has been authorised and the nightly sync has run.</div></div></div></section>`;
+    ${flag('No Xero figures yet','They appear here once the Xero connection has been authorised and the nightly sync has run.')}</section>`;
   const isOpen=k=>DATA.closedTo?k>DATA.closedTo:k===cur;
   const ks=perMonths(), onlyCur=ks.every(isOpen);
   const use=ks.filter(k=>X[k]&&(onlyCur||!isOpen(k))), miss=ks.filter(k=>!X[k]);
   const lab=k=>DATA.months.find(m=>m.key===k).short;
-  const S=f=>use.reduce((s,k)=>s+(X[k][f]||0),0);
-  const bill=billFor(use);
+  const S=f=>use.reduce((s,k)=>s+(X[k][f]||0),0), V={rev:S('rev'),cos:S('cos'),gp:S('gp'),oth:S('oth'),opex:S('opex'),np:S('np'),fees:S('fees')};
+  const bill=billFor(use), sub=use.map(lab).join(', ');
+  const fee=deptsOf(ENT).filter(d=>d.fee);
+  const tipFor=f=>f==='gp'?xGP('Gross profit',sub,V):f==='np'?xNP('Net profit',sub,V)
+    :f==='fees'?(use.length>1?BD('Permanent fees (Recruitment Fees)',sub+' · by month',use.map(k=>({l:lab(k),v:X[k].fees||0})),{keepOrder:true,total:V.fees})
+      :CALC('Permanent fees (Recruitment Fees)',sub,[['Recruitment Fees account',F(V.fees)],['Sales sheet billings',F(bill)],['Difference',SG(V.fees-bill)]]))
+    :xTip(X,use,f,f==='cos'||f==='opex'?-1:1,{rev:'Revenue',cos:'Cost of sales',oth:'Other income',opex:'Operating expenses'}[f],sub,lab);
   const L=[['Revenue','rev',1,''],['of which permanent fees (Recruitment Fees)','fees',1,'sub'],['Cost of sales','cos',-1,''],['Gross profit','gp',1,''],['Other income','oth',1,''],['Operating expenses','opex',-1,''],['Net profit','np',1,'tot']];
   const ms=DATA.months.filter(m=>X[m.key]);
-  const closed=ms.filter(m=>!isOpen(m.key));
+  const closed=ms.filter(m=>!isOpen(m.key)).map(m=>m.key);
   const hdr=onlyCur?esc(perName())+' (not closed)':(use.length?use.map(lab).join(', ').replace(/, ([^,]*)$/,' and $1'):esc(perName()));
-  return `<section class="blk"><div class="hd"><h2>Xero profit and loss</h2><div class="rt">Unreviewed ledger figures · synced ${esc(XD.syncedAt||'')}</div></div>
-    <p class="note">Straight from Xero for ${esc(DATA.ents[ENT].name)}, before month-end review, so the monthly management report remains the reported result.
-      A month counts as closed from the 15th of the following month, when it is snapshotted. Until then it is left out of quarter and year totals and out of the multiples, because payroll, accruals and month-end journals may not be posted.
-      Sales sheet billings tie to the permanent fees account; the difference is invoicing timing and placements not in the sheet.${miss.length?' No Xero data for '+miss.map(lab).join(', ')+'.':''}</p>
-    ${onlyCur?`<div class="flag hi"><div><div class="ft">${esc(perName())} is not closed</div><div class="fd">Expect missing wages, super and payroll tax, and reversing accruals, until month-end. Do not read the net profit below as a result.</div></div></div>`:''}
+  const info=`Straight from Xero for ${esc(DATA.ents[ENT].name)}, before month-end review, so the monthly management report remains the reported result. A month counts as closed from the 15th of the following month, when it is snapshotted. Until then it is left out of quarter and year totals and out of the multiples, because payroll, accruals and month-end journals may not be posted. Sales sheet billings tie to the permanent fees account; the difference is invoicing timing and placements not in the sheet.${miss.length?' No Xero data for '+miss.map(lab).join(', ')+'.':''}`;
+  const cyt=(f,sg)=>BD({rev:'Revenue',fees:'Permanent fees',gp:'Gross profit',opex:'Operating expenses',np:'Net profit'}[f]+', closed months','By month',closed.map(k=>({l:lab(k),v:(X[k][f]||0)*sg})),{keepOrder:true,keepZero:true,signed:f==='np',total:closed.reduce((s,k)=>s+(X[k][f]||0)*sg,0)});
+  return `<section class="blk"><div class="hd"><h2>Xero profit and loss${INFO(info)}</h2><div class="rt">Unreviewed ledger figures · synced ${esc(XD.syncedAt||'')}</div></div>
+    ${onlyCur?flag(esc(perName())+' is not closed','Expect missing wages, super and payroll tax, and reversing accruals, until month-end. Do not read the net profit below as a result.','hi'):''}
     <div class="two">
       <div class="tbl"><table><thead><tr><th>${hdr}</th><th>Xero</th></tr></thead><tbody>
-        ${use.length?L.map(([l,f,sg,cl])=>{const v=S(f)*sg;return `<tr class="${cl}"><td>${l}</td><td class="${v<0?'neg':''}">${F(v)}</td></tr>`}).join('')
+        ${use.length?L.map(([l,f,sg,cl])=>{const v=V[f]*sg;return `<tr class="${cl}"><td>${l}</td><td class="${v<0?'neg':''}"${tipFor(f)}>${F(v)}</td></tr>`}).join('')
           :'<tr><td colspan="2" class="tx mut">No closed month in this period yet</td></tr>'}
-        ${use.length?`<tr class="sub"><td>Sales sheet billings, fee departments, same months</td><td>${F(bill)}</td></tr>
-        <tr class="sub"><td>Permanent fees less sales sheet billings</td><td class="${S('fees')-bill<0?'neg':''}">${F(S('fees')-bill)}</td></tr>`:''}
+        ${use.length?`<tr class="sub"><td>Sales sheet billings, fee departments, same months</td><td${BD('Sales sheet billings',sub+' · by department',fee.map(d=>({l:d.label,v:deptBill(d,use)})),{total:bill})}>${F(bill)}</td></tr>
+        <tr class="sub"><td>Permanent fees less sales sheet billings</td><td class="${V.fees-bill<0?'neg':''}"${BD('Permanent fees less sales sheet billings',sub+' · by month',use.map(k=>({l:lab(k),v:(X[k].fees||0)-billFor([k])})),{keepOrder:true,keepZero:true,signed:true,total:V.fees-bill})}>${F(V.fees-bill)}</td></tr>`:''}
       </tbody></table></div>
       <div class="tbl cmp"><table><thead><tr><th>Month</th><th>Revenue</th><th>Perm fees</th><th>GP</th><th>Opex</th><th>Net</th></tr></thead><tbody>
-        ${ms.map(m=>{const r=X[m.key],ip=isOpen(m.key);return `<tr class="${ip?'sub':''}"><td>${m.short}${ip?' <span class="mut">(open)</span>':''}</td><td>${F(r.rev)}</td><td>${F(r.fees)}</td><td>${F(r.gp)}</td><td>${F(-r.opex)}</td><td class="${ip?'':r.np<0?'neg':'pos'}">${F(r.np)}</td></tr>`}).join('')}
-        <tr class="tot"><td>Closed YTD</td><td>${F(closed.reduce((s,m)=>s+X[m.key].rev,0))}</td><td>${F(closed.reduce((s,m)=>s+(X[m.key].fees||0),0))}</td><td>${F(closed.reduce((s,m)=>s+X[m.key].gp,0))}</td><td>${F(-closed.reduce((s,m)=>s+X[m.key].opex,0))}</td><td>${F(closed.reduce((s,m)=>s+X[m.key].np,0))}</td></tr>
+        ${ms.map(m=>{const r=X[m.key],ip=isOpen(m.key),k=m.key,s=esc(m.label)+(ip?' (open)':''),b=billFor([k]);return `<tr class="${ip?'sub':''}"><td>${m.short}${ip?' <span class="mut">(open)</span>':''}</td>
+          <td${xTip(X,[k],'rev',1,'Revenue',s,lab)}>${F(r.rev)}</td>
+          <td${CALC('Permanent fees',s,[['Recruitment Fees account',F(r.fees)],['Sales sheet billings',F(b)],['Difference',SG((r.fees||0)-b)]])}>${F(r.fees)}</td>
+          <td${xGP('Gross profit',s,r)}>${F(r.gp)}</td><td${xTip(X,[k],'opex',-1,'Operating expenses',s,lab)}>${F(-r.opex)}</td>
+          <td class="${ip?'':r.np<0?'neg':'pos'}"${xNP('Net profit',s,r)}>${F(r.np)}</td></tr>`}).join('')}
+        <tr class="tot"><td>Closed YTD</td><td${cyt('rev',1)}>${F(closed.reduce((s,k)=>s+X[k].rev,0))}</td><td${cyt('fees',1)}>${F(closed.reduce((s,k)=>s+(X[k].fees||0),0))}</td><td${cyt('gp',1)}>${F(closed.reduce((s,k)=>s+X[k].gp,0))}</td><td${cyt('opex',-1)}>${F(-closed.reduce((s,k)=>s+X[k].opex,0))}</td><td${cyt('np',1)}>${F(closed.reduce((s,k)=>s+X[k].np,0))}</td></tr>
       </tbody></table></div>
     </div></section>`;
 }
 
 /* ---------- department ---------- */
 function deptPage(dn){
-  const d=dep(dn), a=deptAgg(dn), mm=M();
+  const d=dep(dn), a=deptAgg(dn), mm=M(), g=goal(), pn=esc(perName()), lab=esc(d.label), c=DATA.current, ks=perMonths(), one=ks.length===1;
   const rows=a.mem.slice().sort((x,y)=>y.a.b-x.a.b);
-  const team=teamRowFor(d,a);
-  const ref=goal()?a.tgt:a.bev;
-  const tg=tempGP(dn);
+  const team=teamRowFor(d,a), ref=g?a.tgt:a.bev, tg=tempGP(dn), T=deptTips(d,a,pn);
+  const P=(ttl,f,o)=>BD(lab+': '+ttl,pn+' · by person',a.mem.map(e=>({l:e.name,v:f(e.a,e)})).concat(o&&o.team&&a.team?[{l:'Team line (sales sheet)',v:a.team}]:[]),Object.assign({total:o&&o.tot!=null?o.tot:a.mem.reduce((s,e)=>s+f(e.a,e),0)},o||{}));
   const kp=d.fee?`<div class="kpis">
-    <div class="kpi"><div class="lab">Billings (GP)</div><div class="val">${F(a.b)}</div><div class="sub">${a.billed} of ${a.heads} billed${a.team?', plus the team line':''}.</div></div>
-    <div class="kpi"><div class="lab">Cost</div><div class="val">${F(a.c)}</div><div class="sub">${a.heads} on payroll${a.est?', current month estimated':''}.</div></div>
-    <div class="kpi"><div class="lab">${goal()?'Target':'Break-even'}</div><div class="val">${F(ref)}</div>
-      <div class="chip ${a.b>=ref?'up':'dn'}">${X(a.mult)} achieved</div><div class="sub">${goal()?'Break-even '+F(a.bev)+'.':'No profit goal set.'}</div></div>
-    <div class="kpi"><div class="lab">Gap</div><div class="val ${a.b-ref>=0?'pos':'neg'}">${a.b-ref>=0?'+'+F(a.b-ref):F(a.b-ref)}</div>
-      <div class="sub">${a.b>=ref?'Ahead.':a.b>=a.bev?'Above break-even, short of target.':'Below break-even.'}</div></div>
-    <div class="kpi"><div class="lab">Contribution</div><div class="val ${a.ct>=0?'pos':'neg'}">${F(a.ct)}</div>
-      <div class="sub">After commission accrued ${F(a.ca)}, cost and overhead share ${F(a.oh)}.${tg?' Temp GP not counted: '+F(tg)+'.':''}</div></div></div>`
-   :`<div class="kpis"><div class="kpi"><div class="lab">Cost</div><div class="val">${F(a.c)}</div><div class="sub">${a.heads} people.</div></div>
-    <div class="kpi"><div class="lab">Billing target</div><div class="val">None</div><div class="sub">Recovered through the ${mm.tg.toFixed(2)}× the fee departments carry. A separate target would count this cost twice.</div></div></div>`;
-  return kp+`<section class="blk"><div class="hd"><h2>${esc(d.label)}</h2><div class="rt">${esc(perName())}</div></div>
+    <div class="kpi"><div class="lab">Billings (GP)${INFO('Billings (GP) per the sales sheet for this department'+(tg?'. Temp GP of '+F(tg)+' is not counted.':'.'))}</div><div class="val"${T.b}>${F(a.b)}</div><div class="sub">${a.billed} of ${a.heads} billed${a.team?' + team line':''}</div></div>
+    <div class="kpi"><div class="lab">Cost${INFO('Fully loaded cost of employment: base pay, leave and allowances, super, payroll tax and WorkCover.')}</div><div class="val"${T.c}>${F(a.c)}</div><div class="sub">${a.heads} on payroll${a.est?' · est.':''}</div></div>
+    <div class="kpi"><div class="lab">${g?'Target':'Break-even'}${INFO(g?'Cost × the target multiple '+mm.tg.toFixed(2)+'. Break-even is cost × '+mm.be.toFixed(2)+'.':'Cost × the break-even multiple '+mm.be.toFixed(2)+'. No profit goal is set.')}</div><div class="val"${g?T.tg:T.be}>${F(ref)}</div>
+      <div class="chip ${a.b>=ref?'up':'dn'}"${T.m}>${X(a.mult)} achieved</div>${g?`<div class="sub"><span${T.be}>Break-even ${F(a.bev)}</span></div>`:''}</div>
+    <div class="kpi"><div class="lab">Gap</div><div class="val ${a.b-ref>=0?'pos':'neg'}"${T.gap}>${a.b-ref>=0?'+'+F(a.b-ref):F(a.b-ref)}</div>
+      <div class="sub">${a.b>=ref?'Ahead':a.b>=a.bev?'Above break-even':'Below break-even'}</div></div>
+    <div class="kpi"><div class="lab">Contribution${INFO('Billings less commission accrued on the sales sheet, cost of employment and a per-head share of non-payroll overhead from Xero.')}</div><div class="val ${a.ct>=0?'pos':'neg'}"${T.ct}>${F(a.ct)}</div>
+      <div class="sub"><span${P('contribution',x=>x.ct,{signed:true,sort:'val',team:true,tot:a.ct})}>By person</span></div></div></div>`
+   :`<div class="kpis"><div class="kpi"><div class="lab">Cost</div><div class="val"${T.c}>${F(a.c)}</div><div class="sub">${a.heads} people</div></div>
+    <div class="kpi"><div class="lab">Billing target${INFO('Recovered through the '+mm.tg.toFixed(2)+'× the fee departments carry. A separate target would count this cost twice.')}</div><div class="val">None</div></div></div>`;
+  /* cost build cells */
+  const byMo=(r,ttl,f,tot,o)=>BD(esc(r.name)+': '+ttl,pn+' · by month',ks.map(k=>({l:mShort(k)+(k===c.key?' (est.)':''),v:f(k)})),Object.assign({keepOrder:true,keepZero:true,total:tot},o||{}));
+  const ptxt=(DATA.rates.pt*100).toFixed(3)+'%', wtxt=(DATA.rates.wc*100).toFixed(3)+'%';
+  const cells=r=>{const x=r.a, n=esc(r.name), x1=one?r.cost[ks[0]]:null, wk=one?(new Date(+ks[0].slice(0,4),+ks[0].slice(5,7),0).getDate()/7).toFixed(2):'';
+    const gp=g?x.gap:x.b-x.bev, r3=roll3(r), sup=isSup(r)&&!x.b;
+    return {
+      g:one?CALC(n+': base pay, leave and allowances',pn,[['FoundU base pay, leave and allowances',F2(x.g)],x1&&x1.b==='A'&&x1.n?['Pays in the month',x1.n+' weekly, normalised to '+wk+' weeks']:null,x.est?['Estimated','to day '+c.day+' of '+c.days+(r.rateSrc?' from '+esc(r.rateSrc):'')]:null])
+        :byMo(r,'base pay, leave and allowances',k=>pc(r,k,'g'),x.g),
+      s:one?CALC(n+': superannuation',pn,[['Superannuation',F2(x.s)],['As % of base pay',x.g?PCT(x.s/x.g):'—']]):byMo(r,'superannuation',k=>pc(r,k,'s'),x.s),
+      o:CALC(n+': on-costs',pn,[['Payroll tax ('+ptxt+')',F2(x.pt)],['WorkCover ('+wtxt+')',F2(x.wc)],['= On-costs',F2(x.pt+x.wc),'s']]),
+      c:CALC(n+': cost of employment',pn,[['Base pay, leave and allowances',F2(x.g)],['Superannuation',F2(x.s)],['Payroll tax',F2(x.pt)],['WorkCover',F2(x.wc)],['= Cost of employment',F2(x.c),'s']]
+        .concat(one?[]:[['By month','','h']].concat(ks.map(k=>[mShort(k),F(pc(r,k,'c'))])))),
+      cm:x.cm||x.tp?(one?CALC(n+': commission and bonus paid',pn,[['Commission and bonus paid, loaded',F2(x.cm)],x.tp?['Termination payments, loaded',F2(x.tp)]:null],'Paid through payroll. Not in cost.')
+        :byMo(r,'commission and bonus paid',k=>pc(r,k,'cm'),x.cm,{note:'Paid through payroll. Not in cost.'})):'',
+      b:one?(r.salesName?CALC(n+': billings (GP)',pn,[['Sales sheet line',esc(r.salesName)],['Billings (GP)',F(x.b),'s']]):''):byMo(r,'billings (GP)',k=>r.bill[k]||0,x.b),
+      be:CALC(n+': break-even',pn,[['Cost of employment',F(x.c)],['× Break-even multiple',mm.be.toFixed(2)+'×'],['= Break-even billings',F(x.bev),'s']]),
+      tg:CALC(n+': target',pn,[['Cost of employment',F(x.c)],['× Target multiple',mm.tg.toFixed(2)+'×'],['= Target billings',F(x.tgt),'s']]),
+      gap:sup?'':CALC(n+': gap to '+word(),pn,[['Billings (GP)',F(x.b)],['Less '+word(),F(-(g?x.tgt:x.bev))],['= Gap',SG(gp),'s']]),
+      r3:r3.c&&!sup&&!r.agg?CALC(n+': last 3 closed months',r3.ks.map(mShort).join(', '),[['Billings (GP)',F(r3.b)],['÷ Cost of employment',F(r3.c)],['= Billings per $1 of cost',X(r3.mult),'s']].concat(xMult(mm.be,mm.tg))):'',
+      ct:CALC(n+': contribution',pn,[['Billings (GP)',F(x.b)],['Less commission accrued (sheet)',F(-x.ca)],['Less cost of employment',F(-x.c)],['Less share of overhead',F(-x.oh)],['= Contribution',SG(x.ct),'s']])};};
+  const info='Cost is base pay, leave and package allowances plus super, payroll tax and WorkCover'+(PER!=='CUR'?', with closed months normalised from weekly pays to a calendar month':'')+'. Commission, bonus and termination payments are shown separately and are not in cost.'
+    +(d.fee?' Contribution is billings less commission accrued on the sales sheet, cost and a per-head share of non-payroll overhead from Xero. The 3-month multiple covers the last three closed months.':'');
+  const r3T=(()=>{const r=a.mem.map(e=>Object.assign(roll3(e),{n:e.name})).filter(x=>x.c);const c3=r.reduce((s,x)=>s+x.c,0),b3=r.reduce((s,x)=>s+x.b,0);
+    return {v:c3?X(b3/c3):'—',t:c3?CALC(lab+': last 3 closed months',(r[0]?r[0].ks.map(mShort).join(', '):''),[['Billings (GP)',F(b3)],['÷ Cost of employment',F(c3)],['= Billings per $1 of cost',X(b3/c3),'s']]):''};})();
+  return kp+`<section class="blk"><div class="hd"><h2>${lab}</h2><div class="rt">${pn}</div></div>
     ${d.fee?bars(rows,team):''}</section>
     ${d.fee&&PER==='CUR'?trackSection([d]):''}
-    <section class="blk"><div class="hd"><h2>Cost build and contribution</h2><div class="rt">Hover a row for detail</div></div>
-    <p class="note">Cost is base pay, leave and package allowances plus super, payroll tax and WorkCover${PER!=='CUR'?', with closed months normalised from weekly pays to a calendar month':''}.
-      Commission, bonus and termination payments are shown separately and are not in cost.${d.fee?' Contribution is billings less commission accrued on the sales sheet, cost and a per-head share of non-payroll overhead from Xero. The 3-month multiple covers the last three closed months.':''}</p>
+    <section class="blk"><div class="hd"><h2>Cost build and contribution${INFO(info)}</h2><div class="rt">${pn}</div></div>
     <div class="tbl cmp"><table><thead><tr><th>Name</th><th>Base pay</th><th>Super</th><th>On-costs</th><th>Cost</th><th>Comm. paid</th>
-      ${d.fee?`<th>Billings</th><th>Break-even</th>${goal()?'<th>Target</th>':''}<th>Gap</th><th>3-mth ×</th><th>Contrib.</th>`:''}</tr></thead><tbody>
-    ${rows.map(r=>{const x=r.a, gp=goal()?x.gap:x.b-x.bev, sup=isSup(r)&&!x.b, r3=roll3(r);return `<tr${TIP(empTip(r))}><td><b style="color:var(--ink)">${esc(r.name)}</b>${x.est?'<span class="est">est.</span>':''}<br><span class="mut" style="font-size:12px">${esc(r.role||r.type||'')}</span></td>
-      <td>${F(x.g)}</td><td>${F(x.s)}</td><td>${F(x.pt+x.wc)}</td><td style="font-weight:700">${F(x.c)}</td>
-      <td class="${x.cm?'':'mut'}">${x.cm?F(x.cm):'—'}</td>
-      ${d.fee?`<td>${x.b?F(x.b):'<span class="mut">nil</span>'}</td><td class="mut">${x.c&&!sup?F(x.bev):'—'}</td>${goal()?`<td>${x.c&&!sup?F(x.tgt):'—'}</td>`:''}
-      <td class="${!x.c||sup?'mut':gp>=0?'pos':'neg'}">${sup?'desk support':!x.c?'—':(gp>=0?'+'+F(gp):F(gp))}</td>
-      <td class="${r3.c&&!sup&&!r.agg?mvc(r3.mult):'mut'}">${r3.c&&!sup&&!r.agg?X(r3.mult):'—'}</td>
-      <td class="${x.ct>=0?'pos':'neg'}">${F(x.ct)}</td>`:''}</tr>`}).join('')}
-    ${a.team?`<tr class="sub"><td>Team line in the sales sheet</td><td colspan="5"></td><td>${F(a.team)}</td><td colspan="${goal()?5:4}"></td></tr>`:''}
-    <tr class="tot"><td>${esc(d.label)}</td><td>${F(a.g)}</td><td>${F(a.s)}</td><td>${F(a.pt+a.wc)}</td><td>${F(a.c)}</td><td>${a.cm?F(a.cm):'—'}</td>
-      ${d.fee?`<td>${F(a.b)}</td><td class="mut">${F(a.bev)}</td>${goal()?`<td>${F(a.tgt)}</td>`:''}<td class="${a.b-ref>=0?'pos':'neg'}">${F(a.b-ref)}</td>
-      <td>${(()=>{const r=a.mem.map(roll3).reduce((s,x)=>({c:s.c+x.c,b:s.b+x.b}),{c:0,b:0});return r.c?X(r.b/r.c):'—';})()}</td><td class="${a.ct>=0?'pos':'neg'}">${F(a.ct)}</td>`:''}</tr>
+      ${d.fee?`<th>Billings</th><th>Break-even</th>${g?'<th>Target</th>':''}<th>Gap</th><th>3-mth ×</th><th>Contrib.</th>`:''}</tr></thead><tbody>
+    ${rows.map(r=>{const x=r.a, gp=g?x.gap:x.b-x.bev, sup=isSup(r)&&!x.b, r3=roll3(r), C=cells(r);return `<tr><td${TIP(empTip(r))}><b style="color:var(--ink)">${esc(r.name)}</b>${x.est?'<span class="est">est.</span>':''}<br><span class="mut" style="font-size:12px">${esc(r.role||r.type||'')}</span></td>
+      <td${C.g}>${F(x.g)}</td><td${C.s}>${F(x.s)}</td><td${C.o}>${F(x.pt+x.wc)}</td><td style="font-weight:700"${C.c}>${F(x.c)}</td>
+      <td class="${x.cm?'':'mut'}"${C.cm}>${x.cm?F(x.cm):'—'}</td>
+      ${d.fee?`<td${C.b}>${x.b?F(x.b):'<span class="mut">nil</span>'}</td><td class="mut"${x.c&&!sup?C.be:''}>${x.c&&!sup?F(x.bev):'—'}</td>${g?`<td${x.c&&!sup?C.tg:''}>${x.c&&!sup?F(x.tgt):'—'}</td>`:''}
+      <td class="${!x.c||sup?'mut':gp>=0?'pos':'neg'}"${x.c?C.gap:''}>${sup?'desk support':!x.c?'—':(gp>=0?'+'+F(gp):F(gp))}</td>
+      <td class="${r3.c&&!sup&&!r.agg?mvc(r3.mult):'mut'}"${C.r3}>${r3.c&&!sup&&!r.agg?X(r3.mult):'—'}</td>
+      <td class="${x.ct>=0?'pos':'neg'}"${C.ct}>${F(x.ct)}</td>`:''}</tr>`}).join('')}
+    ${a.team?`<tr class="sub"><td>Team line in the sales sheet</td><td colspan="5"></td><td${ks.length>1?BD(lab+': team line',pn+' · by month',ks.map(k=>({l:mShort(k),v:(DATA.team[dn]||{})[k]||0})),{keepOrder:true,keepZero:true,total:a.team}):''}>${F(a.team)}</td><td colspan="${g?5:4}"></td></tr>`:''}
+    <tr class="tot"><td>${lab}</td><td${P('base pay, leave and allowances',x=>x.g)}>${F(a.g)}</td><td${P('superannuation',x=>x.s)}>${F(a.s)}</td><td${P('on-costs',x=>x.pt+x.wc)}>${F(a.pt+a.wc)}</td><td${P('cost of employment',x=>x.c)}>${F(a.c)}</td><td${a.cm?P('commission and bonus paid',x=>x.cm):''}>${a.cm?F(a.cm):'—'}</td>
+      ${d.fee?`<td${P('billings (GP)',x=>x.b,{team:true,tot:a.b})}>${F(a.b)}</td><td class="mut"${T.be}>${F(a.bev)}</td>${g?`<td${T.tg}>${F(a.tgt)}</td>`:''}<td class="${a.b-ref>=0?'pos':'neg'}"${T.gap}>${F(a.b-ref)}</td>
+      <td${r3T.t}>${r3T.v}</td><td class="${a.ct>=0?'pos':'neg'}"${P('contribution',x=>x.ct,{signed:true,sort:'val',team:true,tot:a.ct})}>${F(a.ct)}</td>`:''}</tr>
     </tbody></table></div></section>`;
 }
 
 /* ---------- checks ---------- */
 function deriveTable(ent){
-  const dv=DATA.mult.derive||{}, rows=dv[ent]||[], t=dv[ent+'tot'], g=(DATA.ents[ent]||{}).short||ent, gl=ent==='R';
+  const dv=DATA.mult.derive||{}, rows=dv[ent]||[], t=dv[ent+'tot'], g=(DATA.ents[ent]||{}).short||ent, gl=ent==='R', X=(DATA.xero||{})[ent]||{};
   if(!rows.length) return '';
-  const r1=(lab,x,cls)=>{const cm=x.fees?(x.fees-x.dcos)/x.fees:0;return `<tr class="${cls||''}"><td>${lab}</td><td>${F(x.fees)}</td><td>${F(x.dcos)}</td><td>${(cm*100).toFixed(1)}%</td><td>${F(x.opex)}</td>${gl?`<td>${F(x.goal)}</td>`:''}<td>${F(x.pay)}</td><td>${(x.be||0).toFixed(2)}×</td>${gl?`<td>${(x.tg||0).toFixed(2)}×</td>`:''}</tr>`;};
+  const feeTeam=mk=>{const sE=ENT,sP=PER; ENT=ent; PER=mk; const its=deptsOf(ent).filter(d=>d.fee).map(d=>({l:d.label,v:deptAgg(d.name).c})); ENT=sE; PER=sP; return its;};
+  const dcosLines=mk=>xLines(X,[mk],'cos',1).filter(x=>ent==='S'||!/^temporary|w&co\.? ?search/i.test(x.l));
+  const opexLines=mk=>xLines(X,[mk],'opex',1).filter(x=>!/interest/i.test(x.l));
+  const r1=(lab,x,cls,mk)=>{const cm=x.fees?(x.fees-x.dcos)/x.fees:0, s=esc(lab);
+    const tD=mk?(X[mk]&&X[mk].lines?BD('Direct costs, '+s,'Cost of sales excluding temporary lines'+(ent==='S'?'':' and the Search recharge'),dcosLines(mk),{total:x.dcos}):''):BD('Direct costs','By month',rows.map(r=>({l:monthLab(r.m),v:r.dcos})),{keepOrder:true,total:x.dcos});
+    const tO=mk?(X[mk]&&X[mk].lines?BD('Cost base, '+s,'Operating expenses excluding interest · by account',opexLines(mk),{total:x.opex,max:18}):''):BD('Cost base','By month',rows.map(r=>({l:monthLab(r.m),v:r.opex})),{keepOrder:true,total:x.opex});
+    const tP=mk?(()=>{const its=feeTeam(mk), sm=its.reduce((s0,i)=>s0+i.v,0); if(Math.abs(sm-x.pay)>1) its.push({l:'Derivation basis difference',v:x.pay-sm}); return BD('Fee-team cost, '+s,'By department',its,{total:x.pay});})()
+      :BD('Fee-team cost','By month',rows.map(r=>({l:monthLab(r.m),v:r.pay})),{keepOrder:true,total:x.pay});
+    const tF=mk?'':BD('Permanent fees','By month',rows.map(r=>({l:monthLab(r.m),v:r.fees})),{keepOrder:true,total:x.fees});
+    const tM=CALC('Margin, '+s,'',[['Permanent fees',F(x.fees)],['Less direct costs',F(-x.dcos)],['÷ Permanent fees',F(x.fees)],['= Margin',(cm*100).toFixed(1)+'%','s']]);
+    const tB=CALC('Break-even, '+s,'',[['Cost base',F(x.opex)],['÷ Margin',(cm*100).toFixed(1)+'%'],['÷ Fee-team cost',F(x.pay)],['= Break-even multiple',(x.be||0).toFixed(2)+'×','s']]);
+    const tT=gl?CALC('Target, '+s,'',[['Cost base',F(x.opex)],['Plus profit goal',F(x.goal)],['÷ Margin',(cm*100).toFixed(1)+'%'],['÷ Fee-team cost',F(x.pay)],['= Target multiple',(x.tg||0).toFixed(2)+'×','s']]):'';
+    return `<tr class="${cls||''}"><td>${lab}</td><td${tF}>${F(x.fees)}</td><td${tD}>${F(x.dcos)}</td><td${tM}>${(cm*100).toFixed(1)}%</td><td${tO}>${F(x.opex)}</td>${gl?`<td>${F(x.goal)}</td>`:''}<td${tP}>${F(x.pay)}</td><td${tB}>${(x.be||0).toFixed(2)}×</td>${gl?`<td${tT}>${(x.tg||0).toFixed(2)}×</td>`:''}</tr>`;};
   return `<h3 style="font-size:14.5px;color:var(--ink);margin:18px 0 8px">${esc(g)}</h3><div class="tbl"><table><thead><tr><th>Month</th><th>Permanent fees</th><th>Direct costs</th><th>Margin</th><th>Cost base</th>${gl?'<th>Profit goal</th>':''}<th>Fee-team cost</th><th>Break-even</th>${gl?'<th>Target</th>':''}</tr></thead><tbody>
-    ${rows.map(r=>r1(esc(monthLab(r.m)),r)).join('')}${t?r1('Closed months together (adopted, 2 decimals)',t,'tot'):''}</tbody></table></div>`;
+    ${rows.map(r=>r1(esc(monthLab(r.m)),r,'',r.m)).join('')}${t?r1('Closed months together (adopted, 2 decimals)',t,'tot',null):''}</tbody></table></div>`;
 }
 function checks(){
   const w=DATA.warnings||[], x=DATA.excluded||[], ch=DATA.changes||[];
   const exT=x.reduce((s,r)=>s+r.amt,0), dv=DATA.mult.derive||{};
+  const costTxt=`Closed months: FoundU base pay, leave and package allowances plus super, from ${esc(DATA.payrollSource||'FoundU')}. Pay runs are weekly, so a month holds 4 or 5 pays; each closed month is normalised to a calendar month (days ÷ 7 weeks). Commission, bonus and termination payments are shown separately and are not in cost. The current month uses each person's salaried FoundU pay rate for the days employed to date (Employee_Map salary if there is none). Payroll tax ${(DATA.rates.pt*100).toFixed(3)}% and WorkCover ${(DATA.rates.wc*100).toFixed(3)}% from the data sheet.`;
+  const multTxt=dv.override?'A Dashboard_Settings tab in the data sheet overrides the derived multiples.':
+    'Break-even = cost base ÷ margin ÷ fee-team cost. Target = (cost base + monthly profit goal) ÷ margin ÷ fee-team cost. Permanent recruitment only: temporary revenue and costs, the Search recharge, service income, grants and interest are excluded, as in the August 2026 report. Each person\'s target is their own cost × the multiple.';
   return `<section class="blk"><div class="hd"><h2>How the figures are built</h2><div class="rt">Refreshed ${esc(DATA.generated)}</div></div>
-    <div class="flag ok"><div><div class="ft">Cost</div><div class="fd">Closed months: FoundU base pay, leave and package allowances plus super, from ${esc(DATA.payrollSource||'FoundU')}.
-      Pay runs are weekly, so a month holds 4 or 5 pays; each closed month is normalised to a calendar month (days ÷ 7 weeks). Commission, bonus and termination payments are shown separately and are not in cost.
-      The current month uses each person's salaried FoundU pay rate for the days employed to date (Employee_Map salary if there is none). Payroll tax ${(DATA.rates.pt*100).toFixed(3)}% and WorkCover ${(DATA.rates.wc*100).toFixed(3)}% from the data sheet.
-      Payroll last synced ${esc(DATA.payrollSyncedAt||'unknown')}.</div></div></div>
-    <div class="flag ok"><div><div class="ft">Multiples: ${esc(DATA.mult.BASIS)}</div><div class="fd">${dv.override?'A Dashboard_Settings tab in the data sheet overrides the derived multiples.':
-      'Break-even = cost base ÷ margin ÷ fee-team cost. Target = (cost base + monthly profit goal) ÷ margin ÷ fee-team cost. Permanent recruitment only: temporary revenue and costs, the Search recharge, service income, grants and interest are excluded, as in the August 2026 report. Each person\'s target is their own cost × the multiple.'}</div></div></div>
+    ${flag('Cost: payroll last synced '+esc(DATA.payrollSyncedAt||'unknown'),costTxt,'ok')}
+    ${flag('Multiples: '+esc(DATA.mult.BASIS),multTxt,'ok')}
     ${deriveTable('R')}${deriveTable('S')}
   </section>
   <section class="blk"><div class="hd"><h2>Exceptions</h2><div class="rt">${w.length} items</div></div>
-    ${w.length?w.map(r=>`<div class="flag ${r.lvl==='high'?'hi':r.lvl==='low'?'ok':''}"><div><div class="ft">${esc(r.t)}</div><div class="fd">${esc(r.d)}</div></div></div>`).join('')
-      :'<div class="flag ok"><div><div class="ft">No exceptions</div><div class="fd">Every sales line matched an employee and every paid employee has a department.</div></div></div>'}
+    ${w.length?w.map(r=>flag(esc(r.t),esc(r.d),r.lvl==='high'?'hi':r.lvl==='low'?'ok':'')).join('')
+      :flag('No exceptions','Every sales line matched an employee and every paid employee has a department.','ok')}
   </section>
   ${ch.length?`<section class="blk"><div class="hd"><h2>Changed since close</h2><div class="rt">Against the month-end snapshot</div></div>
     <div class="tbl"><table><thead><tr><th>Item</th><th>Month</th><th>Source</th><th>At close</th><th>Now</th><th>Change</th></tr></thead><tbody>
@@ -656,17 +831,19 @@ function checks(){
     </tbody></table></div></section>`:''}
   <section class="blk"><div class="hd"><h2>Sales lines excluded</h2><div class="rt">${DATA.fy} to date</div></div>
     <div class="tbl"><table><thead><tr><th>Line</th><th>Department</th><th>Month</th><th>Amount</th><th>Reason</th></tr></thead><tbody>
-    ${x.length?x.map(r=>`<tr><td>${esc(r.name)}</td><td class="tx">${esc(r.dept)}</td><td class="tx">${esc(r.month)}</td><td>${F(r.amt)}</td><td class="tx mut">${esc(r.why)}</td></tr>`).join('')
+    ${x.length?x.map(r=>`<tr><td>${esc(r.name)}</td><td class="tx">${esc(r.dept)}</td><td class="tx">${esc(monthLab(r.month))}</td><td>${F(r.amt)}</td><td class="tx mut">${esc(r.why)}</td></tr>`).join('')
       :'<tr><td colspan="5" class="mut">None</td></tr>'}
-    <tr class="tot"><td>Total excluded</td><td></td><td></td><td>${F(exT)}</td><td></td></tr></tbody></table></div></section>`;
+    <tr class="tot"><td>Total excluded</td><td></td><td></td><td${x.length?BD('Sales lines excluded','By department and reason',Object.entries(x.reduce((o,r)=>{const k=title(r.dept)+'|'+r.why;o[k]=(o[k]||0)+r.amt;return o;},{})).map(([k,v])=>({l:k.split('|')[0],s:k.split('|')[1],v})),{total:exT}):''}>${F(exT)}</td><td></td></tr></tbody></table></div></section>`;
 }
 
-/* ---------- North America (billings and Xero only; no payroll source yet) ---------- */
+/* ---------- North America ---------- */
 const U=()=>{const u=DATA.usa;
   /* the US Xero file reports all overheads under "Other Income and Expense": show them as operating expenses */
-  if(u&&u.xero&&!u._n){Object.keys(u.xero).forEach(k=>{const x=u.xero[k];if(!x.opex&&x.oth<0){x.opex=-x.oth;x.oth=0;}});u._n=1;}
+  if(u&&u.xero&&!u._n){Object.keys(u.xero).forEach(k=>{const x=u.xero[k];if(!x.opex&&x.oth<0){x.opex=-x.oth;x.oth=0;
+    if(x.lines&&x.lines.oth){x.lines.opex=(x.lines.opex||[]).concat(x.lines.oth.map(([l,a])=>[l,-a]));x.lines.oth=[];}}});u._n=1;}
   return u;};
 const FU=n=>(n<0?'-':'')+'US$'+Math.abs(Math.round(n||0)).toLocaleString('en-AU');
+const uShort=k=>((U().months||[]).find(m=>m.key===k)||{short:k}).short;
 function uMonths(){
   const u=U(), ms=u.months, cur=u.current;
   if(PER==='YTD') return ms.map(m=>m.key);
@@ -680,7 +857,7 @@ function uPerName(){
   if(PER==='QTD') return 'Quarter to date ('+lab(k[0])+(k.length>1?' to '+lab(k[k.length-1]):'')+')';
   return lab(k[0])+(k[0]===u.current?' to date':'');
 }
-function uCost(n,ks){const c=(U().cost||{})[n]||{};return ks.reduce((o,k)=>{const x=c[k];if(x){o.c+=x.c;o.cm+=x.cm||0;if(x.src==='E')o.est=true;}return o;},{c:0,cm:0,est:false});}
+function uCost(n,ks){const c=(U().cost||{})[n]||{};return ks.reduce((o,k)=>{const x=c[k];if(x){o.c+=x.c;o.cm+=x.cm||0;o.g+=x.g||0;o.t+=x.t||0;o.b+=x.b||0;if(x.src==='E')o.est=true;}return o;},{c:0,cm:0,g:0,t:0,b:0,est:false});}
 function uTeamCost(ks){const u=U(); if(u.costTot) return ks.reduce((o,k)=>{const x=u.costTot[k];if(x){o.c+=x.c;if(x.src==='E')o.est=true;}return o;},{c:0,est:false});
   return Object.keys(u.cost||{}).reduce((o,n)=>{const x=uCost(n,ks);o.c+=x.c;o.est=o.est||x.est;return o;},{c:0,est:false});}
 const uBE=()=>(U().mult&&U().mult.BE)||0;
@@ -691,20 +868,20 @@ const uOpen=k=>{const u=U();return u.closedTo?k>u.closedTo:k===u.current;};
 function uOh(n,ks){const c=(U().cost||{})[n]||{}, o=U().ovh||{};return ks.reduce((s,k)=>s+(c[k]&&c[k].c?(o[k]||0):0),0);}
 function uRecs(ks){
   const u=U(), S=(o)=>ks.reduce((s,k)=>s+(o[k]||0),0), names=[...new Set(Object.keys(u.recs).concat(Object.keys(u.cost||{})))];
-  return names.map(n=>{const r=u.recs[n]||{perm:{},temp:{},n:{}}, c=uCost(n,ks);return {name:n,perm:S(r.perm),temp:S(r.temp),n:S(r.n),coordN:u.place.filter(p=>p.coord===n&&p.rec!==n&&ks.includes(p.m)).length,c:c.c,cm:c.cm,est:c.est};})
+  return names.map(n=>{const r=u.recs[n]||{perm:{},temp:{},n:{}}, c=uCost(n,ks);return {name:n,perm:S(r.perm),temp:S(r.temp),n:S(r.n),coordN:u.place.filter(p=>p.coord===n&&p.rec!==n&&ks.includes(p.m)).length,c:c.c,cm:c.cm,cg:c.g,ct2:c.t,cb:c.b,est:c.est};})
     .map(r=>Object.assign(r,{tot:r.perm+r.temp,mult:r.c?r.perm/r.c:0,sup:uSup(r.name),oh:uOh(r.name,ks)}))
     .map(r=>Object.assign(r,{ct:r.perm-r.cm-r.c-r.oh}));
 }
 function uTip(r){const be=uBE(), tg=uTG();
   return `<div class="th">${esc(r.name)}</div><div class="ts">${esc(uPerName())}${r.sup?' · desk support':''}</div><table>`+r2('Permanent fees',FU(r.perm))+(r.temp?r2('Temp margin (not in the multiple)',FU(r.temp)):'')
-   +(r.c?r2('Cost of employment',FU(r.c),'s')+r2('Gross pay excl. commission, employer taxes and benefits','normalised to calendar months')+(r.est?r2('After August','estimated at the August rate'):'')
+   +(r.c?r2('Cost of employment',FU(r.c),'s')+r2('Gross pay excl. commission',FU(r.cg))+r2('Employer taxes',FU(r.ct2))+r2('Benefits',FU(r.cb))+(r.est?r2('After August','estimated at the August rate'):'')
    +(r.sup?r2('Desk support','cost counts in the team multiple, no individual target','g')
      :r2('Break-even ×'+be.toFixed(2),FU(r.c*be),'g')+(tg?r2('Target ×'+tg.toFixed(2),FU(r.c*tg)):'')+r2(r.perm>=r.c*uMark()?'Ahead by':'Short by',`<span class="${r.perm>=r.c*uMark()?'up':'dn'}">${FU(Math.abs(r.perm-r.c*uMark()))}</span>`)+r2('Fees per $1 of cost','×'+r.mult.toFixed(2)))
    +r2('Less commission paid (payroll)',FU(-r.cm),'g')+r2('Less cost of employment',FU(-r.c))+r2('Less share of overhead and cost of sales',FU(-r.oh))+r2('Contribution',`<span class="${r.ct>=0?'up':'dn'}">${FU(r.ct)}</span>`,'s')
    :r2('Cost','no payroll in this period'))+'</table>';}
 function uBars(rows){
   const be=uBE(), tg=uTG(), mk=uMark(), mx=Math.max(...rows.map(r=>Math.max(r.tot,r.c*mk*1.05)),1);
-  return `<div class="beb"><div class="lg"><span><i class="c"></i>Cost of employment</span><span><i class="g"></i>Permanent fees above cost</span><span><i class="r"></i>Short of cost</span>${tg?`<span><i class="bb"></i>Break-even ${be.toFixed(2)}×</span><span><i class="b"></i>Target ${tg.toFixed(2)}×</span>`:`<span><i class="b"></i>Break-even ${be.toFixed(2)}×</span>`}<span>Temp margin is shown on the right, not in the bar.</span></div>
+  return `<div class="beb"><div class="lg"><span><i class="c"></i>Cost of employment</span><span><i class="g"></i>Permanent fees above cost</span><span><i class="r"></i>Short of cost</span>${tg?`<span><i class="bb"></i>Break-even ${be.toFixed(2)}×</span><span><i class="b"></i>Target ${tg.toFixed(2)}×</span>`:`<span><i class="b"></i>Break-even ${be.toFixed(2)}×</span>`}</div>
   ${rows.map(r=>{const c=r.c,b=r.perm,cw=c/mx*100,bw=b/mx*100,bev=c*mk/mx*100,bv2=c*be/mx*100;
     const seg=b>=c?`<div class="seg cost" style="left:0;width:${cw}%"></div><div class="seg gain" style="left:${cw}%;width:${Math.max(bw-cw,0)}%"></div>`
                   :`<div class="seg cost" style="left:0;width:${bw}%"></div><div class="seg short" style="left:${bw}%;width:${Math.max(cw-bw,0)}%"></div>`;
@@ -714,101 +891,138 @@ function uBars(rows){
     ${r.sup?`<div class="mx zero">${b&&c?X(r.mult):'—'}<small>desk support</small></div>`
     :`<div class="mx ${c?(r.mult>=mk?'ok':r.mult>=be?'mid':'bad'):'zero'}">${c?X(r.mult):'—'}<small>${c?(b-c*mk>=0?'+'+F(b-c*mk):F(b-c*mk)):'no payroll'}</small></div>`}</div>`;}).join('')}</div>`;
 }
+/* placements behind a recruiter's month (client and role only; candidate names are never brought in) */
+const uPlaceItems=(n,ks)=>U().place.filter(p=>(n==null||p.rec===n)&&ks.includes(p.m)).map(p=>({l:p.client||'Client not named',s:(p.role||'')+(p.temp?' · temp':p.repl?' · replacement':'')+(n==null?' · '+p.rec:''),v:p.fee||0,f:p.fee?F(p.fee):'nil'}));
 function uMonthTable(){
-  const u=U(), names=Object.keys(u.recs);
+  const u=U(), names=Object.keys(u.recs), all=u.months.map(m=>m.key);
   const val=(n,k)=>(u.recs[n].perm[k]||0)+(u.recs[n].temp[k]||0);
-  const X=u.xero||{}, cur=u.current;
+  const X=u.xero||{};
   const tot=k=>names.reduce((s,n)=>s+val(n,k),0);
+  const pm=k=>names.reduce((s,n)=>s+(u.recs[n].perm[k]||0),0), tc=k=>uTeamCost([k]), be=uBE();
+  const byMo=(ttl,f,o)=>BD(ttl+', '+u.year+' to date','By month',u.months.map(m=>({l:m.short,v:f(m.key)})),Object.assign({keepOrder:true,keepZero:true,total:all.reduce((s,k)=>s+f(k),0)},o||{}));
+  const costBy=k=>u.costTot?'':BD('Fee-team cost, '+uShort(k),'By person',Object.keys(u.cost||{}).map(n=>({l:n,s:uSup(n)?'desk support':'',v:((u.cost[n]||{})[k]||{}).c||0})),{total:tc(k).c,note:tc(k).est?'Estimated at each person\'s August rate.':''});
   return `<div class="tbl cmp"><table><thead><tr><th>Recruiter</th>${u.months.map(m=>`<th>${m.short.split(' ')[0]}</th>`).join('')}<th>${u.year} YTD</th></tr></thead><tbody>
-    ${names.map(n=>`<tr><td><b style="color:var(--ink)">${esc(n)}</b></td>${u.months.map(m=>{const v=val(n,m.key);return `<td class="${v?'':'mut'}">${v?F(v):'—'}</td>`;}).join('')}<td style="font-weight:700">${F(u.months.reduce((s,m)=>s+val(n,m.key),0))}</td></tr>`).join('')}
-    <tr class="tot"><td>Billing sheet</td>${u.months.map(m=>`<td>${F(tot(m.key))}</td>`).join('')}<td>${F(u.months.reduce((s,m)=>s+tot(m.key),0))}</td></tr>
-    ${(()=>{const pm=k=>names.reduce((s,n)=>s+(u.recs[n].perm[k]||0),0), tc=k=>uTeamCost([k]), all=u.months.map(m=>m.key), T=uTeamCost(all), P=all.reduce((s,k)=>s+pm(k),0), be=uBE();
-      return `<tr class="sub"><td>Fee-team cost</td>${u.months.map(m=>{const c=tc(m.key);return `<td>${c.c?F(c.c)+(c.est?'*':''):'—'}</td>`;}).join('')}<td>${F(T.c)}</td></tr>
-    <tr class="sub"><td>Permanent fees per $1 of cost</td>${u.months.map(m=>{const c=tc(m.key).c,x=c?pm(m.key)/c:0;return `<td class="${c?(x>=be?'pos':'neg'):'mut'}">${c?x.toFixed(2)+'×':'—'}</td>`;}).join('')}<td class="${T.c&&P/T.c>=be?'pos':'neg'}">${T.c?(P/T.c).toFixed(2)+'×':'—'}</td></tr>`;})()}
-    ${XON&&Object.keys(X).length?(()=>{const pm=k=>names.reduce((s,n)=>s+(u.recs[n].perm[k]||0),0), xf=k=>X[k]?(X[k].fees||0):0, cl=u.months.filter(m=>!uOpen(m.key)&&X[m.key]);
-      return `<tr class="sub"><td>Xero permanent fees</td>${u.months.map(m=>`<td>${X[m.key]?F(xf(m.key)):'—'}</td>`).join('')}<td>${F(cl.reduce((s,m)=>s+xf(m.key),0))}</td></tr>
-    <tr class="sub"><td>Less sheet permanent fees</td>${u.months.map(m=>{const d=xf(m.key)-pm(m.key);return `<td class="${!X[m.key]||uOpen(m.key)?'mut':Math.abs(d)<1?'mut':'amb'}">${X[m.key]&&!uOpen(m.key)?F(d):'—'}</td>`;}).join('')}<td>${F(cl.reduce((s,m)=>s+xf(m.key)-pm(m.key),0))}</td></tr>`;})()+`
-    <tr class="sub"><td>Xero net profit</td>${u.months.map(m=>`<td class="${X[m.key]&&!uOpen(m.key)?(X[m.key].np<0?'neg':'pos'):'mut'}">${X[m.key]?F(X[m.key].np)+(uOpen(m.key)?'*':''):'—'}</td>`).join('')}<td>${F(u.months.filter(m=>!uOpen(m.key)&&X[m.key]).reduce((s,m)=>s+X[m.key].np,0))}</td></tr>`:''}
+    ${names.map(n=>`<tr><td><b style="color:var(--ink)">${esc(n)}</b></td>${u.months.map(m=>{const v=val(n,m.key);return `<td class="${v?'':'mut'}"${v?BD(esc(n)+', '+esc(m.label),'Placements on the billing sheet',uPlaceItems(n,[m.key]),{keepZero:true,total:v}):''}>${v?F(v):'—'}</td>`;}).join('')}<td style="font-weight:700"${byMo(esc(n),k=>val(n,k))}>${F(u.months.reduce((s,m)=>s+val(n,m.key),0))}</td></tr>`).join('')}
+    <tr class="tot"><td>Billing sheet</td>${u.months.map(m=>`<td${BD('Billing sheet, '+esc(m.label),'By recruiter',names.map(n=>({l:n,v:val(n,m.key)})),{total:tot(m.key)})}>${F(tot(m.key))}</td>`).join('')}<td${byMo('Billing sheet',tot)}>${F(u.months.reduce((s,m)=>s+tot(m.key),0))}</td></tr>
+    <tr class="sub"><td>Fee-team cost</td>${u.months.map(m=>{const c=tc(m.key);return `<td${c.c?costBy(m.key):''}>${c.c?F(c.c)+(c.est?'*':''):'—'}</td>`;}).join('')}<td${byMo('Fee-team cost',k=>tc(k).c)}>${F(uTeamCost(all).c)}</td></tr>
+    ${(()=>{const T=uTeamCost(all), P=all.reduce((s,k)=>s+pm(k),0), cl=(c,x)=>c?(x>=be?'pos':'neg'):'mut';
+      return `<tr class="sub"><td>Permanent fees per $1 of cost</td>${u.months.map(m=>{const c=tc(m.key).c,x=c?pm(m.key)/c:0;return `<td class="${cl(c,x)}"${c?CALC('Multiple, '+esc(m.label),'',[['Permanent fees',F(pm(m.key))],['÷ Fee-team cost',F(c)],['= Fees per $1 of cost',x.toFixed(2)+'×','s'],['Break-even',be.toFixed(2)+'×','g']]):''}>${c?x.toFixed(2)+'×':'—'}</td>`;}).join('')}
+      <td class="${cl(T.c,T.c?P/T.c:0)}"${T.c?CALC('Multiple, '+u.year+' to date','',[['Permanent fees',F(P)],['÷ Fee-team cost',F(T.c)],['= Fees per $1 of cost',(P/T.c).toFixed(2)+'×','s'],['Break-even',be.toFixed(2)+'×','g']]):''}>${T.c?(P/T.c).toFixed(2)+'×':'—'}</td></tr>`;})()}
+    ${XON&&Object.keys(X).length?(()=>{const xf=k=>X[k]?(X[k].fees||0):0, cl=u.months.filter(m=>!uOpen(m.key)&&X[m.key]).map(m=>m.key);
+      const fT=(k,ttl)=>CALC(ttl+', '+esc(u.months.find(m=>m.key===k).label)+(uOpen(k)?' (open)':''),'',[['Recruitment Fees (Xero)',F(xf(k))],['Billing sheet permanent fees',F(pm(k))],['Difference',SG(xf(k)-pm(k))]]);
+      const clBy=(ttl,f,signed)=>BD(ttl+', closed months','By month',cl.map(k=>({l:uShort(k),v:f(k)})),{keepOrder:true,keepZero:true,signed,total:cl.reduce((s,k)=>s+f(k),0)});
+      return `<tr class="sub"><td>Xero permanent fees</td>${u.months.map(m=>`<td${X[m.key]?fT(m.key,'Permanent fees'):''}>${X[m.key]?F(xf(m.key)):'—'}</td>`).join('')}<td${clBy('Xero permanent fees',xf)}>${F(cl.reduce((s,k)=>s+xf(k),0))}</td></tr>
+    <tr class="sub"><td>Less sheet permanent fees</td>${u.months.map(m=>{const d=xf(m.key)-pm(m.key);return `<td class="${!X[m.key]||uOpen(m.key)?'mut':Math.abs(d)<1?'mut':'amb'}"${X[m.key]&&!uOpen(m.key)?fT(m.key,'Xero less billing sheet'):''}>${X[m.key]&&!uOpen(m.key)?F(d):'—'}</td>`;}).join('')}<td${clBy('Xero less billing sheet',k=>xf(k)-pm(k),true)}>${F(cl.reduce((s,k)=>s+xf(k)-pm(k),0))}</td></tr>
+    <tr class="sub"><td>Xero net profit</td>${u.months.map(m=>`<td class="${X[m.key]&&!uOpen(m.key)?(X[m.key].np<0?'neg':'pos'):'mut'}"${X[m.key]?xNP('Net profit, '+esc(m.label)+(uOpen(m.key)?' (open)':''),'',X[m.key]):''}>${X[m.key]?F(X[m.key].np)+(uOpen(m.key)?'*':''):'—'}</td>`).join('')}<td${clBy('Xero net profit',k=>X[k].np,true)}>${F(cl.reduce((s,k)=>s+X[k].np,0))}</td></tr>`;})():''}
   </tbody></table></div>`;
 }
 function uXero(){
   if(!XON) return '';
-  const u=U(), X=u.xero||{}, cur=u.current, ks=uMonths(), closed=ks.filter(k=>!uOpen(k)&&X[k]);
+  const u=U(), X=u.xero||{}, ks=uMonths(), closed=ks.filter(k=>!uOpen(k)&&X[k]);
   if(!Object.keys(X).length) return `<section class="blk"><div class="hd"><h2>Xero profit and loss</h2></div>
-    <div class="flag"><div><div class="ft">Xero North America is not connected yet</div><div class="fd">Figures appear here once the North America Xero organisation is authorised and the nightly sync has run.</div></div></div></section>`;
-  const S=f=>closed.reduce((s,k)=>s+(X[k][f]||0),0);
+    ${flag('Xero North America is not connected yet','Figures appear here once the North America Xero organisation is authorised and the nightly sync has run.')}</section>`;
+  const S=f=>closed.reduce((s,k)=>s+(X[k][f]||0),0), V={rev:S('rev'),cos:S('cos'),gp:S('gp'),oth:S('oth'),opex:S('opex'),np:S('np'),fees:S('fees')};
   const L=[['Revenue','rev',1,''],['of which permanent fees (Recruitment Fees)','fees',1,'sub'],['Cost of sales','cos',-1,''],['Gross profit','gp',1,''],['Other income','oth',1,''],['Operating expenses','opex',-1,''],['Net profit','np',1,'tot']];
-  const bill=uRecs(closed).reduce((s,r)=>s+r.perm,0);
-  return `<section class="blk"><div class="hd"><h2>Xero profit and loss</h2><div class="rt">Unreviewed ledger figures · synced ${esc((DATA.xero||{}).syncedAt||'')}</div></div>
-    <p class="note">Straight from Woods &amp; Co Recruitment LLC in Xero, in its base currency, before month-end review. A month counts as closed from the 15th of the following month; until then it is left out of totals (marked * in the month table). The file reports overheads, payroll and payroll taxes under "Other Income and Expense"; they are shown here as operating expenses. Revenue also includes temp billings at their gross amount, so the tie to the billing sheet uses permanent fees only.</p>
-    <div class="tbl"><table><thead><tr><th>${closed.length?closed.map(k=>u.months.find(m=>m.key===k).short).join(', '):esc(uPerName())}</th><th>Xero</th></tr></thead><tbody>
-      ${closed.length?L.map(([l,f,sg,cl])=>{const v=S(f)*sg;return `<tr class="${cl}"><td>${l}</td><td class="${v<0?'neg':''}">${F(v)}</td></tr>`}).join('')
-        +`<tr class="sub"><td>Billing sheet permanent fees, same months</td><td>${F(bill)}</td></tr><tr class="sub"><td>Xero permanent fees less billing sheet</td><td class="${S('fees')-bill<0?'neg':''}">${F(S('fees')-bill)}</td></tr>`
+  const bill=uRecs(closed).reduce((s,r)=>s+r.perm,0), sub=closed.map(uShort).join(', ');
+  const tipFor=f=>f==='gp'?xGP('Gross profit',sub,V):f==='np'?xNP('Net profit',sub,V)
+    :f==='fees'?(closed.length>1?BD('Permanent fees (Recruitment Fees)',sub+' · by month',closed.map(k=>({l:uShort(k),v:X[k].fees||0})),{keepOrder:true,total:V.fees})
+      :CALC('Permanent fees (Recruitment Fees)',sub,[['Recruitment Fees account',F(V.fees)],['Billing sheet permanent fees',F(bill)],['Difference',SG(V.fees-bill)]]))
+    :xTip(X,closed,f,f==='cos'||f==='opex'?-1:1,{rev:'Revenue',cos:'Cost of sales',oth:'Other income',opex:'Operating expenses'}[f],sub,uShort);
+  const info='Straight from Woods &amp; Co Recruitment LLC in Xero, in its base currency, before month-end review. A month counts as closed from the 15th of the following month; until then it is left out of totals (marked * in the month table). The file reports overheads, payroll and payroll taxes under "Other Income and Expense"; they are shown here as operating expenses. Revenue also includes temp billings at their gross amount, so the tie to the billing sheet uses permanent fees only.';
+  return `<section class="blk"><div class="hd"><h2>Xero profit and loss${INFO(info)}</h2><div class="rt">Unreviewed ledger figures · synced ${esc((DATA.xero||{}).syncedAt||'')}</div></div>
+    <div class="tbl"><table><thead><tr><th>${closed.length?closed.map(uShort).join(', '):esc(uPerName())}</th><th>Xero</th></tr></thead><tbody>
+      ${closed.length?L.map(([l,f,sg,cl])=>{const v=V[f]*sg;return `<tr class="${cl}"><td>${l}</td><td class="${v<0?'neg':''}"${tipFor(f)}>${F(v)}</td></tr>`}).join('')
+        +`<tr class="sub"><td>Billing sheet permanent fees, same months</td><td${BD('Billing sheet permanent fees',sub+' · by recruiter',uRecs(closed).map(r=>({l:r.name,v:r.perm})),{total:bill})}>${F(bill)}</td></tr><tr class="sub"><td>Xero permanent fees less billing sheet</td><td class="${V.fees-bill<0?'neg':''}"${BD('Xero permanent fees less billing sheet',sub+' · by month',closed.map(k=>({l:uShort(k),v:(X[k].fees||0)-uRecs([k]).reduce((s,r)=>s+r.perm,0)})),{keepOrder:true,keepZero:true,signed:true,total:V.fees-bill})}>${F(V.fees-bill)}</td></tr>`
         :'<tr><td colspan="2" class="tx mut">No closed month in this period yet</td></tr>'}
     </tbody></table></div></section>`;
 }
 function uSummary(){
-  const u=U(), ks=uMonths(), rows=uRecs(ks).filter(r=>r.tot||r.n||r.coordN||r.c).sort((a,b)=>(a.sup-b.sup)||b.perm-a.perm||b.c-a.c);
+  const u=U(), ks=uMonths(), pn=esc(uPerName()), rows=uRecs(ks).filter(r=>r.tot||r.n||r.coordN||r.c).sort((a,b)=>(a.sup-b.sup)||b.perm-a.perm||b.c-a.c);
   const pl=u.place.filter(p=>ks.includes(p.m)), tot=rows.reduce((s,r)=>s+r.tot,0), perm=rows.reduce((s,r)=>s+r.perm,0), n=rows.reduce((s,r)=>s+r.n,0);
-  const unpaid=pl.filter(p=>!p.paid&&p.fee).reduce((s,p)=>s+p.fee,0), repl=pl.filter(p=>p.repl).length, tc=uTeamCost(ks), be=uBE(), tg=uTG(), mk=uMark();
-  const ctT=rows.reduce((s,r)=>s+r.ct,0), indiv=!u.costTot;
+  const unp=pl.filter(p=>!p.paid&&p.fee), unpaid=unp.reduce((s,p)=>s+p.fee,0), repl=pl.filter(p=>p.repl).length, tc=uTeamCost(ks), be=uBE(), tg=uTG(), mk=uMark();
+  const ctT=rows.reduce((s,r)=>s+r.ct,0), indiv=!u.costTot, heads=rows.filter(r=>r.c).length, gap=perm-tc.c*be;
+  const R=(ttl,f,o)=>BD(ttl,pn+' · by recruiter',rows.map(r=>({l:r.name,s:r.sup?'desk support':'',v:f(r)})),Object.assign({total:rows.reduce((s,r)=>s+f(r),0)},o||{}));
+  const payInfo=`Cost is each person's Gusto pay (excluding commission) plus employer taxes and health benefits, with weekly pays normalised to calendar months. Gusto stopped at the end of August (payroll moved to VensureHR), so September onwards is estimated at each person's August rate until VensureHR figures are loaded. Break-even ${be.toFixed(2)}× is derived from the LLC's Xero figures for the closed months with payroll. ${esc((u.support||[]).join(' and '))} ${(u.support||[]).length>1?'are':'is'} desk support: their cost counts in the team multiple but they carry no individual target. Temp margin is shown but not counted in the multiple.`;
   return `<div class="kpis">
-    <div class="kpi"><div class="lab">Billings</div><div class="val">${F(tot)}</div><div class="sub">Permanent ${F(perm)}, temp margin ${F(tot-perm)}. US dollars.</div></div>
-    <div class="kpi"><div class="lab">Placements</div><div class="val">${n}</div><div class="sub">Average permanent fee ${n?F(perm/n):'—'}.${repl?' Plus '+repl+' free replacement'+(repl>1?'s':'')+'.':''}</div></div>
-    <div class="kpi"><div class="lab">Fee-team cost</div><div class="val">${F(tc.c)}</div><div class="sub">Gross pay excluding commission, employer taxes and benefits${tc.est?'. After August estimated':''}.</div></div>
-    <div class="kpi"><div class="lab">Permanent fees per $1 of cost</div><div class="val ${tc.c?(perm/tc.c>=be?'pos':'neg'):''}">${tc.c?X(perm/tc.c):'—'}</div><div class="sub">Break-even ${be.toFixed(2)}× (${F(tc.c*be)}), ${perm-tc.c*be>=0?F(perm-tc.c*be)+' ahead':F(tc.c*be-perm)+' behind'}.${tg?' Target '+tg.toFixed(2)+'× ('+F(tc.c*tg)+').':' No profit goal set.'}</div></div>
-    ${indiv?`<div class="kpi"><div class="lab">Contribution</div><div class="val ${ctT>=0?'pos':'neg'}">${F(ctT)}</div><div class="sub">Permanent fees less commission paid, cost and a per-head share of Xero cost of sales and non-payroll overhead.</div></div>`:''}
-    <div class="kpi"><div class="lab">Not yet received</div><div class="val ${unpaid?'amb':''}">${F(unpaid)}</div><div class="sub">Lines marked UNPAID in the billing sheet for this period.</div></div>
+    <div class="kpi"><div class="lab">Billings${INFO('Permanent fees and temp margin from the North America billing sheet, in US dollars, credited to the recruiter in the month of the start date.')}</div><div class="val"${R('Billings',r=>r.tot,{after:[['Permanent fees',F(perm),'g'],['Temp margin',F(tot-perm)]]})}>${F(tot)}</div><div class="sub">Perm ${F(perm)} · temp ${F(tot-perm)}</div></div>
+    <div class="kpi"><div class="lab">Placements</div><div class="val"${R('Placements',r=>r.n,{fmt:CNT,after:[repl?['Free replacements (no fee)',String(repl),'g']:null]})}>${n}</div><div class="sub">Avg fee ${n?F(perm/n):'—'}${repl?' · '+repl+' replacement'+(repl>1?'s':''):''}</div></div>
+    <div class="kpi"><div class="lab">Fee-team cost${INFO('Gross pay excluding commission, plus employer taxes and benefits, normalised to calendar months.'+(tc.est?' Months after August are estimated at each person\'s August rate.':''))}</div><div class="val"${indiv?R('Fee-team cost',r=>r.c,{after:[['Gross pay excl. commission',F(rows.reduce((s,r)=>s+r.cg,0)),'g'],['Employer taxes',F(rows.reduce((s,r)=>s+r.ct2,0))],['Benefits',F(rows.reduce((s,r)=>s+r.cb,0))]]}):''}>${F(tc.c)}</div><div class="sub">${indiv?heads+' people':'Team total'}${tc.est?' · est. after Aug':''}</div></div>
+    <div class="kpi"><div class="lab">Permanent fees per $1 of cost${INFO('Permanent fees ÷ fee-team cost. Break-even '+be.toFixed(2)+'× = the LLC\'s operating costs ÷ permanent fee margin ÷ fee-team cost.'+(tg?'':' No profit goal is set.'))}</div><div class="val ${tc.c?(perm/tc.c>=be?'pos':'neg'):''}"${tc.c?CALC('Permanent fees per $1 of cost',pn,[['Permanent fees',F(perm)],['÷ Fee-team cost',F(tc.c)],['= Multiple',X(perm/tc.c),'s']].concat(xMult(be,tg||be))):''}>${tc.c?X(perm/tc.c):'—'}</div>
+      <div class="sub"><span${CALC((gap>=0?'Ahead of':'Behind')+' break-even',pn,[['Permanent fees',F(perm)],['Less fee-team cost × '+be.toFixed(2),F(-tc.c*be)],['= '+(gap>=0?'Ahead':'Behind'),SG(gap),'s']])}>B/e ${be.toFixed(2)}× · ${gap>=0?F(gap)+' ahead':F(-gap)+' behind'}</span></div></div>
+    ${indiv?`<div class="kpi"><div class="lab">Contribution${INFO('Permanent fees less commission paid, cost of employment and a per-head share of the LLC\'s Xero cost of sales and non-payroll overhead.')}</div><div class="val ${ctT>=0?'pos':'neg'}"${R('Contribution',r=>r.ct,{signed:true,sort:'val',after:[['Permanent fees',F(perm),'g'],['Less commission paid',F(-rows.reduce((s,r)=>s+r.cm,0))],['Less cost of employment',F(-rows.reduce((s,r)=>s+r.c,0))],['Less overhead and cost of sales',F(-rows.reduce((s,r)=>s+r.oh,0))]]})}>${F(ctT)}</div><div class="sub">After overhead share</div></div>`:''}
+    <div class="kpi"><div class="lab">Not yet received${INFO('Lines marked UNPAID on the billing sheet for this period.')}</div><div class="val ${unpaid?'amb':''}"${unp.length?BD('Not yet received',pn+' · by placement',unp.map(p=>({l:p.client||'Client not named',s:(p.role||'')+' · '+p.rec+' · starts '+p.d,v:p.fee})),{total:unpaid,max:16}):''}>${F(unpaid)}</div><div class="sub">${unp.length} line${unp.length===1?'':'s'}</div></div>
   </div>
-  <div class="flag"><div><div class="ft">US dollars, payroll from Gusto to August 2026</div><div class="fd">Cost is each person's Gusto pay (excluding commission) plus employer taxes and health benefits, with weekly pays normalised to calendar months. Gusto stopped at the end of August (payroll moved to VensureHR), so September onwards is estimated at each person's August rate until VensureHR figures are loaded. Break-even ${be.toFixed(2)}× is derived from the LLC's Xero figures for the closed months with payroll. ${esc((u.support||[]).join(' and '))} ${(u.support||[]).length>1?'are':'is'} desk support: their cost counts in the team multiple but they carry no individual target. Temp margin is shown but not counted in the multiple.</div></div></div>
-  <section class="blk"><div class="hd"><h2>Billings against cost, ${esc(uPerName())}</h2><div class="rt">Sorted by permanent fees · hover for detail</div></div>${rows.length?uBars(rows):'<p class="note">Nothing billed in this period yet.</p>'}</section>
+  ${flag('US dollars · Gusto payroll to August 2026'+(tc.est?' · later months estimated':''),payInfo)}
+  <section class="blk"><div class="hd"><h2>Billings against cost, ${pn}${INFO('Each recruiter\'s permanent fees against their fully loaded payroll cost. Temp margin is shown on the right, not in the bar. Hover a row for the cost build.')}</h2><div class="rt">Sorted by permanent fees</div></div>${rows.length?uBars(rows):flag('Nothing billed in this period yet','')}</section>
   ${indiv&&rows.some(r=>r.c)?uCostTable(rows):''}
-  <section class="blk"><div class="hd"><h2>Month by month</h2><div class="rt">${u.year}, calendar year</div></div>${uMonthTable()}</section>
+  <section class="blk"><div class="hd"><h2>Month by month${INFO('Billing sheet totals by recruiter and month, with fee-team cost and, when Xero figures are on, the LLC\'s permanent fees and net profit. * estimated cost, or a month not yet closed.')}</h2><div class="rt">${u.year}, calendar year</div></div>${uMonthTable()}</section>
   ${uXero()}`;
 }
 function uCostTable(rows){
-  const T=rows.reduce((s,r)=>({p:s.p+r.perm,t:s.t+r.temp,c:s.c+r.c,cm:s.cm+r.cm,oh:s.oh+r.oh,ct:s.ct+r.ct}),{p:0,t:0,c:0,cm:0,oh:0,ct:0}), mk=uMark();
-  return `<section class="blk"><div class="hd"><h2>Cost build and contribution</h2><div class="rt">${esc(uPerName())} · US$</div></div>
-    <p class="note">Contribution is permanent fees less commission paid through payroll, cost of employment and a per-head share of the LLC's cost of sales (job ads and the like) and non-payroll overhead from Xero (closed months; later months carry the last closed month's figure). The billing sheet has no commission column, so commission is what payroll paid, not what has accrued.</p>
+  const T=rows.reduce((s,r)=>({p:s.p+r.perm,t:s.t+r.temp,c:s.c+r.c,cm:s.cm+r.cm,oh:s.oh+r.oh,ct:s.ct+r.ct}),{p:0,t:0,c:0,cm:0,oh:0,ct:0}), mk=uMark(), be=uBE(), ks=uMonths(), u=U(), pn=esc(uPerName()), one=ks.length===1;
+  const byMo=(r,ttl,f,tot,o)=>BD(esc(r.name)+': '+ttl,pn+' · by month',ks.map(k=>({l:uShort(k),v:f(k)})),Object.assign({keepOrder:true,keepZero:true,total:tot},o||{}));
+  const rec=n=>u.recs[n]||{perm:{},temp:{}}, cst=(n,k)=>((u.cost||{})[n]||{})[k]||{};
+  const P=(ttl,f,o)=>BD(ttl,pn+' · by person',rows.map(r=>({l:r.name,v:f(r)})),Object.assign({total:rows.reduce((s,r)=>s+f(r),0)},o||{}));
+  const info='Contribution is permanent fees less commission paid through payroll, cost of employment and a per-head share of the LLC\'s cost of sales (job ads and the like) and non-payroll overhead from Xero (closed months; later months carry the last closed month\'s figure). The billing sheet has no commission column, so commission is what payroll paid, not what has accrued.';
+  return `<section class="blk"><div class="hd"><h2>Cost build and contribution${INFO(info)}</h2><div class="rt">${pn} · US$</div></div>
     <div class="tbl cmp"><table><thead><tr><th>Name</th><th>Perm fees</th><th>Temp margin</th><th>Cost</th><th>Comm. paid</th><th>Overhead</th><th>Contrib.</th><th>Multiple</th><th>Gap to ${uTG()?'target':'break-even'}</th></tr></thead><tbody>
-    ${rows.map(r=>`<tr${TIP(uTip(r))}><td><b style="color:var(--ink)">${esc(r.name)}</b>${r.est?'<span class="est">est.</span>':''}${r.sup?'<br><span class="mut" style="font-size:12px">Desk support</span>':''}</td><td>${r.perm?F(r.perm):'<span class="mut">nil</span>'}</td><td class="${r.temp?'':'mut'}">${r.temp?F(r.temp):'—'}</td><td>${F(r.c)}</td><td class="${r.cm?'':'mut'}">${r.cm?F(r.cm):'—'}</td><td>${F(r.oh)}</td><td class="${r.ct>=0?'pos':'neg'}">${F(r.ct)}</td><td class="${r.sup||!r.c?'mut':r.mult>=mk?'pos':'neg'}">${r.c?X(r.mult):'—'}</td><td class="${r.sup||!r.c?'mut':r.perm-r.c*mk>=0?'pos':'neg'}">${r.sup?'desk support':r.c?F(r.perm-r.c*mk):'—'}</td></tr>`).join('')}
-    <tr class="tot"><td>North America</td><td>${F(T.p)}</td><td>${F(T.t)}</td><td>${F(T.c)}</td><td>${F(T.cm)}</td><td>${F(T.oh)}</td><td>${F(T.ct)}</td><td>${T.c?X(T.p/T.c):'—'}</td><td>${F(T.p-T.c*mk)}</td></tr></tbody></table></div></section>`;
+    ${rows.map(r=>{const n=esc(r.name), gp=r.perm-r.c*mk;return `<tr><td${TIP(uTip(r))}><b style="color:var(--ink)">${n}</b>${r.est?'<span class="est">est.</span>':''}${r.sup?'<br><span class="mut" style="font-size:12px">Desk support</span>':''}</td>
+      <td${r.perm?(one?BD(n+': permanent fees',pn,uPlaceItems(r.name,ks).filter(x=>!/ temp/.test(x.s)),{keepZero:true,total:r.perm}):byMo(r,'permanent fees',k=>rec(r.name).perm[k]||0,r.perm)):''}>${r.perm?F(r.perm):'<span class="mut">nil</span>'}</td>
+      <td class="${r.temp?'':'mut'}"${r.temp&&!one?byMo(r,'temp margin',k=>rec(r.name).temp[k]||0,r.temp):''}>${r.temp?F(r.temp):'—'}</td>
+      <td${r.c?CALC(n+': cost of employment',pn,[['Gross pay excl. commission',F(r.cg)],['Employer taxes',F(r.ct2)],['Benefits',F(r.cb)],['= Cost of employment',F(r.c),'s']].concat(one?[]:[['By month','','h']].concat(ks.map(k=>[uShort(k)+(cst(r.name,k).src==='E'?' (est.)':''),F(cst(r.name,k).c||0)])))):''}>${F(r.c)}</td>
+      <td class="${r.cm?'':'mut'}"${r.cm&&!one?byMo(r,'commission paid',k=>cst(r.name,k).cm||0,r.cm):''}>${r.cm?F(r.cm):'—'}</td>
+      <td${r.oh?BD(n+': share of overhead and cost of sales',pn+' · per head, by month',ks.map(k=>({l:uShort(k)+(k>((u.closedTo)||'')?' (carried)':''),v:cst(r.name,k).c?((u.ovh||{})[k]||0):0})),{keepOrder:true,total:r.oh,note:'Xero cost of sales and non-payroll overhead ÷ people on payroll. Months not yet closed carry the last closed month.'}):''}>${F(r.oh)}</td>
+      <td class="${r.ct>=0?'pos':'neg'}"${CALC(n+': contribution',pn,[['Permanent fees',F(r.perm)],['Less commission paid',F(-r.cm)],['Less cost of employment',F(-r.c)],['Less overhead and cost of sales',F(-r.oh)],['= Contribution',SG(r.ct),'s']])}>${F(r.ct)}</td>
+      <td class="${r.sup||!r.c?'mut':r.mult>=mk?'pos':'neg'}"${r.c?CALC(n+': multiple',pn,[['Permanent fees',F(r.perm)],['÷ Cost of employment',F(r.c)],['= Fees per $1 of cost',X(r.mult),'s']].concat(xMult(be,uTG()||be))):''}>${r.c?X(r.mult):'—'}</td>
+      <td class="${r.sup||!r.c?'mut':gp>=0?'pos':'neg'}"${!r.sup&&r.c?CALC(n+': gap to '+(uTG()?'target':'break-even'),pn,[['Permanent fees',F(r.perm)],['Less cost × '+mk.toFixed(2),F(-r.c*mk)],['= Gap',SG(gp),'s']]):''}>${r.sup?'desk support':r.c?F(gp):'—'}</td></tr>`}).join('')}
+    <tr class="tot"><td>North America</td><td${P('Permanent fees',r=>r.perm)}>${F(T.p)}</td><td${P('Temp margin',r=>r.temp)}>${F(T.t)}</td><td${P('Cost of employment',r=>r.c)}>${F(T.c)}</td><td${P('Commission paid',r=>r.cm)}>${F(T.cm)}</td><td${P('Overhead and cost of sales',r=>r.oh)}>${F(T.oh)}</td><td${P('Contribution',r=>r.ct,{signed:true,sort:'val'})}>${F(T.ct)}</td>
+      <td${T.c?CALC('Multiple, North America',pn,[['Permanent fees',F(T.p)],['÷ Cost of employment',F(T.c)],['= Fees per $1 of cost',X(T.p/T.c),'s']]):''}>${T.c?X(T.p/T.c):'—'}</td><td${P('Gap',r=>r.perm-r.c*mk,{signed:true,sort:'val'})}>${F(T.p-T.c*mk)}</td></tr></tbody></table></div></section>`;
 }
 function uPlacements(){
-  const u=U(), ks=uMonths(), pl=u.place.filter(p=>ks.includes(p.m)).slice().sort((a,b)=>a.d<b.d?1:-1);
+  const u=U(), ks=uMonths(), pl=u.place.filter(p=>ks.includes(p.m)).slice().sort((a,b)=>a.d<b.d?1:-1), pn=esc(uPerName());
   const dt=d=>{const [y,m,dd]=d.split('-');return +dd+' '+u.months[+m-1].label.split(' ')[0].slice(0,3)+' '+y;};
-  return `<section class="blk"><div class="hd"><h2>Placements, ${esc(uPerName())}</h2><div class="rt">${pl.length} lines</div></div>
-    <p class="note">From the billing sheet's Confirmed tab. Candidate names are not brought into the dashboard.</p>
+  const byRec=Object.entries(pl.reduce((o,p)=>{o[p.rec]=(o[p.rec]||0)+(p.fee||0);return o;},{})).map(([l,v])=>({l,v}));
+  return `<section class="blk"><div class="hd"><h2>Placements, ${pn}${INFO('From the billing sheet\'s Confirmed tab. Candidate names are not brought into the dashboard.')}</h2><div class="rt">${pl.length} lines</div></div>
     <div class="tbl"><table><thead><tr><th>Start</th><th>Recruiter</th><th>Coordinator</th><th>Client</th><th>Role</th><th>Fee</th><th>Type</th><th>Received</th></tr></thead><tbody>
-    ${pl.length?pl.map(p=>`<tr><td>${dt(p.d)}</td><td class="tx">${esc(p.rec)}</td><td class="tx mut">${esc(p.coord||'')}</td><td class="tx">${esc(p.client)}</td><td class="tx">${esc(p.role)}${p.note?`<br><span class="mut" style="font-size:12px">${esc(p.note)}</span>`:''}</td>
+    ${pl.length?pl.map(p=>`<tr><td>${dt(p.d)}</td><td class="tx">${esc(p.rec)}</td><td class="tx mut">${esc(p.coord||'')}</td><td class="tx">${esc(p.client)}</td><td class="tx">${esc(p.role)}${p.note?INFO(esc(p.note)):''}</td>
       <td>${p.fee?F(p.fee):'<span class="mut">nil</span>'}</td><td class="tx mut">${p.temp?'Temp':p.repl?'Replacement':'Perm'}</td><td class="tx ${p.paid?'pos':p.fee?'neg':'mut'}">${p.paid?'Paid':p.fee?'Unpaid':'—'}</td></tr>`).join('')
       :'<tr><td colspan="8" class="mut">None</td></tr>'}
-    <tr class="tot"><td>Total</td><td colspan="4"></td><td>${F(pl.reduce((s,p)=>s+p.fee,0))}</td><td colspan="2"></td></tr></tbody></table></div></section>`;
+    <tr class="tot"><td>Total</td><td colspan="4"></td><td${BD('Placement fees',pn+' · by recruiter',byRec,{total:pl.reduce((s,p)=>s+p.fee,0),after:[['Paid',F(pl.filter(p=>p.paid).reduce((s,p)=>s+p.fee,0)),'g'],['Unpaid',F(pl.filter(p=>!p.paid).reduce((s,p)=>s+p.fee,0))]]})}>${F(pl.reduce((s,p)=>s+p.fee,0))}</td><td colspan="2"></td></tr></tbody></table></div></section>`;
 }
 function uChecks(){
   const c=U().checks||[];
   return `<section class="blk"><div class="hd"><h2>Checks</h2><div class="rt">${c.length} items</div></div>
-    <div class="flag ok"><div><div class="ft">Reconciled to the billing sheet</div><div class="fd">Each recruiter's monthly total is compared with the sheet's own Team Member Summary tab. Any difference is listed below.</div></div></div>
-    ${c.map(r=>`<div class="flag ${r.lvl==='high'?'hi':r.lvl==='low'?'ok':''}"><div><div class="ft">${esc(r.t)}</div><div class="fd">${esc(r.d)}</div></div></div>`).join('')}</section>
+    ${flag('Reconciled to the billing sheet','Each recruiter\'s monthly total is compared with the sheet\'s own Team Member Summary tab. Any difference is listed below.','ok')}
+    ${c.map(r=>flag(esc(r.t),esc(r.d),r.lvl==='high'?'hi':r.lvl==='low'?'ok':'')).join('')}</section>
   ${(U().changes||[]).length?`<section class="blk"><div class="hd"><h2>Changed since close</h2><div class="rt">Against the month-end snapshot</div></div>
     <div class="tbl"><table><thead><tr><th>Item</th><th>Month</th><th>Source</th><th>At close</th><th>Now</th><th>Change</th></tr></thead><tbody>
     ${U().changes.map(x=>`<tr><td>${esc(x.what)}</td><td class="tx">${esc((U().months.find(m=>m.key===x.m)||{label:x.m}).label)}</td><td class="tx mut">${esc(x.kind)}</td><td>${F2(x.was)}</td><td>${F2(x.now)}</td><td class="${x.now-x.was>=0?'pos':'neg'}">${F2(x.now-x.was)}</td></tr>`).join('')}
     </tbody></table></div></section>`:''}
-  ${(()=>{const M=U().mult; if(!M||!M.derive||!M.derive.length) return ''; const r1=(l,x,cl,be)=>{const mg=x.fees?(x.fees-x.dcos)/x.fees:0;return `<tr class="${cl||''}"><td>${l}</td><td>${F(x.fees)}</td><td>${F(x.dcos)}</td><td>${(mg*100).toFixed(1)}%</td><td>${F(x.opex)}</td><td>${F(x.tmp)}</td><td>${F(x.pay)}</td><td>${be.toFixed(2)}×</td></tr>`;};
-    return `<section class="blk"><div class="hd"><h2>Break-even multiple</h2><div class="rt">Xero (LLC) and Gusto</div></div>
-    <p class="note">Closed months with payroll only (a month closes on the 15th of the following month). Break-even = operating costs ÷ permanent fee margin ÷ fee-team cost. Operating costs are the LLC's overheads, payroll and payroll taxes, less temp workers' pay and employer taxes from Gusto. Margin is Recruitment Fees less cost of sales (job advertising, executive costs). Temp revenue and temp costs are left out, as for Recruitment in Australia.</p>
+  ${(()=>{const Mu=U().mult, X=U().xero||{}; if(!Mu||!Mu.derive||!Mu.derive.length) return '';
+    const r1=(l,x,cl,be,mk)=>{const mg=x.fees?(x.fees-x.dcos)/x.fees:0, s=esc(l);
+      const tC=mk&&X[mk]&&X[mk].lines?BD('Cost of sales, '+s,'By account',xLines(X,[mk],'cos',1),{total:x.dcos}):'';
+      const tO=mk&&X[mk]&&X[mk].lines?BD('Operating costs, '+s,'By account, before removing temp pay',xLines(X,[mk],'opex',1).filter(i=>!/interest/i.test(i.l)),{total:x.opex+x.tmp,max:18,after:[['Less temp pay and employer taxes (Gusto)',F(-x.tmp),'g'],['= Operating costs',F(x.opex),'s']]})
+        :(!mk?BD('Operating costs','By month',Mu.derive.map(d=>({l:uShort(d.m),v:d.opex})),{keepOrder:true,total:x.opex}):'');
+      const tP=mk?BD('Fee-team cost, '+s,'By person',Object.keys(U().cost||{}).map(n=>({l:n,v:(((U().cost[n]||{})[mk])||{}).c||0})),{total:x.pay}):BD('Fee-team cost','By month',Mu.derive.map(d=>({l:uShort(d.m),v:d.pay})),{keepOrder:true,total:x.pay});
+      const tM=CALC('Margin, '+s,'',[['Permanent fees',F(x.fees)],['Less cost of sales',F(-x.dcos)],['÷ Permanent fees',F(x.fees)],['= Margin',(mg*100).toFixed(1)+'%','s']]);
+      const tB=CALC('Break-even, '+s,'',[['Operating costs',F(x.opex)],['÷ Margin',(mg*100).toFixed(1)+'%'],['÷ Fee-team cost',F(x.pay)],['= Break-even multiple',be.toFixed(2)+'×','s']]);
+      return `<tr class="${cl||''}"><td>${l}</td><td${mk?'':BD('Permanent fees','By month',Mu.derive.map(d=>({l:uShort(d.m),v:d.fees})),{keepOrder:true,total:x.fees})}>${F(x.fees)}</td><td${tC}>${F(x.dcos)}</td><td${tM}>${(mg*100).toFixed(1)}%</td><td${tO}>${F(x.opex)}</td><td>${F(x.tmp)}</td><td${tP}>${F(x.pay)}</td><td${tB}>${be.toFixed(2)}×</td></tr>`;};
+    const info='Closed months with payroll only (a month closes on the 15th of the following month). Break-even = operating costs ÷ permanent fee margin ÷ fee-team cost. Operating costs are the LLC\'s overheads, payroll and payroll taxes, less temp workers\' pay and employer taxes from Gusto. Margin is Recruitment Fees less cost of sales (job advertising, executive costs). Temp revenue and temp costs are left out, as for Recruitment in Australia.';
+    return `<section class="blk"><div class="hd"><h2>Break-even multiple${INFO(info)}</h2><div class="rt">Xero (LLC) and Gusto</div></div>
     <div class="tbl"><table><thead><tr><th>Month</th><th>Permanent fees</th><th>Cost of sales</th><th>Margin</th><th>Operating costs</th><th>Temp pay removed</th><th>Fee-team cost</th><th>Break-even</th></tr></thead><tbody>
-    ${M.derive.map(x=>r1(esc((U().months.find(m=>m.key===x.m)||{label:x.m}).label),x,'',x.be)).join('')}${r1('Together (adopted, 2 decimals)',M.tot,'tot',M.BE)}</tbody></table></div></section>`;})()}`;
+    ${Mu.derive.map(x=>r1(esc((U().months.find(m=>m.key===x.m)||{label:x.m}).label),x,'',x.be,x.m)).join('')}${r1('Together (adopted, 2 decimals)',Mu.tot,'tot',Mu.BE,null)}</tbody></table></div></section>`;})()}`;
 }
 function paintUSA(){
   const u=U(), e=DATA.ents.U;
+  TIPS.length=0;
   document.getElementById('mTitle').textContent='Billings against cost, live';
   document.getElementById('mName').textContent=e.name;
   document.getElementById('mBasis').textContent='US dollars · calendar year '+(u?u.year:'');
-  document.getElementById('mLede').innerHTML='Permanent fees for each recruiter against their fully loaded payroll cost, from the North America billing sheet, Gusto and the LLC\'s Xero file. Break-even is cost × '+uBE().toFixed(2)+(uTG()?'; the profit target is cost × '+uTG().toFixed(2)+'.':'; no profit goal is set yet.');
+  document.getElementById('mLede').innerHTML=`<span class="lchip">Break-even <b>${uBE().toFixed(2)}×</b></span>${uTG()?`<span class="lchip">Target <b>${uTG().toFixed(2)}×</b></span>`:'<span class="lchip">No profit goal set</span>'}`
+    +INFO('Permanent fees for each recruiter against their fully loaded payroll cost, from the North America billing sheet, Gusto and the LLC\'s Xero file. Break-even is cost × '+uBE().toFixed(2)+(uTG()?'; the profit target is cost × '+uTG().toFixed(2)+'.':'; no profit goal is set yet.'),'North America');
   document.getElementById('asat').textContent='Live at '+DATA.generated+(DATA.cached?' (cached)':'');
   if(!u||!u.ok){ document.getElementById('seg').innerHTML=''; document.getElementById('tabs').innerHTML='';
-    document.getElementById('content').innerHTML=`<div class="err">North America figures are not available.${u&&u.checks&&u.checks[0]?' '+esc(u.checks[0].t)+'.':''}</div>`; return; }
+    document.getElementById('content').innerHTML=`<div class="err">North America figures are not available.${u&&u.checks&&u.checks[0]?' '+esc(u.checks[0].t)+'.':''}</div>`; bindTips(); return; }
   if(!(PER==='CUR'||PER==='QTD'||PER==='YTD'||u.months.some(m=>m.key===PER))) PER='CUR';
   const cm=u.months.find(m=>m.key===u.current);
   const opts=[{p:'CUR',t:cm.short+' to date'}].concat(u.months.filter(m=>m.key!==u.current).slice().reverse().map(m=>({p:m.key,t:m.short})))
@@ -818,7 +1032,6 @@ function paintUSA(){
   const tabs=[{id:'sum',t:'Summary',s:F(tot)+' billed'},{id:'upl',t:'Placements',s:u.place.filter(p=>ks.includes(p.m)).length+' lines'},{id:'uchk',t:'Checks',s:(u.checks||[]).length+' items'}];
   if(!tabs.some(x=>x.id===TAB)) TAB='sum';
   document.getElementById('tabs').innerHTML=tabs.map(p=>`<button class="tab${p.id===TAB?' on':''}" role="tab" data-p="${esc(p.id)}">${esc(p.t)}<span class="sub">${p.s}</span></button>`).join('');
-  TIPS.length=0;
   document.getElementById('content').innerHTML=TAB==='upl'?uPlacements():TAB==='uchk'?uChecks():uSummary();
   bindTips();
 }
@@ -828,26 +1041,43 @@ const hasUS=()=>!!(DATA.ents.U&&DATA.usa&&DATA.usa.ok);
 function fxUSD(k){const f=(DATA.fx||{}).USD||{}; if(f[k]) return f[k]; const ks=Object.keys(f).sort(), p=ks.filter(x=>x<=k).pop()||ks[ks.length-1]; return f[p]||0;}
 const aud=(usd,k)=>{const r=fxUSD(k);return r?usd/r:0;};
 const gOpen=k=>DATA.closedTo?k>DATA.closedTo:k===DATA.current.key;
-/* one entity over the selected FY period, in A$ */
+const ENTNM={R:'Recruitment',S:'W&Co Search',U:'North America'};
+/* one entity over the selected FY period, in A$, with the parts behind each figure */
 function gEnt(ent){
-  const ks=perMonths(), o={ent,b:0,c:0,bev:0,tgt:0,ct:0,xrev:0,xnp:0,xks:[],est:false,be:0,tg:0};
+  const ks=perMonths(), o={ent,b:0,c:0,bev:0,tgt:0,ct:0,xrev:0,xnp:0,xks:[],est:false,be:0,tg:0,parts:[],xparts:[]};
   if(ent==='U'){
     const u=U(), names=Object.keys(u.recs), be=uBE(), mk=uMark();
     ks.forEach(k=>{
       const p=names.reduce((s,n)=>s+(u.recs[n].perm[k]||0),0), tc=uTeamCost([k]), cm=Object.keys(u.cost||{}).reduce((s,n)=>s+(((u.cost[n]||{})[k]||{}).cm||0),0);
-      const heads=Object.keys(u.cost||{}).filter(n=>u.cost[n][k]&&u.cost[n][k].c).length, oh=(u.ovh||{})[k]||0;
-      o.b+=aud(p,k); o.c+=aud(tc.c,k); o.bev+=aud(tc.c*be,k); o.tgt+=aud(tc.c*mk,k); o.ct+=aud(p-cm-tc.c-oh*heads,k); if(tc.est) o.est=true;
-      const x=(u.xero||{})[k]; if(x&&!gOpen(k)){o.xrev+=aud(x.rev,k);o.xnp+=aud(x.np,k);o.xks.push(k);}
+      const heads=Object.keys(u.cost||{}).filter(n=>u.cost[n][k]&&u.cost[n][k].c).length, oh=(u.ovh||{})[k]||0, r=fxUSD(k);
+      const pt={l:mShort(k),k,usd:{b:p,c:tc.c,ct:p-cm-tc.c-oh*heads},b:aud(p,k),c:aud(tc.c,k),bev:aud(tc.c*be,k),tgt:aud(tc.c*mk,k),ct:aud(p-cm-tc.c-oh*heads,k),rate:r};
+      o.parts.push(pt); o.b+=pt.b; o.c+=pt.c; o.bev+=pt.bev; o.tgt+=pt.tgt; o.ct+=pt.ct; if(tc.est) o.est=true;
+      const x=(u.xero||{})[k]; if(x&&!gOpen(k)){o.xrev+=aud(x.rev,k);o.xnp+=aud(x.np,k);o.xks.push(k);o.xparts.push({l:mShort(k),v:aud(x.np,k),s:FU(x.np)+' at '+r.toFixed(4)});}
     });
     o.be=be; o.tg=mk; return o;
   }
   const save=ENT; ENT=ent;
   const a=entAgg(); o.b=a.b; o.c=a.c; o.bev=a.bev; o.tgt=a.tgt; o.be=M().be; o.tg=M().tg;
-  deptsOf(ent).filter(d=>d.fee).forEach(d=>{const x=deptAgg(d.name); o.ct+=x.ct; if(x.est) o.est=true;});
-  const X=(DATA.xero||{})[ent]||{}; ks.forEach(k=>{if(X[k]&&!gOpen(k)){o.xrev+=X[k].rev;o.xnp+=X[k].np;o.xks.push(k);}});
+  deptsOf(ent).filter(d=>d.fee).forEach(d=>{const x=deptAgg(d.name); o.ct+=x.ct; if(x.est) o.est=true;
+    if(x.c||x.b) o.parts.push({l:d.label,b:x.b,c:x.c,bev:x.bev,tgt:x.tgt,ct:x.ct});});
+  const X=(DATA.xero||{})[ent]||{}; ks.forEach(k=>{if(X[k]&&!gOpen(k)){o.xrev+=X[k].rev;o.xnp+=X[k].np;o.xks.push(k);o.xparts.push({l:mShort(k),v:X[k].np});}});
   ENT=save; return o;
 }
-/* every fee earner in the group, A$ */
+/* tooltips for one entity's figures */
+function gTips(r,pn){
+  const nm=ENTNM[r.ent], us=r.ent==='U', sub=pn+(us?' · by month, US$ at the RBA average rate':' · by department');
+  const pp=f=>r.parts.map(p=>({l:p.l,v:f(p),s:us?FU(f===pb?p.usd.b:f===pc2?p.usd.c:f===pct?p.usd.ct:0)+' at '+(p.rate||0).toFixed(4):''}));
+  const pb=p=>p.b, pc2=p=>p.c, pct=p=>p.ct;
+  return {
+    b:BD(nm+': billings',sub,pp(pb),{keepOrder:us,keepZero:us,total:r.b}),
+    c:BD(nm+': fee-team cost',sub,pp(pc2),{keepOrder:us,keepZero:us,total:r.c}),
+    m:CALC(nm+': multiple',pn,[['Billings',F(r.b)],['÷ Fee-team cost',F(r.c)],['= Billings per $1 of cost',X(r.c?r.b/r.c:0),'s']].concat(xMult(r.be,r.tg))),
+    gb:CALC(nm+': gap to break-even',pn,[['Billings',F(r.b)],['Less cost × '+r.be.toFixed(2),F(-r.bev)],['= Gap',SG(r.b-r.bev),'s']]),
+    gt:CALC(nm+': gap to target',pn,[['Billings',F(r.b)],['Less cost × '+r.tg.toFixed(2),F(-r.tgt)],['= Gap',SG(r.b-r.tgt),'s']],r.tg>r.be+1e-9?'':'No profit goal, so the target is break-even.'),
+    ct:BD(nm+': contribution',sub,pp(pct),{keepOrder:us,keepZero:us,signed:true,total:r.ct}),
+    x:r.xks.length?BD(nm+': Xero net profit','Closed months'+(us?', US$ at the RBA average rate':''),r.xparts,{keepOrder:true,keepZero:true,signed:true,total:r.xnp}):''};
+}
+/* every fee earner in the group, A$, with their months */
 function gPeople(){
   const ks=perMonths(), out=[];
   ['R','S'].filter(e=>DATA.ents[e]).forEach(ent=>{
@@ -855,12 +1085,14 @@ function gPeople(){
     deptsOf(ent).filter(d=>d.fee).forEach(d=>{
       const a=deptAgg(d.name);
       if(a.team&&!a.billed){   // department bills only as a team line: one row for the team
-        if(a.c||a.b) out.push({name:d.label+' team',ent:DATA.ents[ent].short,dept:'Billed as a team on the sales sheet',b:a.b,c:a.c,bev:a.bev,tgt:a.tgt,be:M().be,tg:M().tg,est:a.est,ct:a.ct});
+        if(a.c||a.b) out.push({name:d.label+' team',ent:DATA.ents[ent].short,dept:'Billed as a team on the sales sheet',b:a.b,c:a.c,bev:a.bev,tgt:a.tgt,be:M().be,tg:M().tg,est:a.est,ct:a.ct,ca:a.ca,oh:a.oh,
+          mo:ks.map(k=>({k,b:((DATA.team[d.name]||{})[k]||0)+a.mem.reduce((s,e)=>s+(e.bill[k]||0),0),c:a.mem.reduce((s,e)=>s+pc(e,k,'c'),0)}))});
         return;
       }
       a.mem.forEach(e=>{
         if(e.agg||isSup(e)||!e.a.c) return;
-        out.push({name:e.name,ent:DATA.ents[ent].short,dept:d.label,b:e.a.b,c:e.a.c,bev:e.a.bev,tgt:e.a.tgt,be:M().be,tg:M().tg,est:e.a.est,ct:e.a.ct});
+        out.push({name:e.name,ent:DATA.ents[ent].short,dept:d.label,b:e.a.b,c:e.a.c,bev:e.a.bev,tgt:e.a.tgt,be:M().be,tg:M().tg,est:e.a.est,ct:e.a.ct,ca:e.a.ca,oh:e.a.oh,
+          mo:ks.map(k=>({k,b:e.bill[k]||0,c:pc(e,k,'c')}))});
       });
     });
     ENT=save;
@@ -868,56 +1100,72 @@ function gPeople(){
   if(hasUS()&&!U().costTot){
     const u=U(), be=uBE(), mk=uMark();
     Object.keys(u.cost||{}).filter(n=>!uSup(n)).forEach(n=>{
-      const o={name:n,ent:'North America',dept:'North America',b:0,c:0,bev:0,tgt:0,be:be,tg:mk,est:false,ct:0}, r=u.recs[n]||{perm:{}};
+      const o={name:n,ent:'North America',dept:'North America',b:0,c:0,bev:0,tgt:0,be:be,tg:mk,est:false,ct:0,ca:0,oh:0,mo:[],us:true}, r=u.recs[n]||{perm:{}};
       ks.forEach(k=>{const c=(u.cost[n]||{})[k], p=r.perm[k]||0, cc=c?c.c:0, cm=c?c.cm||0:0, oh=c&&c.c?((u.ovh||{})[k]||0):0;
-        o.b+=aud(p,k); o.c+=aud(cc,k); o.bev+=aud(cc*be,k); o.tgt+=aud(cc*mk,k); o.ct+=aud(p-cm-cc-oh,k); if(c&&c.src==='E') o.est=true;});
+        o.b+=aud(p,k); o.c+=aud(cc,k); o.bev+=aud(cc*be,k); o.tgt+=aud(cc*mk,k); o.ct+=aud(p-cm-cc-oh,k); o.ca+=aud(cm,k); o.oh+=aud(oh,k); if(c&&c.src==='E') o.est=true;
+        o.mo.push({k,b:aud(p,k),c:aud(cc,k),ub:p,uc:cc,rate:fxUSD(k)});});
       if(o.c) out.push(o);
     });
   }
   return out.map(p=>Object.assign(p,{mult:p.c?p.b/p.c:0,gap:p.b-p.bev,gapT:p.b-p.tgt}));
 }
 function gSummary(){
-  const ks=perMonths(), ents=['R','S'].filter(e=>DATA.ents[e]).concat(hasUS()?['U']:[]), rows=ents.map(gEnt);
+  const ks=perMonths(), pn=esc(perName()), ents=['R','S'].filter(e=>DATA.ents[e]).concat(hasUS()?['U']:[]), rows=ents.map(gEnt);
   const T=rows.reduce((s,r)=>({b:s.b+r.b,c:s.c+r.c,bev:s.bev+r.bev,tgt:s.tgt+r.tgt,ct:s.ct+r.ct,xrev:s.xrev+r.xrev,xnp:s.xnp+r.xnp}),{b:0,c:0,bev:0,tgt:0,ct:0,xrev:0,xnp:0});
   const xks=[...new Set(rows.flatMap(r=>r.xks))].sort(), lab=k=>DATA.months.find(m=>m.key===k).short;
-  const nm={R:'Recruitment',S:'W&Co Search',U:'North America'};
   const people=gPeople().sort((a,b)=>b.gap-a.gap), summaryLevel=DATA.viewer&&DATA.viewer.level==='summary';
-  const usNote=hasUS()?` North America is converted from US$ at the RBA monthly average AUD/USD rate (${ks.filter(k=>fxUSD(k)).map(k=>lab(k)+' '+fxUSD(k).toFixed(4)).join(', ')}${ks.includes(DATA.current.key)?', current month to date':''}).`:'';
+  const fxTxt=hasUS()?' North America is converted from US$ at the RBA monthly average AUD/USD rate ('+ks.filter(k=>fxUSD(k)).map(k=>lab(k)+' '+fxUSD(k).toFixed(4)).join(', ')+(ks.includes(DATA.current.key)?', current month to date':'')+').':'';
   const gapCls=v=>v>=0?'pos':'neg';
+  const E=(ttl,f,o)=>BD(ttl,pn+' · by entity, A$',rows.map(r=>({l:ENTNM[r.ent],v:f(r)})),Object.assign({total:rows.reduce((s,r)=>s+f(r),0)},o||{}));
   return `<div class="kpis">
-    <div class="kpi"><div class="lab">Group billings (GP)</div><div class="val">${F(T.b)}</div><div class="sub">Permanent fees across ${ents.length} entit${ents.length>1?'ies':'y'}, A$.</div></div>
-    <div class="kpi"><div class="lab">Fee-team cost</div><div class="val">${F(T.c)}</div><div class="sub">Fully loaded${rows.some(r=>r.est)?', includes estimates':''}.</div></div>
-    <div class="kpi"><div class="lab">Gap to break-even</div><div class="val ${gapCls(T.b-T.bev)}">${T.b-T.bev>=0?'+':''}${F(T.b-T.bev)}</div><div class="sub">Each entity's billings less its cost × its own break-even multiple.</div></div>
-    <div class="kpi"><div class="lab">Gap to target</div><div class="val ${gapCls(T.b-T.tgt)}">${T.b-T.tgt>=0?'+':''}${F(T.b-T.tgt)}</div><div class="sub">Recruitment carries the $100,000 a month profit goal; the others have no goal, so break-even.</div></div>
-    <div class="kpi"><div class="lab">Contribution</div><div class="val ${gapCls(T.ct)}">${F(T.ct)}</div><div class="sub">After commission, cost and overhead share.</div></div>
-    <div class="kpi"><div class="lab">Xero net profit</div><div class="val ${gapCls(T.xnp)}">${xks.length?F(T.xnp):'—'}</div><div class="sub">${xks.length?'Closed months: '+xks.map(lab).join(', ')+'.':'No closed month in this period yet.'}</div></div>
+    <div class="kpi"><div class="lab">Group billings (GP)${INFO('Permanent fees and billings (GP) across the entities, in A$.'+fxTxt)}</div><div class="val"${E('Group billings (GP)',r=>r.b)}>${F(T.b)}</div><div class="sub">${ents.length} entit${ents.length>1?'ies':'y'}</div></div>
+    <div class="kpi"><div class="lab">Fee-team cost${INFO('Fully loaded cost of the fee earners in each entity, in A$.')}</div><div class="val"${E('Fee-team cost',r=>r.c)}>${F(T.c)}</div><div class="sub">${rows.some(r=>r.est)?'Includes estimates':'Actual'}</div></div>
+    <div class="kpi"><div class="lab">Gap to break-even${INFO('Each entity\'s billings less its cost × its own break-even multiple, added up.')}</div><div class="val ${gapCls(T.b-T.bev)}"${E('Gap to break-even',r=>r.b-r.bev,{signed:true,sort:'val'})}>${T.b-T.bev>=0?'+':''}${F(T.b-T.bev)}</div><div class="sub">Each entity's own multiple</div></div>
+    <div class="kpi"><div class="lab">Gap to target${INFO('Recruitment carries the $100,000 a month profit goal; the others have no goal, so their target is break-even.')}</div><div class="val ${gapCls(T.b-T.tgt)}"${E('Gap to target',r=>r.b-r.tgt,{signed:true,sort:'val'})}>${T.b-T.tgt>=0?'+':''}${F(T.b-T.tgt)}</div><div class="sub">Recruitment goal $100,000 a month</div></div>
+    <div class="kpi"><div class="lab">Contribution${INFO('Billings less commission, cost of employment and a per-head share of overhead, in each entity.')}</div><div class="val ${gapCls(T.ct)}"${E('Contribution',r=>r.ct,{signed:true,sort:'val'})}>${F(T.ct)}</div><div class="sub">After overhead share</div></div>
+    <div class="kpi"><div class="lab">Xero net profit${INFO('Unreviewed Xero net profit for closed months only. A month counts as closed from the 15th of the following month.')}</div><div class="val ${gapCls(T.xnp)}"${xks.length?E('Xero net profit',r=>r.xnp,{signed:true,sort:'val'}):''}>${xks.length?F(T.xnp):'—'}</div><div class="sub">${xks.length?'Closed: '+xks.map(lab).join(', '):'No closed month yet'}</div></div>
   </div>
-  <div class="flag"><div><div class="ft">Australian dollars</div><div class="fd">Each entity is measured against its own multiples, then added up.${usNote} A month counts as closed from the 15th of the following month.</div></div></div>
-  <section class="blk"><div class="hd"><h2>Entities, ${esc(perName())}</h2><div class="rt">A$</div></div>
+  <section class="blk"><div class="hd"><h2>Entities, ${pn}${INFO('Each entity is measured against its own multiples, then added up.'+fxTxt+' A month counts as closed from the 15th of the following month.')}</h2><div class="rt">A$</div></div>
     <div class="tbl"><table><thead><tr><th>Entity</th><th>Billings</th><th>Fee-team cost</th><th>Multiple</th><th>Gap to break-even</th><th>Gap to target</th><th>Contribution</th><th>Xero NP (closed)</th></tr></thead><tbody>
-    ${rows.map(r=>`<tr><td><b style="color:var(--ink)">${nm[r.ent]}</b>${r.est?'<span class="est">est.</span>':''}</td><td>${F(r.b)}</td><td>${F(r.c)}</td><td class="${r.c?(r.b/r.c>=r.tg?'pos':r.b/r.c>=r.be?'amb':'neg'):'mut'}"><b>${r.c?X(r.b/r.c):'—'}</b><br><span class="mut" style="font-size:11px">b/e ${r.be.toFixed(2)}×${r.tg>r.be+1e-9?' · target '+r.tg.toFixed(2)+'×':''}</span></td><td class="${gapCls(r.b-r.bev)}">${F(r.b-r.bev)}</td><td class="${gapCls(r.b-r.tgt)}">${F(r.b-r.tgt)}</td><td class="${gapCls(r.ct)}">${F(r.ct)}</td><td class="${r.xks.length?gapCls(r.xnp):'mut'}">${r.xks.length?F(r.xnp):'—'}</td></tr>`).join('')}
-    <tr class="tot"><td>Woods Group</td><td>${F(T.b)}</td><td>${F(T.c)}</td><td>${T.c?X(T.b/T.c):'—'}</td><td>${F(T.b-T.bev)}</td><td>${F(T.b-T.tgt)}</td><td>${F(T.ct)}</td><td>${xks.length?F(T.xnp):'—'}</td></tr>
+    ${rows.map(r=>{const G=gTips(r,pn);return `<tr><td><b style="color:var(--ink)">${ENTNM[r.ent]}</b>${r.est?'<span class="est">est.</span>':''}</td><td${G.b}>${F(r.b)}</td><td${G.c}>${F(r.c)}</td><td class="${r.c?(r.b/r.c>=r.tg?'pos':r.b/r.c>=r.be?'amb':'neg'):'mut'}"${G.m}><b>${r.c?X(r.b/r.c):'—'}</b><br><span class="mut" style="font-size:11px">b/e ${r.be.toFixed(2)}×${r.tg>r.be+1e-9?' · target '+r.tg.toFixed(2)+'×':''}</span></td><td class="${gapCls(r.b-r.bev)}"${G.gb}>${F(r.b-r.bev)}</td><td class="${gapCls(r.b-r.tgt)}"${G.gt}>${F(r.b-r.tgt)}</td><td class="${gapCls(r.ct)}"${G.ct}>${F(r.ct)}</td><td class="${r.xks.length?gapCls(r.xnp):'mut'}"${G.x}>${r.xks.length?F(r.xnp):'—'}</td></tr>`;}).join('')}
+    <tr class="tot"><td>Woods Group</td><td${E('Billings',r=>r.b)}>${F(T.b)}</td><td${E('Fee-team cost',r=>r.c)}>${F(T.c)}</td><td${CALC('Multiple, Woods Group',pn,[['Billings',F(T.b)],['÷ Fee-team cost',F(T.c)],['= Billings per $1 of cost',X(T.c?T.b/T.c:0),'s']])}>${T.c?X(T.b/T.c):'—'}</td><td${E('Gap to break-even',r=>r.b-r.bev,{signed:true,sort:'val'})}>${F(T.b-T.bev)}</td><td${E('Gap to target',r=>r.b-r.tgt,{signed:true,sort:'val'})}>${F(T.b-T.tgt)}</td><td${E('Contribution',r=>r.ct,{signed:true,sort:'val'})}>${F(T.ct)}</td><td${xks.length?E('Xero net profit',r=>r.xnp,{signed:true,sort:'val'}):''}>${xks.length?F(T.xnp):'—'}</td></tr>
     </tbody></table></div></section>
-  <section class="blk"><div class="hd"><h2>Month by month</h2><div class="rt">${DATA.fy} · A$</div></div>${gMonthTable(ents)}</section>
-  ${summaryLevel?'':`<section class="blk"><div class="hd"><h2>Every fee earner in the group, ${esc(perName())}</h2><div class="rt">Ranked by gap to break-even · A$</div></div>
-    <p class="note">Each person against their own entity's break-even multiple, so the gaps can be compared across Recruitment, Search and North America. Coordinators and desk support are left out; their cost is still in the entity figures above. A department that bills only as a team line on the sales sheet (Search) shows as one team row.</p>
+  <section class="blk"><div class="hd"><h2>Month by month${INFO('Each month\'s billings and cost by entity, in A$. * includes estimated cost (the current month, or North America after the last payroll loaded).')}</h2><div class="rt">${DATA.fy} · A$</div></div>${gMonthTable(ents)}</section>
+  ${summaryLevel?'':`<section class="blk"><div class="hd"><h2>Every fee earner in the group, ${pn}${INFO('Each person against their own entity\'s break-even multiple, so the gaps can be compared across Recruitment, Search and North America. Coordinators and desk support are left out; their cost is still in the entity figures above. A department that bills only as a team line on the sales sheet (Search) shows as one team row.')}</h2><div class="rt">Ranked by gap to break-even · A$</div></div>
     <div class="tbl cmp"><table><thead><tr><th>Name</th><th>Entity</th><th>Billings</th><th>Cost</th><th>Multiple</th><th>Break-even</th><th>Gap</th><th>Gap to target</th><th>Contrib.</th></tr></thead><tbody>
-    ${people.map(p=>`<tr><td><b style="color:var(--ink)">${esc(p.name)}</b>${p.est?'<span class="est">est.</span>':''}<br><span class="mut" style="font-size:12px">${esc(p.dept)}</span></td><td class="tx mut">${esc(p.ent)}</td><td>${p.b?F(p.b):'<span class="mut">nil</span>'}</td><td>${F(p.c)}</td><td class="${p.mult>=p.tg?'pos':p.mult>=p.be?'amb':'neg'}" style="font-weight:700">${X(p.mult)}</td><td class="mut">${p.be.toFixed(2)}×</td><td class="${gapCls(p.gap)}">${p.gap>=0?'+':''}${F(p.gap)}</td><td class="${gapCls(p.gapT)}">${p.gapT>=0?'+':''}${F(p.gapT)}</td><td class="${gapCls(p.ct)}">${F(p.ct)}</td></tr>`).join('')}
+    ${people.map(p=>{const n=esc(p.name), mo=(f,uf)=>BD(n+': '+(f==='b'?'billings':'cost'),pn+' · by month, A$',p.mo.map(m=>({l:mShort(m.k),v:m[f],s:p.us&&m[uf]?FU(m[uf])+' at '+(m.rate||0).toFixed(4):''})),{keepOrder:true,keepZero:true,total:p[f]});
+      return `<tr><td><b style="color:var(--ink)">${n}</b>${p.est?'<span class="est">est.</span>':''}<br><span class="mut" style="font-size:12px">${esc(p.dept)}</span></td><td class="tx mut">${esc(p.ent)}</td>
+      <td${p.mo.length>1||p.us?mo('b','ub'):''}>${p.b?F(p.b):'<span class="mut">nil</span>'}</td><td${p.mo.length>1||p.us?mo('c','uc'):''}>${F(p.c)}</td>
+      <td class="${p.mult>=p.tg?'pos':p.mult>=p.be?'amb':'neg'}" style="font-weight:700"${CALC(n+': multiple',pn,[['Billings',F(p.b)],['÷ Cost',F(p.c)],['= Billings per $1 of cost',X(p.mult),'s']].concat(xMult(p.be,p.tg)))}>${X(p.mult)}</td>
+      <td class="mut"${CALC(n+': break-even multiple',esc(p.ent),[['Entity break-even',p.be.toFixed(2)+'×'],['Break-even billings (cost × '+p.be.toFixed(2)+')',F(p.bev)]])}>${p.be.toFixed(2)}×</td>
+      <td class="${gapCls(p.gap)}"${CALC(n+': gap to break-even',pn,[['Billings',F(p.b)],['Less cost × '+p.be.toFixed(2),F(-p.bev)],['= Gap',SG(p.gap),'s']])}>${p.gap>=0?'+':''}${F(p.gap)}</td>
+      <td class="${gapCls(p.gapT)}"${CALC(n+': gap to target',pn,[['Billings',F(p.b)],['Less cost × '+p.tg.toFixed(2),F(-p.tgt)],['= Gap',SG(p.gapT),'s']])}>${p.gapT>=0?'+':''}${F(p.gapT)}</td>
+      <td class="${gapCls(p.ct)}"${CALC(n+': contribution',pn,[['Billings',F(p.b)],['Less commission',F(-p.ca)],['Less cost',F(-p.c)],['Less share of overhead',F(-p.oh)],['= Contribution',SG(p.ct),'s']])}>${F(p.ct)}</td></tr>`;}).join('')}
     </tbody></table></div></section>`}`;
 }
 function gMonthTable(ents){
   const nm={R:'Recruitment',S:'Search',U:'North America'}, ms=DATA.months, save=PER, rows=[];
-  ms.forEach(m=>{PER=m.key; rows.push({m,e:ents.map(gEnt)});}); PER=save;
-  const sum=(r,f)=>r.e.reduce((s,x)=>s+x[f],0);
+  ms.forEach(m=>{PER=m.key; const e=ents.map(gEnt), lab=m.label+(m.key===DATA.current.key?' to date':''), r=fxUSD(m.key);
+    const E=(ttl,f,o)=>BD(ttl+', '+lab,'By entity, A$',e.map(x=>({l:ENTNM[x.ent],v:f(x)})),Object.assign({total:e.reduce((s,x)=>s+f(x),0)},o||{}));
+    const b=e.reduce((s,x)=>s+x.b,0), c=e.reduce((s,x)=>s+x.c,0), op=gOpen(m.key);
+    rows.push({m,e,b,c,g:b-e.reduce((s,x)=>s+x.bev,0),op,np:e.reduce((s,x)=>s+x.xnp,0),r,
+      tE:e.map(x=>x.ent==='U'?(x.parts[0]?CALC('North America, '+lab,'Permanent fees',[['Billing sheet',FU(x.parts[0].usd.b)],['÷ AUD/USD (RBA monthly average)',r.toFixed(4)],['= A$',F(x.b),'s']]):''):BD(ENTNM[x.ent]+', '+lab,'By department',x.parts.map(p=>({l:p.l,v:p.b})),{total:x.b})),
+      tB:E('Group billings',x=>x.b), tC:E('Fee-team cost',x=>x.c), tG:E('Gap to break-even',x=>x.b-x.bev,{signed:true,sort:'val'}),
+      tM:CALC('Multiple, '+lab,'',[['Group billings',F(b)],['÷ Fee-team cost',F(c)],['= Billings per $1 of cost',X(c?b/c:0),'s']]),
+      tN:op?'':E('Xero net profit',x=>x.xnp,{signed:true,sort:'val'}),
+      tR:r?CALC('AUD/USD, '+lab,'RBA F11.1',[['Monthly average of daily 4pm rates',r.toFixed(4)],['US$1 in A$',(1/r).toFixed(4)]]):''});});
+  PER=save;
   return `<div class="tbl cmp"><table><thead><tr><th>Month</th>${ents.map(e=>`<th>${nm[e]}</th>`).join('')}<th>Group billings</th><th>Fee-team cost</th><th>Multiple</th><th>Gap to break-even</th><th>Xero net profit</th>${hasUS()?'<th>AUD/USD</th>':''}</tr></thead><tbody>
-    ${rows.map(r=>{const b=sum(r,'b'),c=sum(r,'c'),g=b-sum(r,'bev'),op=gOpen(r.m.key);return `<tr><td>${r.m.label}${r.m.key===DATA.current.key?' <span class="mut">(to date)</span>':''}</td>${r.e.map(x=>`<td>${F(x.b)}</td>`).join('')}<td style="font-weight:700">${F(b)}</td><td>${F(c)}${r.e.some(x=>x.est)?'*':''}</td><td>${c?X(b/c):'—'}</td><td class="${g>=0?'pos':'neg'}">${F(g)}</td><td class="${op?'mut':sum(r,'xnp')>=0?'pos':'neg'}">${op?'not closed':F(sum(r,'xnp'))}</td>${hasUS()?`<td class="mut">${fxUSD(r.m.key)?fxUSD(r.m.key).toFixed(4):'—'}</td>`:''}</tr>`;}).join('')}
-    </tbody></table></div><p class="note" style="margin-top:8px">* includes estimated cost (current month, or North America after the last payroll loaded).</p>`;
+    ${rows.map(r=>`<tr><td>${r.m.label}${r.m.key===DATA.current.key?' <span class="mut">(to date)</span>':''}</td>${r.e.map((x,i)=>`<td${r.tE[i]}>${F(x.b)}</td>`).join('')}<td style="font-weight:700"${r.tB}>${F(r.b)}</td><td${r.tC}>${F(r.c)}${r.e.some(x=>x.est)?'*':''}</td><td${r.tM}>${r.c?X(r.b/r.c):'—'}</td><td class="${r.g>=0?'pos':'neg'}"${r.tG}>${F(r.g)}</td><td class="${r.op?'mut':r.np>=0?'pos':'neg'}"${r.tN}>${r.op?'not closed':F(r.np)}</td>${hasUS()?`<td class="mut"${r.tR}>${r.r?r.r.toFixed(4):'—'}</td>`:''}</tr>`).join('')}
+    </tbody></table></div>`;
 }
 function paintGroup(){
+  TIPS.length=0;
   document.getElementById('mTitle').textContent='Woods Group, live';
   document.getElementById('mName').textContent='Woods Group';
   document.getElementById('mBasis').textContent='A$'+(hasUS()?' · North America at RBA monthly average AUD/USD':'');
-  document.getElementById('mLede').innerHTML='Billings against fully loaded cost for every entity in Australian dollars, each measured against its own multiples, so effort can be compared across the group.';
+  document.getElementById('mLede').innerHTML='<span class="lchip">All entities in <b>A$</b></span><span class="lchip">Each against its own multiples</span>'
+    +INFO('Billings against fully loaded cost for every entity in Australian dollars, each measured against its own multiples, so effort can be compared across the group.'+(hasUS()?' North America is converted at the RBA monthly average AUD/USD rate.':'')+' A month counts as closed from the 15th of the following month.','Woods Group');
   document.getElementById('asat').textContent='Live at '+DATA.generated+(DATA.cached?' (cached)':'');
   if(!DATA.months.some(m=>m.key===PER)&&!['CUR','QTD','YTD'].includes(PER)) PER='CUR';
   const opts=[{p:'CUR',t:DATA.months.find(m=>m.key===DATA.current.key).short+' to date'}]
@@ -926,7 +1174,6 @@ function paintGroup(){
   document.getElementById('seg').innerHTML=opts.map(o=>`<button class="${o.p===PER?'on':''}" data-p="${o.p}">${o.t}</button>`).join('');
   TAB='sum';
   document.getElementById('tabs').innerHTML=`<button class="tab on" role="tab" data-p="sum">Group summary<span class="sub">A$</span></button>`;
-  TIPS.length=0;
   document.getElementById('content').innerHTML=gSummary();
   bindTips();
 }
@@ -937,14 +1184,16 @@ function paint(){
   document.body.classList.toggle('ent-S',ENT==='S');
   if(ENT==='G'){ paintGroup(); return; }
   if(ENT==='U'){ paintUSA(); return; }
+  TIPS.length=0;
   document.getElementById('mTitle').textContent='Billings against cost, live';
   if(!DATA.months.some(m=>m.key===PER)&&!['CUR','QTD','YTD'].includes(PER)) PER='CUR';
   const e=DATA.ents[ENT], mm=M();
   document.getElementById('mName').textContent=e.name;
   document.getElementById('mBasis').textContent='Multiples '+DATA.mult.BASIS;
-  document.getElementById('mLede').innerHTML=goal()
-    ?`Billings for each person and department against fully loaded employment cost. Break-even is cost × ${mm.be.toFixed(2)}; the profit target is cost × ${mm.tg.toFixed(2)}.`
-    :`Billings against fully loaded employment cost. No profit goal is set for ${esc(e.short)}, so break-even at cost × ${mm.be.toFixed(2)} is the only marker.`;
+  document.getElementById('mLede').innerHTML=`<span class="lchip">Break-even <b>${mm.be.toFixed(2)}×</b></span>`+(goal()?`<span class="lchip">Target <b>${mm.tg.toFixed(2)}×</b></span>`:'<span class="lchip">No profit goal set</span>')
+    +INFO((goal()?`Billings for each person and department against fully loaded employment cost. Break-even is cost × ${mm.be.toFixed(2)}; the profit target is cost × ${mm.tg.toFixed(2)}.`
+      :`Billings against fully loaded employment cost. No profit goal is set for ${esc(e.short)}, so break-even at cost × ${mm.be.toFixed(2)} is the only marker.`)
+      +' Billings (GP) come from the Woods &amp; Co Financial Performance sheet, read only. Cost is FoundU base pay, leave and package allowances plus super, payroll tax and WorkCover; closed months are normalised from weekly pays to a calendar month and the current month uses each person\'s pay rate to today. Commission, bonus and termination payments are not in cost. Multiples are '+esc(DATA.mult.BASIS)+', permanent recruitment only.',esc(e.name));
   document.getElementById('asat').textContent='Live at '+DATA.generated+(DATA.cached?' (cached)':'');
   // period buttons
   const seg=document.getElementById('seg');
@@ -959,7 +1208,6 @@ function paint(){
     .concat(DATA.ents.R&&DATA.ents.S?[{id:'chk',t:'Data checks',s:(DATA.warnings||[]).length+' items'}]:[]);
   if(!tabs.some(x=>x.id===TAB)) TAB='sum';
   document.getElementById('tabs').innerHTML=tabs.map(p=>`<button class="tab${p.id===TAB?' on':''}" role="tab" data-p="${esc(p.id)}">${esc(p.t)}<span class="sub">${p.s}</span></button>`).join('');
-  TIPS.length=0;
   document.getElementById('content').innerHTML=TAB==='sum'?summary():TAB==='chk'?checks():deptPage(TAB);
   bindTips();
 }
