@@ -149,6 +149,19 @@
 
   table{width:100%;border-collapse:collapse;font-size:14px;background:var(--card)}
   .tbl{border:1px solid var(--line);border-radius:12px;overflow:hidden;overflow-x:auto}
+  /* wide screens: column headings stay visible while a long table scrolls */
+  @media(min-width:901px){
+    .tbl{overflow:visible}
+    .tbl thead th{position:sticky;top:0;z-index:3}
+    .tbl thead th:first-child{border-top-left-radius:12px}.tbl thead th:last-child{border-top-right-radius:12px}
+    .tbl tbody tr:last-child td:first-child{border-bottom-left-radius:12px}.tbl tbody tr:last-child td:last-child{border-bottom-right-radius:12px}
+  }
+  /* narrow screens: tables scroll sideways with the row label held in place */
+  @media(max-width:900px){
+    .tbl td:first-child,.tbl th:first-child{position:sticky;left:0;z-index:1;background:inherit}
+    .tbl tbody td:first-child{background:var(--card)} .tbl tr.tot td:first-child{background:#f4f1ea} .tbl thead th:first-child{background:#fbfaf7}
+    th:first-child,td:first-child{min-width:150px}
+  }
   th,td{padding:11px 15px;text-align:right;white-space:nowrap}
   th:first-child,td:first-child{text-align:left;white-space:normal;min-width:168px}
   thead th{font-size:11.5px;color:var(--mid);font-weight:600;background:#fbfaf7;border-bottom:1.5px solid var(--line)}
@@ -211,6 +224,19 @@
     padding:4px 12px;font-size:12.5px;color:#a7a197}
   .lchip b{font-family:var(--mono);color:#fff;font-weight:700}
 
+  /* phones: compact header; period and tab bars scroll sideways and stay at the top */
+  @media(max-width:640px){
+    .entbar{padding:6px 0}.entbar label[for=entsel]{display:none}.entbar .asat{display:none}
+    .entbar select{font-size:13px;padding:6px 28px 6px 10px;max-width:58vw}.rbtn{padding:6px 10px;font-size:12px}
+    header.top{padding:12px 0 0;position:sticky;z-index:30}
+    .hd-row{margin-bottom:8px;gap:10px}.logo{height:18px}.hd-meta{font-size:10.5px;line-height:1.5}.hd-meta br,.hd-meta span{display:none}
+    header.top h1{font-size:21px;margin-bottom:6px}header.top .lede{margin-bottom:8px;font-size:12px}
+    .perbar{margin-bottom:8px}
+    .pseg{flex-wrap:nowrap;overflow-x:auto;max-width:100%;scrollbar-width:none}.pseg::-webkit-scrollbar,.tabs::-webkit-scrollbar{display:none}
+    .pseg button{white-space:nowrap;padding:6px 10px;font-size:12.5px}
+    header.top .tabs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}.tab{padding:8px 12px 9px;font-size:13px}
+    main{padding-top:18px}.wlogo{height:26px!important}.slogo{height:11px!important}
+  }
   footer{background:var(--black);color:#b6b1a6;padding:30px 0 36px;font-size:12.5px;line-height:1.65}
   footer .logo{height:22px;margin-bottom:14px}footer .logo path{fill:#e4e0d6}
   footer b{color:#ddd8cd;font-weight:600}
@@ -281,10 +307,14 @@
 (()=>{'use strict';
 let DATA=null, ENT='R', PER='CUR', TAB='sum';
 let XON=true; try{ XON=localStorage.getItem('woodsXero')!=='off'; }catch(e){}
+/* phones: the header scrolls away except its period and tab bars */
+{const hd=document.querySelector('header.top'), stick=()=>{const pb=hd.querySelector('.perbar'); hd.style.top=(window.innerWidth<=640&&pb)?(-(pb.offsetTop-6))+'px':'';};
+ try{ new ResizeObserver(stick).observe(hd); }catch(e){} window.addEventListener('resize',stick);}
 
 /* ---------- formatting ---------- */
-const F=n=>(n<0?'-':'')+'$'+Math.abs(Math.round(n||0)).toLocaleString('en-AU');
-const F2=n=>(n<0?'-':'')+'$'+Math.abs(n||0).toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2});
+/* accounting style: negatives in brackets */
+const F=n=>{const v=Math.round(n||0);return v<0?'($'+(-v).toLocaleString('en-AU')+')':'$'+v.toLocaleString('en-AU');};
+const F2=n=>{const v=Math.round((n||0)*100)/100, t='$'+Math.abs(v).toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2});return v<0?'('+t+')':t;};
 const X=n=>(n||0).toFixed(2)+'×';
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const title=s=>String(s||'').toLowerCase().replace(/\b[a-z]/g,c=>c.toUpperCase());
@@ -848,7 +878,7 @@ const U=()=>{const u=DATA.usa;
   if(u&&u.xero&&!u._n){Object.keys(u.xero).forEach(k=>{const x=u.xero[k];if(!x.opex&&x.oth<0){x.opex=-x.oth;x.oth=0;
     if(x.lines&&x.lines.oth){x.lines.opex=(x.lines.opex||[]).concat(x.lines.oth.map(([l,a])=>[l,-a]));x.lines.oth=[];}}});u._n=1;}
   return u;};
-const FU=n=>(n<0?'-':'')+'US$'+Math.abs(Math.round(n||0)).toLocaleString('en-AU');
+const FU=n=>{const v=Math.round(n||0);return v<0?'(US$'+(-v).toLocaleString('en-AU')+')':'US$'+v.toLocaleString('en-AU');};
 const uShort=k=>((U().months||[]).find(m=>m.key===k)||{short:k}).short;
 function uMonths(){
   const u=U(), ms=u.months, cur=u.current;
