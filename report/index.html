@@ -149,6 +149,19 @@
 
   table{width:100%;border-collapse:collapse;font-size:14px;background:var(--card)}
   .tbl{border:1px solid var(--line);border-radius:12px;overflow:hidden;overflow-x:auto}
+  /* wide screens: column headings stay visible while a long table scrolls */
+  @media(min-width:901px){
+    .tbl{overflow:visible}
+    .tbl thead th{position:sticky;top:0;z-index:3}
+    .tbl thead th:first-child{border-top-left-radius:12px}.tbl thead th:last-child{border-top-right-radius:12px}
+    .tbl tbody tr:last-child td:first-child{border-bottom-left-radius:12px}.tbl tbody tr:last-child td:last-child{border-bottom-right-radius:12px}
+  }
+  /* narrow screens: tables scroll sideways with the row label held in place */
+  @media(max-width:900px){
+    .tbl td:first-child,.tbl th:first-child{position:sticky;left:0;z-index:1;background:inherit}
+    .tbl tbody td:first-child{background:var(--card)} .tbl tr.tot td:first-child{background:#f4f1ea} .tbl thead th:first-child{background:#fbfaf7}
+    th:first-child,td:first-child{min-width:150px}
+  }
   th,td{padding:11px 15px;text-align:right;white-space:nowrap}
   th:first-child,td:first-child{text-align:left;white-space:normal;min-width:168px}
   thead th{font-size:11.5px;color:var(--mid);font-weight:600;background:#fbfaf7;border-bottom:1.5px solid var(--line)}
@@ -211,6 +224,19 @@
     padding:4px 12px;font-size:12.5px;color:#a7a197}
   .lchip b{font-family:var(--mono);color:#fff;font-weight:700}
 
+  /* phones: compact header; period and tab bars scroll sideways and stay at the top */
+  @media(max-width:640px){
+    .entbar{padding:6px 0}.entbar label[for=entsel]{display:none}.entbar .asat{display:none}
+    .entbar select{font-size:13px;padding:6px 28px 6px 10px;max-width:58vw}.rbtn{padding:6px 10px;font-size:12px}
+    header.top{padding:12px 0 0;position:sticky;z-index:30}
+    .hd-row{margin-bottom:8px;gap:10px}.logo{height:18px}.hd-meta{font-size:10.5px;line-height:1.5}.hd-meta br,.hd-meta span{display:none}
+    header.top h1{font-size:21px;margin-bottom:6px}header.top .lede{margin-bottom:8px;font-size:12px}
+    .perbar{margin-bottom:8px}
+    .pseg{flex-wrap:nowrap;overflow-x:auto;max-width:100%;scrollbar-width:none}.pseg::-webkit-scrollbar,.tabs::-webkit-scrollbar{display:none}
+    .pseg button{white-space:nowrap;padding:6px 10px;font-size:12.5px}
+    header.top .tabs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}.tab{padding:8px 12px 9px;font-size:13px}
+    main{padding-top:18px}.wlogo{height:26px!important}.slogo{height:11px!important}
+  }
   footer{background:var(--black);color:#b6b1a6;padding:30px 0 36px;font-size:12.5px;line-height:1.65}
   footer .logo{height:22px;margin-bottom:14px}footer .logo path{fill:#e4e0d6}
   footer b{color:#ddd8cd;font-weight:600}
@@ -254,6 +280,11 @@
   .vtog button:focus-visible,.lnkb:focus-visible{outline:2px solid var(--bench);outline-offset:1px}
   .lnkb{background:none;border:none;font-family:var(--sans);font-size:12.5px;font-weight:600;color:var(--ink);text-decoration:underline;cursor:pointer;padding:0}
   .tnote{font-size:12px;color:var(--mid);margin-top:8px;text-align:right}
+  tr.tg td{cursor:pointer;user-select:none}
+  tr.tg td::before{content:'';display:inline-block;width:0;height:0;border-left:4.5px solid transparent;border-right:4.5px solid transparent;border-top:6px solid currentColor;margin-right:8px;vertical-align:2px;transition:transform .12s}
+  tr.tg.shut td::before{transform:rotate(-90deg)}
+  tr.hid{display:none}
+  .hd .rt .vtog+.vtog,.hd .rt .lnkb+.vtog{margin-left:8px}
   .kpis.k3{grid-template-columns:repeat(3,1fr)}@media(max-width:900px){.kpis.k3{grid-template-columns:repeat(2,1fr)}}@media(max-width:560px){.kpis.k3{grid-template-columns:1fr}}
   .three{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}@media(max-width:1000px){.three{grid-template-columns:1fr}}
   @media print{
@@ -327,10 +358,14 @@
 (()=>{'use strict';
 let DATA=null, ENT='R', PER='CUR', TAB='sum';
 let XON=false;   // Xero figures live on the report's own tabs, not inside Sales
+/* phones: the header scrolls away except its period and tab bars */
+{const hd=document.querySelector('header.top'), stick=()=>{const pb=hd.querySelector('.perbar'); hd.style.top=(window.innerWidth<=640&&pb)?(-(pb.offsetTop-6))+'px':'';};
+ try{ new ResizeObserver(stick).observe(hd); }catch(e){} window.addEventListener('resize',stick);}
 
 /* ---------- formatting ---------- */
-const F=n=>(n<0?'-':'')+'$'+Math.abs(Math.round(n||0)).toLocaleString('en-AU');
-const F2=n=>(n<0?'-':'')+'$'+Math.abs(n||0).toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2});
+/* accounting style: negatives in brackets */
+const F=n=>{const v=Math.round(n||0);return v<0?'($'+(-v).toLocaleString('en-AU')+')':'$'+v.toLocaleString('en-AU');};
+const F2=n=>{const v=Math.round((n||0)*100)/100, t='$'+Math.abs(v).toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2});return v<0?'('+t+')':t;};
 const X=n=>(n||0).toFixed(2)+'×';
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const title=s=>String(s||'').toLowerCase().replace(/\b[a-z]/g,c=>c.toUpperCase());
@@ -894,7 +929,7 @@ const U=()=>{const u=DATA.usa;
   if(u&&u.xero&&!u._n){Object.keys(u.xero).forEach(k=>{const x=u.xero[k];if(!x.opex&&x.oth<0){x.opex=-x.oth;x.oth=0;
     if(x.lines&&x.lines.oth){x.lines.opex=(x.lines.opex||[]).concat(x.lines.oth.map(([l,a])=>[l,-a]));x.lines.oth=[];}}});u._n=1;}
   return u;};
-const FU=n=>(n<0?'-':'')+'US$'+Math.abs(Math.round(n||0)).toLocaleString('en-AU');
+const FU=n=>{const v=Math.round(n||0);return v<0?'(US$'+(-v).toLocaleString('en-AU')+')':'US$'+v.toLocaleString('en-AU');};
 const uShort=k=>((U().months||[]).find(m=>m.key===k)||{short:k}).short;
 function uMonths(){
   const u=U(), ms=u.months, cur=u.current;
@@ -1270,7 +1305,7 @@ function salesPaint(){
    Financial tabs read the Xero P&L (by month and account), the Xero balance sheet at
    each month end and the Xero bank summary. The Sales tab is the live dashboard.
    ===================================================================== */
-let RT='dash', PERSET=false, PLV='det', BSV='side';
+let RT='dash', PERSET=false, PLV='det', BSV='side', PLG='side'; const COLL=new Set();
 const vtog=(k,cur,opts)=>`<div class="vtog" role="group">${opts.map(([v,t])=>`<button type="button" data-${k}="${v}" class="${v===cur?'on':''}">${t}</button>`).join('')}</div>`;
 const RTABS=[{id:'dash',t:'Dashboard'},{id:'pl',t:'P&L'},{id:'bs',t:'Balance Sheet'},{id:'cf',t:'Cash Flow Summary'},{id:'sales',t:'Sales'}];
 const MNL=['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -1288,7 +1323,7 @@ const rOpen=k=>rUS()?uOpen(k):gOpen(k);
 const rYS=()=>kPrev(rYear()[0]);   // last month of the prior year: June, or December for North America
 const rEnts=()=>ENT==='G'?['R','S','U'].filter(e=>DATA.ents[e]&&(e!=='U'||hasUS())):[ENT];
 const GRP=()=>ENT==='G';
-const FK=v=>{const a=Math.abs(v||0),s=v<0?'-':'';return a>=1e6?s+'$'+(a/1e6).toFixed(a>=1e7?0:1)+'m':a>=1e3?s+'$'+Math.round(a/1e3)+'k':s+'$'+Math.round(a);};
+const FK=v=>{const a=Math.abs(v||0),t=a>=1e6?'$'+(a/1e6).toFixed(a>=1e7?0:1)+'m':a>=1e3?'$'+Math.round(a/1e3)+'k':'$'+Math.round(a);return v<0&&Math.round(a)?'('+t+')':t;};
 const PTS=v=>(v>=0?'+':'')+(v*100).toFixed(1)+' pts';
 function defPer(){const ms=rYear(), i=ms.indexOf(rCur()); return i>0?ms[i-1]:'CUR';}
 /* the period to compare with: the prior month for a month, the prior quarter for a quarter (null for year to date) */
@@ -1316,29 +1351,42 @@ function plAdd(o,x,r){ PLF.forEach(f=>o[f]+=(x[f]||0)*r);
   else o.noLines=true;
   if(x.noLines) o.noLines=true; if(x.miss) o.miss=o.miss.concat(x.miss); o.n+=x.n||1; return o; }
 function plSum(e,ks,a){ const o=plZero(); ks.forEach(k=>{const x=plOf(e,k); if(!x){o.miss.push(k);return;} plAdd(o,x,rAvg(e,k,a)); o.n--; o.n++;}); o.n=ks.length-o.miss.length; return o; }
+/* consolidated P&L: Recruitment invoices clients for W&Co Search placements and pays Search its fee, booked as
+   "Recruitment Cost - W&Co. Search" in Recruitment and as Recruitment Fees in Search. Both sides are eliminated;
+   the client revenue in Recruitment stays. Profit is unchanged. */
+const isSearchCost=l=>/recruitment cost.*w\s*&\s*co\.?\s*search/i.test(l);
+function plConsSum(ks){
+  const o=plGroup(ks); if(!DATA.ents.R||!DATA.ents.S||!rEnts().includes('S')) return o;
+  let E=0; ks.forEach(k=>{const x=plOf('R',k); ((x&&x.lines&&x.lines.cos)||[]).forEach(([l,v])=>{if(isSearchCost(l)) E+=v;});});
+  if(Math.abs(E)<0.005) return o;
+  Object.keys(o.L.cos).filter(isSearchCost).forEach(l=>{o.L.cos[l]-=E; if(Math.abs(o.L.cos[l])<0.005) delete o.L.cos[l];});
+  if(o.L.rev['Recruitment Fees']!=null) o.L.rev['Recruitment Fees']-=E;
+  o.cos-=E; o.rev-=E; o.fees-=E; o.elim=E; return o;
+}
 function plGroup(ks){ const o=plZero(); rEnts().forEach(e=>plAdd(o,plSum(e,ks,true),1)); return o; }
 
 /* columns: {h, s (sum), parts:[{l,s}] for breakdowns, mv:[i,j] for a movement column, k (single month)} */
 function plCols(){
   const ks=rKs();
-  if(GRP()){
+  if(GRP()&&PLG==='side'){
     const cols=rEnts().map(e=>({h:ENTNM[e],s:plSum(e,ks,true),parts:ks.length>1?ks.map(k=>({l:kShort(k),s:plSum(e,[k],true)})):null,e}));
     cols.push({h:'Combined',s:plGroup(ks),parts:rEnts().map(e=>({l:ENTNM[e],s:plSum(e,ks,true)})),tot:true});
     return cols;
   }
-  const e=ENT;
+  /* one entity, or the consolidated group */
+  const S=q=>GRP()?plConsSum(q):plSum(ENT,q);
   if(ks.length===1&&!isQ(PER)){
     const k=ks[0], p=kPrev(k), y=rYear().filter(x=>x<=k);
-    return [{h:kShort(k)+(rOpen(k)?' *':''),s:plSum(e,[k]),k},{h:kShort(p),s:plSum(e,[p]),k:p},{h:'Movement',mv:[0,1]},
-      {h:'YTD to '+kShort(k),s:plSum(e,y),parts:y.map(x=>({l:kShort(x),s:plSum(e,[x])})),tot:true}];
+    return [{h:kShort(k)+(rOpen(k)?' *':''),s:S([k]),k},{h:kShort(p),s:S([p]),k:p},{h:'Movement',mv:[0,1]},
+      {h:'YTD to '+kShort(k),s:S(y),parts:y.map(x=>({l:kShort(x),s:S([x])})),tot:true}];
   }
-  const byM=q=>q.map(k=>({l:kShort(k),s:plSum(e,[k])}));
-  if(isQ(PER)){ const last=ks[ks.length-1], y=rYear().filter(x=>x<=last), cm=rCmp(), cols=[{h:PER+(ks.some(rOpen)?' *':''),s:plSum(e,ks),parts:byM(ks)}];
-    const ps=cm&&plSum(e,cm.ks); if(ps&&!ps.miss.length) cols.push({h:cm.h,s:ps,parts:byM(cm.ks)},{h:'Movement',mv:[0,1]});
-    return cols.concat([{h:'YTD to '+kShort(last),s:plSum(e,y),parts:byM(y),tot:true}]); }
-  if(PER==='YTD'){ const qs=rQuarters(); return qs.map(q=>({h:q.h+(q.ks.some(rOpen)?' *':''),s:plSum(e,q.ks),parts:byM(q.ks)}))
-    .concat([{h:'Total',s:plSum(e,ks),parts:qs.map(q=>({l:q.h,s:plSum(e,q.ks)})),tot:true}]); }
-  return ks.map(k=>({h:kShort(k)+(rOpen(k)?' *':''),s:plSum(e,[k]),k})).concat([{h:'Total',s:plSum(e,ks),parts:byM(ks),tot:true}]);
+  const byM=q=>q.map(k=>({l:kShort(k),s:S([k])}));
+  if(isQ(PER)){ const last=ks[ks.length-1], y=rYear().filter(x=>x<=last), cm=rCmp(), cols=[{h:PER+(ks.some(rOpen)?' *':''),s:S(ks),parts:byM(ks)}];
+    const ps=cm&&S(cm.ks); if(ps&&!ps.miss.length) cols.push({h:cm.h,s:ps,parts:byM(cm.ks)},{h:'Movement',mv:[0,1]});
+    return cols.concat([{h:'YTD to '+kShort(last),s:S(y),parts:byM(y),tot:true}]); }
+  if(PER==='YTD'){ const qs=rQuarters(); return qs.map(q=>({h:q.h+(q.ks.some(rOpen)?' *':''),s:S(q.ks),parts:byM(q.ks)}))
+    .concat([{h:'Total',s:S(ks),parts:qs.map(q=>({l:q.h,s:S(q.ks)})),tot:true}]); }
+  return ks.map(k=>({h:kShort(k)+(rOpen(k)?' *':''),s:S([k]),k})).concat([{h:'Total',s:S(ks),parts:byM(ks),tot:true}]);
 }
 function plTable(cols){
   const pn=esc(rPN());
@@ -1363,7 +1411,8 @@ function plTable(cols){
   const hdr=t=>`<tr class="h"><td colspan="${cols.length+1}">${t}</td></tr>`;
   const sec=(f,lab,tot,exp)=>{
     const ns=lines?names(f):[]; if(!ns.length&&!cols.some(c=>Math.abs(get(c,f))>=0.5)) return '';
-    return hdr(lab)+ns.map(l=>`<tr class="ln"><td>${esc(l)}</td>${cols.map(c=>cell(c,f,l,esc(l),{exp})).join('')}</tr>`).join('')
+    const key='pl-'+f, shut=COLL.has(key);
+    return (ns.length?`<tr class="h tg${shut?' shut':''}" data-sec="${key}" title="Show or hide the accounts"><td colspan="${cols.length+1}">${lab}</td></tr>`:hdr(lab))+ns.map(l=>`<tr class="ln${shut?' hid':''}"><td>${esc(l)}</td>${cols.map(c=>cell(c,f,l,esc(l),{exp})).join('')}</tr>`).join('')
       +`<tr class="sub2"><td>${tot}</td>${cols.map(c=>cell(c,f,null,tot,{sec:true,exp})).join('')}</tr>`;};
   const calcGP=c=>CALC('Gross profit, '+esc(c.h.replace(' *','')),'',[['Trading income',F(c.s.rev)],['Less cost of sales',F(-c.s.cos)],['= Gross profit',F(c.s.gp),'s']]);
   const calcNP=c=>CALC('Net profit, '+esc(c.h.replace(' *','')),'',[['Gross profit',F(c.s.gp)],['Plus other income',F(c.s.oth)],['Less operating expenses',F(-c.s.opex)],['= Net profit',SG(c.s.np),'s']]);
@@ -1408,14 +1457,19 @@ function bsFin(o){o.assets=o.T.bank+o.T.ca+o.T.fa+o.T.nca; o.liabs=o.T.cl+o.T.nc
 const hasBS=e=>!!Object.keys(((DATA.bs||{})[e])||{}).length;
 function bsAt(e,k,a){ const b=((DATA.bs||{})[e]||{})[k]; if(!b) return null; const r=rEndR(e,k,a), o=bsZero(); o.d=b.d;
   b.s.forEach(([sec,l,v])=>{if(!sec) return; const s=bsSec(sec); o.L[s][l]=(o.L[s][l]||0)+v*r; o.T[s]+=v*r;}); return bsFin(o); }
+const bsGroupOf=(k,ents)=>bsGroupE(k,ents);
+function bsGroupE(k,ents){ const o=bsZero(), parts=[]; let any=false;
+  ents.forEach(e=>{const b=bsAt(e,k,true); if(!b) return; any=true; parts.push({l:ENTNM[e],b}); o.d=o.d||b.d;
+    BSS.forEach(([s])=>{Object.keys(b.L[s]).forEach(l=>{o.L[s][l]=(o.L[s][l]||0)+b.L[s][l];}); o.T[s]+=b.T[s];});});
+  if(!any) return null; bsFin(o); o.parts=parts; return o; }
 function bsGroup(k){ const o=bsZero(), parts=[]; let any=false;
   rEnts().forEach(e=>{const b=bsAt(e,k,true); if(!b) return; any=true; parts.push({l:ENTNM[e],b}); o.d=o.d||b.d;
     BSS.forEach(([s])=>{Object.keys(b.L[s]).forEach(l=>{o.L[s][l]=(o.L[s][l]||0)+b.L[s][l];}); o.T[s]+=b.T[s];});});
   if(!any) return null; bsFin(o); o.parts=parts; return o; }
 /* consolidation: an account in one entity that names another entity in the group is an inter-entity balance */
 const ENTREF={R:/woods\s*&?\s*co\.?\s*recruitment\s*pty/i,S:/w\s*&\s*co\.?\s*search/i,U:/recruitment\s*llc/i};
-function bsCons(k){
-  const es=rEnts(), comb=bsGroup(k); if(!comb) return null;
+function bsCons(k,ents){
+  const es=ents||rEnts(), comb=ents?bsGroupOf(k,ents):bsGroup(k); if(!comb) return null;
   const el=bsZero(), items=[];
   const drop=(e,to,s,l,v,x)=>{el.L[s][l]=(el.L[s][l]||0)-v; el.T[s]-=v; items.push(Object.assign({e,to,s,l,v},x||{}));};
   es.forEach(e=>{const b=bsAt(e,k,true); if(!b) return;
@@ -1471,7 +1525,8 @@ function bsTable(cols){
     return o.filter(l=>cols.some(c=>c.b&&Math.abs(c.b.L[s][l]||0)>=0.5));};
   const hdr=t=>`<tr class="h"><td colspan="${cols.length+1}">${t}</td></tr>`;
   const sec=(s,lab)=>{const ns=names(s); if(!ns.length) return '';
-    return `<tr class="h2"><td colspan="${cols.length+1}">${lab}</td></tr>`+ns.map(l=>`<tr class="ln"><td>${esc(l)}</td>${cols.map(c=>cell(c,s,l,esc(l))).join('')}</tr>`).join('')
+    const key='bs-'+s, shut=COLL.has(key);
+    return `<tr class="h2 tg${shut?' shut':''}" data-sec="${key}" title="Show or hide the accounts"><td colspan="${cols.length+1}">${lab}</td></tr>`+ns.map(l=>`<tr class="ln${shut?' hid':''}"><td>${esc(l)}</td>${cols.map(c=>cell(c,s,l,esc(l))).join('')}</tr>`).join('')
       +`<tr class="sub2"><td>Total ${lab.toLowerCase()}</td>${cols.map(c=>cell(c,s,null,'Total '+lab.toLowerCase(),{sec:true})).join('')}</tr>`;};
   const C=(lab,rows)=>c=>CALC(lab+', '+nm(c),'',rows(c));
   const body=hdr('Assets')+sec('bank','Bank')+sec('ca','Current assets')+sec('fa','Fixed assets')+sec('nca','Non-current assets')
@@ -1608,10 +1663,10 @@ function finFlags(){
 function plPage(){
   const cols=plCols(), pn=esc(rPN()), es=rEnts();
   const miss=cols.filter(c=>c.s&&c.s.miss&&c.s.miss.length).length;
-  const info='Xero profit and loss, standard layout, by account. '+(GRP()?'Each entity in A$ (North America at the RBA monthly average AUD/USD rate). Not consolidated: recharges and other transactions between the entities are not eliminated.':
+  const info='Xero profit and loss, standard layout, by account. '+(GRP()?(PLG==='cons'?'Consolidated in A$ (North America at the RBA monthly average AUD/USD rate). W&amp;Co Search fees that Recruitment pays Search ("Recruitment Cost - W&amp;Co. Search") are eliminated against the same amount of Search\'s Recruitment Fees; the client revenue stays in Recruitment. Profit is unchanged.':'Each entity in A$ (North America at the RBA monthly average AUD/USD rate). Not consolidated: switch to Consolidated to eliminate the fees between Recruitment and W&amp;Co Search.'):
     (rKs().length===1?'The month, the prior month, the movement and the year to date.':'Each month in the period and the total.'))+(rUS()?' North America reports in US$; its overheads come through Xero as "Other Income and Expense" and are shown as operating expenses.':'')+' * month not yet closed.';
   return finFlags()+(miss&&!cols.some(c=>c.s&&c.s.n)?flag('No Xero profit and loss for this period yet','','hi'):'')
-    +`<section class="blk"><div class="hd"><h2>Profit and loss, ${pn}${INFO(info)}</h2><div class="rt">${vtog('plv',PLV,[['det','Detailed'],['sum','Summary']])}</div></div>${plTable(cols)}<div class="tnote">${GRP()?'A$':rUS()?'US$':'A$'} \u00b7 Xero synced ${esc((DATA.xero||{}).syncedAt||'')}</div></section>`;
+    +`<section class="blk"><div class="hd"><h2>Profit and loss, ${pn}${INFO(info)}</h2><div class="rt">${GRP()?vtog('plg',PLG,[['side','Side by side'],['cons','Consolidated']]):(Object.keys(DATA.ents).length>1?`<button type="button" class="lnkb" data-goplc="1">Consolidated group P&amp;L \u2192</button>`:'')} ${vtog('plv',PLV,[['det','Detailed'],['sum','Summary']])}</div></div>${plTable(cols)}${GRP()&&PLG==='cons'?(()=>{const e=cols.filter(c=>c.s&&c.s.elim).map(c=>esc(c.h.replace(' *',''))+' '+F(c.s.elim)); return e.length?`<div class="tnote">Eliminated between Recruitment and W&amp;Co Search: ${e.join(' \u00b7 ')}</div>`:'';})():''}<div class="tnote">${GRP()?'A$':rUS()?'US$':'A$'} \u00b7 Xero synced ${esc((DATA.xero||{}).syncedAt||'')}</div></section>`;
 }
 function bsPage(){
   const {cols,end,cons}=bsCols(), pn=esc(rPN()), es=rEnts();
@@ -1684,8 +1739,8 @@ function salesHead(){
 }
 function dashPage(){
   const ks=rKs(), es=rEnts(), one=ks.length===1, pn=esc(rPN()), end=ks[ks.length-1];
-  const cm=rCmp(), P=GRP()?plGroup(ks):plSum(ENT,ks);
-  let PP=cm?(GRP()?plGroup(cm.ks):plSum(ENT,cm.ks)):null; if(PP&&(PP.miss.length||!PP.n)) PP=null;
+  const cm=rCmp(), P=GRP()?plConsSum(ks):plSum(ENT,ks);
+  let PP=cm?(GRP()?plConsSum(cm.ks):plSum(ENT,cm.ks)):null; if(PP&&(PP.miss.length||!PP.n)) PP=null;
   const chip=(v,pv,inv)=>PP&&pv!=null?`<span class="chip ${(v-pv)*(inv?-1:1)>=0?'up':'dn'}">${SG(v-pv).replace(/<[^>]+>/g,'')} vs ${cm.h}</span>`:'';
   const B=GRP()?bsGroup(end):bsAt(ENT,end), B0=GRP()?bsGroup(kPrev(ks[0])):bsAt(ENT,kPrev(ks[0]));
   const S=salesHead();
@@ -1713,13 +1768,18 @@ function dashPage(){
   /* a quarter or the year shows the year quarter by quarter; a month shows it month by month */
   const qv=isQ(PER)||PER==='YTD', on=k=>ks.includes(k), unit=qv?'quarter':'month';
   const per=qv?rQuarters().map(q=>({l:q.h,ks:q.ks,long:q.h+' ('+kShort(q.ks[0])+(q.ks.length>1?' to '+kShort(q.ks[q.ks.length-1]):'')+')'})):rYear().map(k=>({l:kShort(k).slice(0,3),ks:[k],long:kLong(k)}));
-  const ym=p=>GRP()?plGroup(p.ks):plSum(ENT,p.ks), pon=p=>p.ks.every(on), pop=p=>p.ks.some(rOpen)?' (not closed)':'';
+  const ym=p=>GRP()?plConsSum(p.ks):plSum(ENT,p.ks), pon=p=>p.ks.every(on), pop=p=>p.ks.some(rOpen)?' (not closed)':'';
   const yv=per.map(p=>Object.assign({},p,{s:ym(p)})).filter(x=>x.s.n);
   const rc=barChart(yv.map(x=>({l:x.l,v:x.s.rev,on:pon(x),tip:CALC('Trading income, '+x.long+pop(x),'',[['Trading income',F(x.s.rev)],['Gross profit',F(x.s.gp)],['Gross margin',x.s.rev?PCT(x.s.gp/x.s.rev):'\u2013']])})),{label:'Trading income by '+unit});
   const nc=barChart(yv.map(x=>({l:x.l,v:x.s.np,on:pon(x),tip:xNP('Net profit, '+x.long+pop(x),'',x.s)})),{label:'Net profit by '+unit});
   const cash=per.map(p=>{const k=p.ks[p.ks.length-1], b=GRP()?bsGroup(k):bsAt(ENT,k);return {l:p.l,v:b?b.T.bank:null,on:pon(p),tip:b?BD('Cash at bank, '+(b.d?dLong(b.d):kEnd(k)),GRP()?'By entity, A$':'By account',GRP()?(b.parts||[]).map(p=>({l:p.l,v:p.b.T.bank})):Object.keys(b.L.bank).map(l=>({l,v:b.L.bank[l]})),{total:b.T.bank}):''};});
   const cur=GRP()?'A$':rUS()?'US$':'A$';
-  return finFlags()+kpis
+  /* balances between the entities that do not agree, as action items until they do */
+  const allE=['R','S','U'].filter(e=>DATA.ents[e]&&hasBS(e)), ic=allE.length>1?bsCons(end,allE):null;
+  const icp=ic?ic.pairs.filter(p=>Math.abs(p.diff)>=1&&(GRP()||p.a===ENT||p.b===ENT)):[];
+  const icHtml=icp.length?`<section class="blk"><div class="hd"><h2>Inter-entity balances to fix${INFO('Loans and other balances between the entities, as recorded in each entity\'s Xero file at the period end, in A$ at the month-end rate. The two sides should agree. Each item stays here until they do. Details on the Group balance sheet, Consolidated view.')}</h2><div class="rt">${esc(kEnd(end))}</div></div>
+    ${icp.map(p=>`<div class="flag hi"><div class="ft">${ENTNM[p.a]} and ${ENTNM[p.b]} differ by <span${BD(ENTNM[p.a]+' and '+ENTNM[p.b],'At '+kEnd(end)+', A$',p.items.map(t=>({l:t.l,s:ENTNM[t.e],v:t.v})),{keepOrder:true,signed:true})}>${F(Math.abs(p.diff))}</span>: ${ENTNM[p.a]}'s books ${p.ab>=0?'show '+F(p.ab)+' owed by':'show '+F(-p.ab)+' owed to'} ${ENTNM[p.b]}; ${ENTNM[p.b]}'s books ${p.ba<=0?'show '+F(-p.ba)+' owed to':'show '+F(p.ba)+' owed by'} ${ENTNM[p.a]}.</div></div>`).join('')}</section>`:'';
+  return finFlags()+kpis+icHtml
     +`<section class="blk"><div class="hd"><h2>Headlines${INFO('Worked out from the figures on the other tabs.')}</h2><div class="rt">${pn}</div></div>${hl.map(([t,c])=>`<div class="flag ${c}"><div class="ft">${t}</div></div>`).join('')}</section>`
     +`<section class="blk"><div class="hd"><h2>The year so far</h2><div class="rt">${cur} · selected period highlighted</div></div>
       <div class="three"><div class="chc"><div class="cht">Trading income by ${unit}</div>${rc}</div><div class="chc"><div class="cht">Net profit by ${unit}</div>${nc}</div>
@@ -1773,8 +1833,10 @@ function paint(){
 function goRT(id){ if(!RTABS.some(t=>t.id===id)) return; RT=id; paint(); window.scrollTo({top:0}); }
 document.getElementById('rtabs').addEventListener('click',ev=>{const b=ev.target.closest('[data-r]'); if(b) goRT(b.dataset.r);});
 document.getElementById('content').addEventListener('click',ev=>{const b=ev.target.closest('.rnav [data-r]'); if(b){ goRT(b.dataset.r); return; }
-  const v=ev.target.closest('[data-plv],[data-bsv],[data-gocons]'); if(!v) return;
-  if(v.dataset.plv) PLV=v.dataset.plv; if(v.dataset.bsv) BSV=v.dataset.bsv;
+  const tg=ev.target.closest('tr.tg'); if(tg){ const k=tg.dataset.sec; COLL.has(k)?COLL.delete(k):COLL.add(k); const y=window.scrollY; paint(); window.scrollTo({top:y}); return; }
+  const v=ev.target.closest('[data-plv],[data-bsv],[data-plg],[data-gocons],[data-goplc]'); if(!v) return;
+  if(v.dataset.plv) PLV=v.dataset.plv; if(v.dataset.bsv) BSV=v.dataset.bsv; if(v.dataset.plg) PLG=v.dataset.plg;
+  if(v.dataset.goplc&&DATA.ents&&Object.keys(DATA.ents).length>1){ ENT='G'; PLG='cons'; setEnts(); }
   if(v.dataset.gocons&&DATA.ents&&Object.keys(DATA.ents).length>1){ ENT='G'; BSV='cons'; setEnts(); }
   const y=window.scrollY; paint(); window.scrollTo({top:y}); });
 document.addEventListener('keydown',ev=>{ if(ev.altKey||ev.ctrlKey||ev.metaKey||/INPUT|SELECT|TEXTAREA/.test((ev.target||{}).tagName||'')) return;
