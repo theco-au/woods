@@ -1294,7 +1294,7 @@ function defPer(){const ms=rYear(), i=ms.indexOf(rCur()); return i>0?ms[i-1]:'CU
 /* the period to compare with: the prior month for a month, the prior quarter for a quarter (null for year to date) */
 const rQuarters=()=>{const ys=rYear(); return [1,2,3,4].map(n=>({n,h:'Q'+n,ks:ys.slice((n-1)*3,n*3)})).filter(q=>q.ks.length);};
 function rCmp(){ const ks=rKs();
-  if(ks.length===1) return {h:kShort(kPrev(ks[0])),long:kLong(kPrev(ks[0])),ks:[kPrev(ks[0])]};
+  if(ks.length===1&&!isQ(PER)) return {h:kShort(kPrev(ks[0])),long:kLong(kPrev(ks[0])),ks:[kPrev(ks[0])]};
   if(isQ(PER)){ const n=+PER[1]; if(n>1){ const q=rQuarters()[n-2]; return {h:q.h,long:q.h+' ('+kShort(q.ks[0])+' to '+kShort(q.ks[2])+')',ks:q.ks}; }
     const a=kPrev(ks[0]), b=kPrev(a), c=kPrev(b); return {h:'prior Q4',long:'the prior year\'s Q4 ('+kShort(c)+' to '+kShort(a)+')',ks:[c,b,a]}; }
   return null; }
@@ -1327,7 +1327,7 @@ function plCols(){
     return cols;
   }
   const e=ENT;
-  if(ks.length===1){
+  if(ks.length===1&&!isQ(PER)){
     const k=ks[0], p=kPrev(k), y=rYear().filter(x=>x<=k);
     return [{h:kShort(k)+(rOpen(k)?' *':''),s:plSum(e,[k]),k},{h:kShort(p),s:plSum(e,[p]),k:p},{h:'Movement',mv:[0,1]},
       {h:'YTD to '+kShort(k),s:plSum(e,y),parts:y.map(x=>({l:kShort(x),s:plSum(e,[x])})),tot:true}];
@@ -1481,7 +1481,7 @@ function bsTable(cols){
     +`<tr class="tot net"><td>Net assets</td>${cols.map(c=>cell(c,'net',null,'Net assets',{calc:C('Net assets',c=>[['Total assets',F(c.b.assets)],['Less total liabilities',F(-c.b.liabs)],['= Net assets',F(c.b.net),'s']])})).join('')}</tr>`
     +hdr('Equity')+names('eq').map(l=>`<tr class="ln"><td>${esc(l)}</td>${cols.map(c=>cell(c,'eq',l,esc(l))).join('')}</tr>`).join('')
     +`<tr class="tot"><td>Total equity</td>${cols.map(c=>cell(c,'eq',null,'Total equity',{sec:true})).join('')}</tr>`
-    +`<tr class="pct"><td>Net assets less equity</td>${cols.map(c=>{const v=c.mv?null:c.b?c.b.net-c.b.eq:null;return v==null?'<td class="mut"></td>':`<td class="${Math.abs(v)<1?'mut':'neg'}">${F(v)}</td>`;}).join('')}</tr>`;
+    +`<tr class="pct"><td>Net assets less equity</td>${cols.map(c=>{const v=c.mv?null:c.b?c.b.net-c.b.eq:null;return v==null?'<td class="mut"></td>':`<td class="${Math.abs(v)<1?'mut':'neg'}">${F(Math.abs(v)<0.5?0:v)}</td>`;}).join('')}</tr>`;
   return `<div class="tbl"><table class="fin">\n<thead><tr><th></th>${cols.map(c=>`<th>${esc(c.h)}</th>`).join('')}</tr></thead><tbody>${body}</tbody></table></div>`;
 }
 
@@ -1643,7 +1643,7 @@ function cfCols(){
   const ks=rKs(), es=rEnts();
   if(GRP()){ const cols=es.map(e=>({h:ENTNM[e],x:cfPeriod([e],ks,true)})); cols.push({h:'Combined',x:cfPeriod(es,ks,true),tot:true}); return cols; }
   if(PER==='YTD'){ const qs=rQuarters(); return qs.map(q=>({h:q.h+(q.ks.some(rOpen)?' *':''),x:cfPeriod([ENT],q.ks)})).concat([{h:'YTD',x:cfPeriod([ENT],ks),tot:true}]); }
-  const last=ks[ks.length-1], cols=[{h:ks.length===1?kShort(last)+(rOpen(last)?' *':''):PER+(ks.some(rOpen)?' *':''),x:cfPeriod([ENT],ks)}];
+  const last=ks[ks.length-1], cols=[{h:ks.length===1&&!isQ(PER)?kShort(last)+(rOpen(last)?' *':''):PER+(ks.some(rOpen)?' *':''),x:cfPeriod([ENT],ks)}];
   const cm=rCmp(); if(cm){ const x=cfPeriod([ENT],cm.ks); if(!x.miss.length) cols.push({h:cm.h,x}); }
   const y=rYear().filter(k=>k<=last); if(y.length>ks.length) cols.push({h:'YTD to '+kShort(last),x:cfPeriod([ENT],y),tot:true});
   return cols;
