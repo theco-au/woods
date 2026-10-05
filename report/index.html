@@ -1351,14 +1351,14 @@ function plTable(cols){
 /* ---------- Balance sheet ---------- */
 const BSS=[['bank','Bank'],['ca','Current assets'],['fa','Fixed assets'],['nca','Non-current assets'],['cl','Current liabilities'],['ncl','Non-current liabilities'],['eq','Equity']];
 function bsSec(t){t=String(t||'').toLowerCase();
-  if(/^bank|cash/.test(t))return 'bank'; if(/non.?current assets/.test(t))return 'nca'; if(/fixed assets/.test(t))return 'fa'; if(/current assets/.test(t))return 'ca';
+  if(/^bank|cash/.test(t))return 'bank'; if(/non.?current assets/.test(t))return 'nca'; if(/fixed assets|plant|equipment/.test(t))return 'fa'; if(/current assets/.test(t))return 'ca';
   if(/non.?current liabilit/.test(t))return 'ncl'; if(/current liabilit/.test(t))return 'cl'; if(/equity/.test(t))return 'eq';
   if(/asset/.test(t))return 'nca'; if(/liabilit/.test(t))return 'ncl'; return 'eq';}
 function bsZero(){const o={L:{},T:{},d:''};BSS.forEach(([s])=>{o.L[s]={};o.T[s]=0;});return o;}
 function bsFin(o){o.assets=o.T.bank+o.T.ca+o.T.fa+o.T.nca; o.liabs=o.T.cl+o.T.ncl; o.net=o.assets-o.liabs; o.eq=o.T.eq; o.wc=o.T.bank+o.T.ca-o.T.cl; return o;}
 const hasBS=e=>!!Object.keys(((DATA.bs||{})[e])||{}).length;
 function bsAt(e,k,a){ const b=((DATA.bs||{})[e]||{})[k]; if(!b) return null; const r=rEndR(e,k,a), o=bsZero(); o.d=b.d;
-  b.s.forEach(([sec,l,v])=>{const s=bsSec(sec); o.L[s][l]=(o.L[s][l]||0)+v*r; o.T[s]+=v*r;}); return bsFin(o); }
+  b.s.forEach(([sec,l,v])=>{if(!sec) return; const s=bsSec(sec); o.L[s][l]=(o.L[s][l]||0)+v*r; o.T[s]+=v*r;}); return bsFin(o); }
 function bsGroup(k){ const o=bsZero(), parts=[]; let any=false;
   rEnts().forEach(e=>{const b=bsAt(e,k,true); if(!b) return; any=true; parts.push({l:ENTNM[e],b}); o.d=o.d||b.d;
     BSS.forEach(([s])=>{Object.keys(b.L[s]).forEach(l=>{o.L[s][l]=(o.L[s][l]||0)+b.L[s][l];}); o.T[s]+=b.T[s];});});
@@ -1409,28 +1409,37 @@ function bsTable(cols){
 
 /* ---------- Cash flow summary: Xero's cash-basis (payments only) P&L, then the other balance sheet movements ---------- */
 const isDep=l=>/accum|deprec|amorti/i.test(l);
-const isFinL=l=>/loan|director|shareholder|related|inter.?company|inter.?entity|hire purchase|chattel|w ?& ?co|woods|lease liab|borrow/i.test(l);
-const isTaxL=l=>/gst|payg|withholding|super|wage|payroll|salar|income tax|tax payable|provision for tax|workcover|annual leave|long service|holiday/i.test(l);
+const isFinL=l=>/loan|director|shareholder|related part|inter.?company|inter.?entity|hire purchase|chattel|lease liab|borrow|debtor financ|invoice financ/i.test(l);
+const isTaxL=l=>/gst|payg|withholding|super|wage|payroll|salar|income tax|tax payable|provision for tax|workcover|annual leave|long service|holiday|\bato\b|integrated client/i.test(l);
 const isEarn=l=>/current year earnings|retained earnings|retained profits|accumulated (profits|losses)/i.test(l);
-const CFGRP=[['tax','GST, PAYG, super and payroll liabilities'],['inv','Fixed and non-current assets'],['dep','Depreciation and other non-cash journals'],['fin','Loans and related entity balances'],['eq','Equity: capital, drawings and dividends'],['bso','Other balance sheet accounts']];
+const isPayX=l=>/wage|salar|super|payroll|workcover|leave|long service|holiday|bonus|commission paid|employer tax|social security|medicare|health insurance|benefit/i.test(l);
+const CFGRP=[['tax','Payroll, super, PAYG and GST paid'],['timing','Unpaid bills, accruals and debtor timing'],['inv','Fixed and non-current assets'],['dep','Depreciation and other non-cash journals'],['fin','Loans and related entity balances'],['eq','Equity: capital, drawings and dividends'],['bso','Other balance sheet accounts']];
 function cplOf(e,k){ return nx((((DATA.cpl||{})[e])||{})[k]||null); }
 function cfMonth(e,k,a){
   const o=bsAt(e,kPrev(k)), c=bsAt(e,k), p=cplOf(e,k); if(!o||!c) return null;
   const r=rAvg(e,k,a), d=(s,l)=>(c.L[s][l]||0)-(o.L[s][l]||0);
   const names=s=>[...new Set(Object.keys(o.L[s]).concat(Object.keys(c.L[s])))];
-  const it={rev:{},oth:{},cos:{},opex:{},tax:{},inv:{},dep:{},fin:{},eq:{},bso:{}}, add=(g,l,v)=>{if(Math.abs(v)>=0.005) it[g][l]=(it[g][l]||0)+v*r;};
+  const it={rev:{},oth:{},cos:{},opex:{},tax:{},timing:{},inv:{},dep:{},fin:{},eq:{},bso:{}}, add=(g,l,v)=>{if(Math.abs(v)>=0.005) it[g][l]=(it[g][l]||0)+v*r;};
+  const lm=(x,f)=>{const m={}; ((x&&x.lines&&x.lines[f])||[]).forEach(([l,v])=>{m[l]=(m[l]||0)+v;}); return m;};
   if(p){ if(p.lines) [['rev',1],['oth',1],['cos',-1],['opex',-1]].forEach(([f,sg])=>(p.lines[f]||[]).forEach(([l,v])=>add(f,l,v*sg)));
     else { add('rev','Trading income',p.rev); add('oth','Other income',p.oth); add('cos','Cost of sales',-p.cos); add('opex','Operating expenses',-p.opex); }
-    /* lines that do not add to the section totals (should not happen) */
     [['rev',p.rev,1],['oth',p.oth,1],['cos',p.cos,-1],['opex',p.opex,-1]].forEach(([f,t,sg])=>{const s=Object.values(it[f]).reduce((x,v)=>x+v,0)/(r||1), df=t*sg-s; if(Math.abs(df)>=0.5) add(f,'Not itemised',df);}); }
-  /* other cash movements: every balance sheet account except bank, trade debtors and creditors (already in the cash P&L) and earnings */
-  names('ca').forEach(l=>{ if(!isAR(l)) add(isFinL(l)?'fin':isTaxL(l)?'tax':'bso',l,-d('ca',l)); });
-  names('cl').forEach(l=>{ if(!isAP(l)) add(isFinL(l)?'fin':isTaxL(l)?'tax':'bso',l,d('cl',l)); });
+  /* accrual P&L less cash-basis P&L, account by account: expenses posted by journal (payroll, depreciation) or not yet paid,
+     and income invoiced but not yet received. With the balance sheet movements below, this turns the cash-basis P&L into the change in cash. */
+  const ap=plOf(e,k);
+  if(ap&&ap.lines&&(!p||p.lines)){
+    ['cos','opex'].forEach(f=>{const A=lm(ap,f), C=lm(p,f); new Set(Object.keys(A).concat(Object.keys(C))).forEach(l=>{const j=(A[l]||0)-(C[l]||0); if(Math.abs(j)<0.005) return;
+      add(isDep(l)?'dep':isPayX(l)?'tax':'timing',l+(isDep(l)?' (expense)':isPayX(l)?' (expensed by journal)':' (expensed, not paid)'),-j);});});
+    ['rev','oth'].forEach(f=>{const A=lm(ap,f), C=lm(p,f); new Set(Object.keys(A).concat(Object.keys(C))).forEach(l=>{const j=(A[l]||0)-(C[l]||0); if(Math.abs(j)>=0.005) add('timing',l+' (invoiced, not received)',j);});});
+  } else if(ap) add('timing','Accrual less cash-basis profit',ap.np-(p?p.np:0));
+  /* balance sheet movements: every account except bank and earnings */
+  names('ca').forEach(l=>add(isAR(l)?'timing':isFinL(l)?'fin':isTaxL(l)?'tax':'bso',l,-d('ca',l)));
+  names('cl').forEach(l=>add(isAP(l)?'timing':isFinL(l)?'fin':isTaxL(l)?'tax':'bso',l,d('cl',l)));
   ['fa','nca'].forEach(s=>names(s).forEach(l=>add(isDep(l)?'dep':isFinL(l)?'fin':'inv',l,-d(s,l))));
   names('ncl').forEach(l=>add('fin',l,d('ncl',l)));
   names('eq').forEach(l=>{ if(!isEarn(l)) add('eq',l,d('eq',l)); });
   const S=g=>Object.values(it[g]).reduce((x,v)=>x+v,0);
-  const rec=S('rev')+S('oth'), paid=S('cos')+S('opex'), trade=rec+paid, other=CFGRP.reduce((x,[g])=>x+S(g),0);
+  const rec=S('rev')+S('oth'), paid=S('cos')+S('opex')+S('tax'), trade=rec+paid, other=CFGRP.filter(([g])=>g!=='tax').reduce((x,[g])=>x+S(g),0);
   const move=(c.T.bank-o.T.bank)*r, resid=move-trade-other;
   const open=o.T.bank*rEndR(e,kPrev(k),a), close=c.T.bank*rEndR(e,k,a), fx=close-open-move;
   return {k,it,rec,paid,trade,other,resid,move,fx,open,close,noPL:!p};
@@ -1451,17 +1460,18 @@ function cfTable(cols){
   const acct=(gs,lab)=>c=>BD(lab+', '+esc(c.h),'By account',[].concat(...gs.map(g=>items(c,g))),{total:gs.reduce((s,g)=>s+gsum(c.x,g),0),max:18,signed:true});
   const row=(lab,cls,fv,tipf,info)=>`<tr class="${cls||''}"><td>${lab}${info?INFO(info):''}</td>${cols.map(c=>{const v=fv(c); if(v==null) return '<td class="mut">–</td>'; const t=tipf?tipf(c):''; return `<td class="${v<-0.5?'neg':Math.abs(v)<0.5?'mut':''}"${t}>${Math.abs(v)<0.5?'–':F(v)}</td>`;}).join('')}</tr>`;
   const hdr=t=>`<tr class="h"><td colspan="${cols.length+1}">${t}</td></tr>`;
-  const body=hdr('Cash from trading (cash-basis P&amp;L)')
+  const body=hdr('Operations (cash-basis P&amp;L and payroll)')
     +row('Trading income received','',c=>gsum(c.x,'rev'),acct(['rev'],'Trading income received'))
     +row('Other income received','',c=>gsum(c.x,'oth'),acct(['oth'],'Other income received'))
     +row('Cost of sales paid','',c=>gsum(c.x,'cos'),acct(['cos'],'Cost of sales paid'))
     +row('Operating expenses paid','',c=>gsum(c.x,'opex'),acct(['opex'],'Operating expenses paid'))
-    +row('Net cash from trading','sub2',c=>c.x.trade,c=>multi(c)?byM(c,'Net cash from trading',m=>m.trade):CALC('Net cash from trading, '+esc(c.h),'',[['Received',F(c.x.rec)],['Paid',F(c.x.paid)],['= Net cash from trading',SG(c.x.trade),'s']]))
+    +row('Payroll, super, PAYG and GST paid','',c=>gsum(c.x,'tax'),acct(['tax'],'Payroll, super, PAYG and GST paid'),'Wages, super and payroll tax posted by payroll journal (not in the cash-basis P&amp;L), less the movement in wages, super, PAYG and payroll tax payable and leave provisions, plus GST and ATO account movements: in effect payroll, super, PAYG and GST paid.')
+    +row('Net cash from operations','sub2',c=>c.x.trade,c=>multi(c)?byM(c,'Net cash from operations',m=>m.trade):CALC('Net cash from operations, '+esc(c.h),'',[['Received',F(c.x.rec)],['Paid',F(c.x.paid)],['= Net cash from operations',SG(c.x.trade),'s']]))
     +hdr('Other cash movements (balance sheet)')
-    +CFGRP.map(([g,lab])=>row(lab,'',c=>gsum(c.x,g),acct([g],lab),g==='tax'?'GST and PAYG paid or collected, super and wages payable, leave provisions. Movement in the balance sheet accounts.':g==='fin'?'Loans, director and shareholder accounts and balances with related entities (Woods, W&amp;Co), current or non-current.':g==='dep'?'Depreciation and other journals that appear in the cash-basis P&amp;L but are not cash. The offsetting balance sheet movement is shown here so they net to nil.':'')).join('')
-    +row('Timing and journals not itemised','',c=>c.x.resid,c=>multi(c)?byM(c,'Timing and journals not itemised',m=>m.resid):'','The part of the change in cash not explained by the cash-basis P&amp;L and the balance sheet movements above: for example GST on invoices that are not yet paid, or accrual journals. Usually small.')
+    +CFGRP.filter(([g])=>g!=='tax').map(([g,lab])=>row(lab,'',c=>gsum(c.x,g),acct([g],lab),g==='tax'?'Wages, super and payroll tax posted by payroll journal (not in the cash-basis P&amp;L), less the movement in wages, super, PAYG and payroll tax payable and leave provisions, plus GST and ATO account movements: in effect payroll, super, PAYG and GST paid.':g==='timing'?'Expenses in the accrual P&amp;L not yet paid and income invoiced not yet received, less the movement in trade debtors and creditors. Normally small.':g==='fin'?'Loans, director and shareholder accounts and balances with related entities (Woods, W&amp;Co), current or non-current.':g==='dep'?'Depreciation expense and the movement in accumulated depreciation. Not cash, so these net to nil.':'')).join('')
+    +row('Other differences','',c=>c.x.resid,c=>multi(c)?byM(c,'Other differences',m=>m.resid):'','Anything not explained by the cash-basis P&amp;L, the accrual adjustments and the balance sheet movements. Should be nil; a difference usually means a month is missing from the sync or the balance sheet earnings do not match the P&amp;L.')
     +row('Net other cash movements','sub2',c=>c.x.other+c.x.resid,c=>multi(c)?byM(c,'Net other cash movements',m=>m.other+m.resid):'')
-    +row('Net movement in cash','tot',c=>c.x.move,c=>CALC('Net movement in cash, '+esc(c.h),'',[['Net cash from trading',SG(c.x.trade)],['Net other cash movements',SG(c.x.other+c.x.resid)],['= Net movement',SG(c.x.move),'s']]))
+    +row('Net movement in cash','tot',c=>c.x.move,c=>CALC('Net movement in cash, '+esc(c.h),'',[['Net cash from operations',SG(c.x.trade)],['Net other cash movements',SG(c.x.other+c.x.resid)],['= Net movement',SG(c.x.move),'s']]))
     +row('Opening cash at bank','',c=>c.x.open)
     +(GRP()?row('Exchange rate effect','',c=>c.x.fx,null,'North America balances are converted at month-end AUD/USD rates and its cash movements at monthly average rates; the difference is the exchange rate effect.'):'')
     +row('Closing cash at bank','tot',c=>c.x.close,c=>c.x.open==null||c.x.close==null?'':CALC('Closing cash, '+esc(c.h),'Agrees to the balance sheet',[['Opening cash',F(c.x.open)],['Net movement',SG(c.x.move)],GRP()?['Exchange rate effect',SG(c.x.fx)]:null,['= Closing cash',F(c.x.close),'s']]));
@@ -1470,15 +1480,17 @@ function cfTable(cols){
 function bankTable(e,ks){
   const B=(DATA.bank||{})[e]||{}, acc={};
   ks.forEach((k,i)=>(B[k]||[]).forEach(([n,o,r,s,c])=>{const a=acc[n]=acc[n]||{o:null,r:0,s:0,c:0,ms:[]}; if(a.o==null) a.o=o; a.r+=r; a.s+=s; a.c=c; a.ms.push({k,r,s});}));
-  const ns=Object.keys(acc); if(!ns.length) return '';
+  const all=Object.keys(acc); if(!all.length) return '';
+  const bs=bsAt(e,ks[ks.length-1]), inB=n=>!bs||bs.L.bank[n]!=null, ns=all.filter(inB), out=all.filter(n=>!inB(n)), pn=esc(rPN());
   const T={o:0,r:0,s:0,c:0}; ns.forEach(n=>{['o','r','s','c'].forEach(f=>T[f]+=acc[n][f]||0);});
-  const bs=bsAt(e,ks[ks.length-1]), diff=bs?T.c-bs.T.bank:null, pn=esc(rPN());
+  const diff=bs?T.c-bs.T.bank:null;
   const m=(n,f,lab)=>acc[n].ms.length>1?BD(esc(n)+': '+lab,pn+' · by month',acc[n].ms.map(x=>({l:kShort(x.k),v:x[f]})),{keepOrder:true,keepZero:true,total:acc[n][f]}):'';
   return `<section class="blk"><div class="hd"><h2>Bank accounts${INFO('Xero bank summary for the period. Used to check that each bank account\'s closing balance agrees to the balance sheet.')}</h2><div class="rt">${pn}</div></div>
     <div class="tbl"><table><thead><tr><th>Account</th><th>Opening</th><th>Received</th><th>Spent</th><th>Closing</th></tr></thead><tbody>
     ${ns.map(n=>`<tr><td>${esc(n)}</td><td>${F(acc[n].o)}</td><td${m(n,'r','received')}>${F(acc[n].r)}</td><td${m(n,'s','spent')}>${F(acc[n].s)}</td><td>${F(acc[n].c)}</td></tr>`).join('')}
-    <tr class="tot"><td>Total</td><td>${F(T.o)}</td><td>${F(T.r)}</td><td>${F(T.s)}</td><td>${F(T.c)}</td></tr>
+    <tr class="tot"><td>Total cash at bank</td><td>${F(T.o)}</td><td>${F(T.r)}</td><td>${F(T.s)}</td><td>${F(T.c)}</td></tr>
     ${bs?`<tr class="sub"><td>Bank per balance sheet</td><td></td><td></td><td></td><td>${F(bs.T.bank)}</td></tr><tr class="sub"><td>Difference</td><td></td><td></td><td></td><td class="${Math.abs(diff)<1?'mut':'neg'}">${F(Math.abs(diff)<0.5?0:diff)}</td></tr>`:''}
+    ${out.map(n=>`<tr class="sub"><td>${esc(n)} (a liability on the balance sheet, not in cash)</td><td>${F(acc[n].o)}</td><td${m(n,'r','received')}>${F(acc[n].r)}</td><td${m(n,'s','spent')}>${F(acc[n].s)}</td><td>${F(acc[n].c)}</td></tr>`).join('')}
     </tbody></table></div></section>`;
 }
 
@@ -1554,21 +1566,21 @@ function cfPage(){
   const kp=`<div class="kpis">
     <div class="kpi"><div class="lab">Opening cash</div><div class="val">${m.open==null?'–':F(m.open)}</div><div class="sub">${kEnd(kPrev(ks[0]))}</div></div>
     <div class="kpi"><div class="lab">Cash received</div><div class="val">${F(m.rec)}</div><div class="sub">Trading and other income</div></div>
-    <div class="kpi"><div class="lab">Cash paid</div><div class="val">${F(-m.paid)}</div><div class="sub">Cost of sales and expenses</div></div>
-    <div class="kpi"><div class="lab">Net cash from trading</div><div class="val ${m.trade<0?'neg':''}">${F(m.trade)}</div><div class="sub">Other movements ${F(m.other+m.resid)}</div></div>
+    <div class="kpi"><div class="lab">Cash paid</div><div class="val">${F(-m.paid)}</div><div class="sub">Suppliers, payroll and tax</div></div>
+    <div class="kpi"><div class="lab">Net cash from operations</div><div class="val ${m.trade<0?'neg':''}">${F(m.trade)}</div><div class="sub">Other movements ${F(m.other+m.resid)}</div></div>
     <div class="kpi"><div class="lab">Closing cash</div><div class="val">${m.close==null?'–':F(m.close)}</div><div class="sub">${m.open!=null&&m.close!=null?SG(m.close-m.open)+' in the period':''}</div></div></div>`;
   const miss=[...new Set(cols.flatMap(c=>c.x.miss))], nopl=[...new Set(cols.flatMap(c=>c.x.noPL))];
-  const info='Starts from Xero\'s cash-basis P&amp;L (the profit and loss on payments only, as in Xero\'s Cash Summary), by account. The other cash movements are the change in every other balance sheet account between the month ends (trade debtors and creditors excluded, as they are already reflected in the cash-basis P&amp;L). It ends at the cash at bank on the balance sheet; anything not explained is shown as timing and journals.'+(GRP()?' Side by side in A$, not consolidated.':'');
+  const info='Starts from Xero\'s cash-basis P&amp;L (the profit and loss on payments only, as in Xero\'s Cash Summary), by account. The other cash movements are the change in every other balance sheet account between the month ends (trade debtors and creditors excluded, as they are already reflected in the cash-basis P&amp;L). Payroll posted by journal is matched to the payroll liabilities, so the lines below show what was actually paid. It ends at the cash at bank on the balance sheet.'+(GRP()?' Side by side in A$, not consolidated.':'');
   let h=finFlags()+(miss.length?flag('Balance sheet missing for '+miss.map(kLong).join(', '),'Those months are left out of the cash flow.','hi'):'')
-    +(nopl.length?flag('Cash-basis P&amp;L missing for '+nopl.map(kLong).join(', '),'The change in cash for those months shows as timing and journals until the next Xero sync.','hi'):'')+kp
+    +(nopl.length?flag('Cash-basis P&amp;L missing for '+nopl.map(kLong).join(', '),'The change in cash for those months shows in the adjustments until the next Xero sync.','hi'):'')+kp
     +`<section class="blk"><div class="hd"><h2>Cash flow summary${INFO(info)}</h2><div class="rt">${pn}</div></div>${cfTable(cols)}</section>`;
   if(!GRP()) h+=bankTable(ENT,ks);
   const yr=rYear().filter(k=>es.some(e=>bsAt(e,k)&&bsAt(e,kPrev(k))));
   if(yr.length){ const ms=yr.map(k=>({k,x:cfPeriod(es,[k],GRP())}));
     h+=`<section class="blk"><div class="hd"><h2>Month by month${INFO('Cash flow for each month of the year. * month not yet closed.')}</h2><div class="rt">${GRP()||!rUS()?DATA.fy:U().year}</div></div>
-      <div class="tbl"><table><thead><tr><th>Month</th><th>Received</th><th>Paid</th><th>Net trading</th><th>Other movements</th><th>Net movement</th><th>Closing cash</th></tr></thead><tbody>
+      <div class="tbl"><table><thead><tr><th>Month</th><th>Received</th><th>Paid</th><th>Net operations</th><th>Other movements</th><th>Net movement</th><th>Closing cash</th></tr></thead><tbody>
       ${ms.map(({k,x})=>`<tr><td>${kLong(k)}${rOpen(k)?' *':''}</td><td>${F(x.rec)}</td><td>${F(x.paid)}</td><td class="${x.trade<0?'neg':''}">${F(x.trade)}</td>
-        <td class="${x.other+x.resid<0?'neg':''}"${BD('Other cash movements, '+kShort(k),'',CFGRP.map(([g,l])=>({l,v:gsum(x,g)})).concat([{l:'Timing and journals not itemised',v:x.resid}]),{keepOrder:true,signed:true,total:x.other+x.resid})}>${F(x.other+x.resid)}</td>
+        <td class="${x.other+x.resid<0?'neg':''}"${BD('Other cash movements, '+kShort(k),'',CFGRP.filter(([g])=>g!=='tax').map(([g,l])=>({l,v:gsum(x,g)})).concat([{l:'Other differences',v:x.resid}]),{keepOrder:true,signed:true,total:x.other+x.resid})}>${F(x.other+x.resid)}</td>
         <td class="${x.move<0?'neg':''}">${F(x.move)}</td><td>${x.close==null?'–':F(x.close)}</td></tr>`).join('')}
       </tbody></table></div></section>`; }
   return h;
@@ -1602,8 +1614,8 @@ function dashPage(){
     if(P.rev) hl.push([`Trading income ${F(P.rev)} at a ${PCT(P.gp/P.rev)} gross margin`+(PP&&PP.rev?` (${kShort(kPrev(end))}: ${F(PP.rev)}, ${PCT(PP.gp/PP.rev)})`:''),'']);
     const ex=Object.keys(P.L.opex).map(l=>({l,v:P.L.opex[l],p:PP?PP.L.opex[l]||0:0})).sort((a,b)=>Math.abs(b.v-b.p)-Math.abs(a.v-a.p))[0];
     if(PP&&ex&&Math.abs(ex.v-ex.p)>=1000) hl.push([`Largest expense movement: ${esc(ex.l)} ${F(ex.v)}, ${ex.v>=ex.p?'up':'down'} ${F(Math.abs(ex.v-ex.p))} on ${kShort(kPrev(end))}`,ex.v>ex.p?'':'ok']); }
-  if(B&&B0){ const cf=cfPeriod(es,ks,GRP()); const drv=CFGRP.map(([g,l])=>[l,gsum(cf,g)]).sort((a,b)=>Math.abs(b[1])-Math.abs(a[1]))[0];
-    hl.push([`Cash at bank ${F(B.T.bank)}, ${B.T.bank>=B0.T.bank?'up':'down'} ${F(Math.abs(B.T.bank-B0.T.bank))} in the period: ${F(cf.trade)} net cash from trading`+(drv&&Math.abs(drv[1])>=1000?`; largest other movement ${drv[0].toLowerCase()} (${F(drv[1])})`:''),B.T.bank>=B0.T.bank?'ok':'hi']); }
+  if(B&&B0){ const cf=cfPeriod(es,ks,GRP()); const drv=CFGRP.filter(([g])=>g!=='tax').map(([g,l])=>[l,gsum(cf,g)]).sort((a,b)=>Math.abs(b[1])-Math.abs(a[1]))[0];
+    hl.push([`Cash at bank ${F(B.T.bank)}, ${B.T.bank>=B0.T.bank?'up':'down'} ${F(Math.abs(B.T.bank-B0.T.bank))} in the period: ${F(cf.trade)} net cash from operations`+(drv&&Math.abs(drv[1])>=1000?`; largest other movement ${drv[0].toLowerCase()} (${F(drv[1])})`:''),B.T.bank>=B0.T.bank?'ok':'hi']); }
   if(!GRP()&&!rUS()){ const below=deptsOf(ENT).filter(d=>d.fee).map(d=>({d,a:deptAgg(d.name)})).filter(x=>x.a.c&&x.a.b<x.a.bev);
     hl.push([`Fee team ${X(S.m)} against ${S.be.toFixed(2)}× break-even`+(below.length?`; below break-even: ${below.map(x=>esc(x.d.label)).join(', ')}`:'; every fee department at or above break-even'),S.m>=S.be?'ok':'hi']); }
   else hl.push([`${S.lab} ${F(S.b)} at ${X(S.m)} against ${S.be.toFixed(2)}× break-even`,S.m>=S.be?'ok':'hi']);
