@@ -1305,7 +1305,7 @@ function salesPaint(){
    Financial tabs read the Xero P&L (by month and account), the Xero balance sheet at
    each month end and the Xero bank summary. The Sales tab is the live dashboard.
    ===================================================================== */
-let RT='dash', PERSET=false, PLV='det', BSV='side', PLG='side'; const COLL=new Set();
+let RT='dash', PERSET=false, PLV='det', BSV='side', PLG='side', BSD='det'; const COLL=new Set();
 const vtog=(k,cur,opts)=>`<div class="vtog" role="group">${opts.map(([v,t])=>`<button type="button" data-${k}="${v}" class="${v===cur?'on':''}">${t}</button>`).join('')}</div>`;
 const RTABS=[{id:'dash',t:'Dashboard'},{id:'pl',t:'P&L'},{id:'bs',t:'Balance Sheet'},{id:'cf',t:'Cash Flow Summary'},{id:'sales',t:'Sales'}];
 const MNL=['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -1529,6 +1529,37 @@ function bsTable(cols){
     return `<tr class="h2 tg${shut?' shut':''}" data-sec="${key}" title="Show or hide the accounts"><td colspan="${cols.length+1}">${lab}</td></tr>`+ns.map(l=>`<tr class="ln${shut?' hid':''}"><td>${esc(l)}</td>${cols.map(c=>cell(c,s,l,esc(l))).join('')}</tr>`).join('')
       +`<tr class="sub2"><td>Total ${lab.toLowerCase()}</td>${cols.map(c=>cell(c,s,null,'Total '+lab.toLowerCase(),{sec:true})).join('')}</tr>`;};
   const C=(lab,rows)=>c=>CALC(lab+', '+nm(c),'',rows(c));
+  if(BSD==='sum'){
+    /* summarised: each account goes to one line, so the lines add to the section totals */
+    const cat=(s,l)=>s==='bank'?'cash':s==='fa'?'fa':(s==='ca'||s==='nca')?(isFinL(l)?'aloan':isAR(l)?'ar':'aoth')
+      :(s==='cl'||s==='ncl')?(isAP(l)?'ap':isTaxL(l)?'tax':isFinL(l)?'lloan':'loth'):s==='eq'?(isEarn(l)?'earn':'cap'):'x';
+    const acc=(b,k)=>{const o=[]; BSS.forEach(([s])=>Object.keys(b.L[s]).forEach(l=>{if(cat(s,l)===k) o.push({l,v:b.L[s][l]});})); return o;};
+    const val=(b,k)=>k==='cr'?((b.T.cl)?(b.T.bank+b.T.ca)/b.T.cl:null):b[k]!=null&&typeof b[k]==='number'?b[k]:acc(b,k).reduce((t,x)=>t+x.v,0);
+    const g=(c,k)=>c.mv?(()=>{const a=g(cols[c.mv[0]],k), b=g(cols[c.mv[1]],k); return a==null||b==null?null:a-b;})():!c.b?null:val(c.b,k);
+    const ACC=new Set(['cash','ar','aloan','fa','aoth','ap','tax','lloan','loth','cap','earn']);
+    const R=(lab,k,o)=>{o=o||{}; if(o.opt&&!cols.some(c=>Math.abs(g(c,k)||0)>=0.5)) return '';
+      return `<tr class="${o.cls||''}"><td>${lab}${o.info?INFO(o.info):''}</td>${cols.map(c=>{const v=g(c,k); if(v==null) return '<td class="mut">\u2013</td>';
+      const fmt=x=>k==='cr'?(x<0?'('+(-x).toFixed(2)+'\u00d7)':x.toFixed(2)+'\u00d7'):F(x);
+      let tip='';
+      if(c.mv){const a=cols[c.mv[0]], b=cols[c.mv[1]]; tip=CALC(lab+': movement','',[[nm(a),fmt(g(a,k))],['Less '+nm(b),fmt(-g(b,k))],['= Movement',k==='cr'?fmt(v):SG(v),'s']]);}
+      else if(c.parts&&c.b&&c.b.parts&&k!=='cr') tip=BD(lab+', '+nm(c),'By entity, A$ at month-end rates',c.b.parts.map(p=>({l:p.l,v:val(p.b,k)})),{keepOrder:true,keepZero:true,total:v});
+      else if(ACC.has(k)) tip=BD(lab+', '+nm(c),'By account',acc(c.b,k),{total:v,max:18});
+      else if(o.calc) tip=o.calc(c);
+      const cls=c.mv?(Math.abs(v)<(k==='cr'?0.005:0.5)?'mut':''):(v<0?'neg':'');
+      return `<td class="${cls}"${tip}>${c.mv&&Math.abs(v)<(k==='cr'?0.005:0.5)?'\u2013':fmt(v)}</td>`;}).join('')}</tr>`;};
+    const body3=hdr('Assets')+R('Cash at bank','cash')+R('Trade debtors','ar',{opt:1})+R('Loans to related parties and others','aloan',{opt:1,info:'Loan, director, shareholder and inter-entity accounts in current and non-current assets.'})
+      +R('Fixed assets (net)','fa',{opt:1})+R('Other assets','aoth',{opt:1})
+      +R('Total assets','assets',{cls:'tot'})
+      +hdr('Liabilities')+R('Trade creditors','ap',{opt:1})+R('Payroll, GST and tax payable','tax',{opt:1,info:'Wages, super, PAYG, payroll tax, GST, income tax, ATO and leave provision accounts.'})
+      +R('Loans and borrowings','lloan',{opt:1,info:'Loan, director, shareholder, inter-entity, hire purchase and lease accounts in current and non-current liabilities.'})+R('Other liabilities','loth',{opt:1})
+      +R('Total liabilities','liabs',{cls:'tot'})
+      +R('Net assets','net',{cls:'tot net',calc:C('Net assets',c=>[['Total assets',F(c.b.assets)],['Less total liabilities',F(-c.b.liabs)],['= Net assets',F(c.b.net),'s']])})
+      +hdr('Equity')+R('Share capital and other equity','cap',{opt:1})+R('Retained and current year earnings','earn',{opt:1})
+      +R('Total equity','eq',{cls:'tot'})
+      +hdr('Liquidity')+R('Working capital','wc',{info:'Cash at bank and current assets, less current liabilities.',calc:C('Working capital',c=>[['Cash at bank',F(c.b.T.bank)],['Plus current assets',F(c.b.T.ca)],['Less current liabilities',F(-c.b.T.cl)],['= Working capital',F(c.b.wc),'s']])})
+      +R('Current ratio','cr',{info:'Cash at bank and current assets divided by current liabilities.'});
+    return `<div class="tbl"><table class="fin">\n<thead><tr><th></th>${cols.map(c=>`<th>${esc(c.h)}</th>`).join('')}</tr></thead><tbody>${body3}</tbody></table></div>`;
+  }
   const body=hdr('Assets')+sec('bank','Bank')+sec('ca','Current assets')+sec('fa','Fixed assets')+sec('nca','Non-current assets')
     +`<tr class="tot"><td>Total assets</td>${cols.map(c=>cell(c,'assets',null,'Total assets',{calc:C('Total assets',c=>[['Bank',F(c.b.T.bank)],['Current assets',F(c.b.T.ca)],['Fixed assets',F(c.b.T.fa)],['Non-current assets',F(c.b.T.nca)],['= Total assets',F(c.b.assets),'s']])})).join('')}</tr>`
     +hdr('Liabilities')+sec('cl','Current liabilities')+sec('ncl','Non-current liabilities')
@@ -1683,7 +1714,7 @@ function bsPage(){
       <div class="kpi"><div class="lab">Trade creditors</div><div class="val"${BD('Payables','By account',Object.keys(b.L.cl).filter(isAP).map(l=>({l,v:b.L.cl[l]})),{total:ap})}>${F(ap)}</div></div>
     </div>`; }
   const info='Xero balance sheet, standard layout. '+(GRP()?(BSV==='cons'?'Consolidated: the entities added together in A$ (North America at the RBA month-end AUD/USD rate), less balances between them. An account in one entity that names another entity in the group (for example "Loan - W&amp;Co Search Pty Ltd") is eliminated, and an investment in a group entity is eliminated against its share capital. Where the two sides do not agree, the difference shows in equity as "Inter-entity balances that do not agree" and in the table below. Entities outside the dashboard (Woods &amp; Co Education, USA CCORP) are not eliminated.':'Side by side in A$, North America at the RBA month-end AUD/USD rate. Not consolidated: switch to Consolidated to eliminate the balances between the entities.'):'At the end of the period, against the start of the period and the end of the last financial year.')+(rUS()?' North America\'s year runs to 31 December.':'');
-  const tog=GRP()?vtog('bsv',BSV,[['side','Side by side'],['cons','Consolidated']]):(Object.keys(DATA.ents).length>1?`<button type="button" class="lnkb" data-gocons="1">Consolidated group balance sheet \u2192</button>`:'');
+  const tog=(GRP()?vtog('bsv',BSV,[['side','Side by side'],['cons','Consolidated']]):(Object.keys(DATA.ents).length>1?`<button type="button" class="lnkb" data-gocons="1">Consolidated group balance sheet \u2192</button>`:''))+' '+vtog('bsd',BSD,[['det','Detailed'],['sum','Summary']]);
   let pt='';
   if(cons&&cons.pairs.length){ const nm=e=>ENTNM[e];
     pt=`<section class="blk"><div class="hd"><h2>Balances between the entities${INFO('Each pair\'s balance as recorded in each entity\'s Xero file, in A$ at the month-end rate. A positive figure means the first entity is owed money. The two sides should agree, so the difference should be nil; a difference needs a correcting entry or is timing or exchange.')}</h2><div class="rt">${esc(kEnd(end))} \u00b7 A$</div></div>
@@ -1834,8 +1865,8 @@ function goRT(id){ if(!RTABS.some(t=>t.id===id)) return; RT=id; paint(); window.
 document.getElementById('rtabs').addEventListener('click',ev=>{const b=ev.target.closest('[data-r]'); if(b) goRT(b.dataset.r);});
 document.getElementById('content').addEventListener('click',ev=>{const b=ev.target.closest('.rnav [data-r]'); if(b){ goRT(b.dataset.r); return; }
   const tg=ev.target.closest('tr.tg'); if(tg){ const k=tg.dataset.sec; COLL.has(k)?COLL.delete(k):COLL.add(k); const y=window.scrollY; paint(); window.scrollTo({top:y}); return; }
-  const v=ev.target.closest('[data-plv],[data-bsv],[data-plg],[data-gocons],[data-goplc]'); if(!v) return;
-  if(v.dataset.plv) PLV=v.dataset.plv; if(v.dataset.bsv) BSV=v.dataset.bsv; if(v.dataset.plg) PLG=v.dataset.plg;
+  const v=ev.target.closest('[data-plv],[data-bsd],[data-bsv],[data-plg],[data-gocons],[data-goplc]'); if(!v) return;
+  if(v.dataset.plv) PLV=v.dataset.plv; if(v.dataset.bsv) BSV=v.dataset.bsv; if(v.dataset.bsd) BSD=v.dataset.bsd; if(v.dataset.plg) PLG=v.dataset.plg;
   if(v.dataset.goplc&&DATA.ents&&Object.keys(DATA.ents).length>1){ ENT='G'; PLG='cons'; setEnts(); }
   if(v.dataset.gocons&&DATA.ents&&Object.keys(DATA.ents).length>1){ ENT='G'; BSV='cons'; setEnts(); }
   const y=window.scrollY; paint(); window.scrollTo({top:y}); });
