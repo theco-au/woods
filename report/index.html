@@ -330,9 +330,14 @@ const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;',
 const title=s=>String(s||'').toLowerCase().replace(/\b[a-z]/g,c=>c.toUpperCase());
 
 /* ---------- period ---------- */
+/* quarters of the reporting year: Q1 is July to September (calendar quarters for North America) */
+const isQ=p=>/^Q[1-4]$/.test(p||'');
+const qOf=(ms,p)=>ms.slice((+p[1]-1)*3,+p[1]*3);
+const qBtns=ms=>[1,2,3,4].filter(n=>ms[(n-1)*3]).map(n=>{const q=qOf(ms,'Q'+n);return {p:'Q'+n,t:'Q'+n,ti:q[0].label+(q.length>1?' to '+q[q.length-1].label:'')};});
 function perMonths(){
   const ms=DATA.months, cur=DATA.current.key;
   if(PER==='YTD') return ms.map(m=>m.key);
+  if(isQ(PER)) return qOf(ms,PER).map(m=>m.key);
   if(PER==='QTD'){ const q=ms.find(m=>m.key===cur).q; return ms.filter(m=>m.q===q).map(m=>m.key); }
   if(PER==='CUR') return [cur];
   return [PER];
@@ -341,6 +346,7 @@ function perName(){
   const ms=DATA.months, k=perMonths();
   const lab=kk=>ms.find(m=>m.key===kk).label;
   if(PER==='YTD') return DATA.fy+' year to date';
+  if(isQ(PER)) return PER+' '+DATA.fy+' ('+lab(k[0])+(k.length>1?' to '+lab(k[k.length-1]):'')+(k.includes(DATA.current.key)?', to date':'')+')';
   if(PER==='QTD') return 'Quarter to date ('+lab(k[0])+(k.length>1?' to '+lab(k[k.length-1]):'')+')';
   return lab(k[0])+(k[0]===DATA.current.key?' to date':'');
 }
@@ -586,7 +592,7 @@ function scorecard(){
   </tbody></table></div>`;
 }
 function quarterSection(){
-  const ms=DATA.months, qk=ms.find(m=>m.key===(PER==='YTD'||PER==='QTD'||PER==='CUR'?DATA.current.key:PER)).q;
+  const ms=DATA.months, qk=ms.find(m=>m.key===(PER==='YTD'||PER==='QTD'||PER==='CUR'?DATA.current.key:isQ(PER)?perMonths()[0]:PER)).q;
   const qm=ms.filter(m=>m.q===qk).map(m=>m.key), started=qm.filter(k=>k<=DATA.current.key);
   const rows=[];
   deptsOf(ENT).filter(d=>d.fee).forEach(d=>DATA.emps.filter(e=>e.dept===d.name&&e.qtr&&e.qtr[qk]).forEach(e=>{
@@ -887,6 +893,7 @@ const uShort=k=>((U().months||[]).find(m=>m.key===k)||{short:k}).short;
 function uMonths(){
   const u=U(), ms=u.months, cur=u.current;
   if(PER==='YTD') return ms.map(m=>m.key);
+  if(isQ(PER)) return qOf(ms,PER).map(m=>m.key);
   if(PER==='QTD'){ const q=ms.find(m=>m.key===cur).q; return ms.filter(m=>m.q===q).map(m=>m.key); }
   if(PER==='CUR') return [cur];
   return ms.some(m=>m.key===PER)?[PER]:[cur];
@@ -894,6 +901,7 @@ function uMonths(){
 function uPerName(){
   const u=U(), k=uMonths(), lab=kk=>u.months.find(m=>m.key===kk).label;
   if(PER==='YTD') return u.year+' year to date';
+  if(isQ(PER)) return PER+' '+u.year+' ('+lab(k[0])+(k.length>1?' to '+lab(k[k.length-1]):'')+(k.includes(u.current)?', to date':'')+')';
   if(PER==='QTD') return 'Quarter to date ('+lab(k[0])+(k.length>1?' to '+lab(k[k.length-1]):'')+')';
   return lab(k[0])+(k[0]===u.current?' to date':'');
 }
@@ -1063,11 +1071,11 @@ function paintUSA(){
   document.getElementById('asat').textContent='Live at '+DATA.generated+(DATA.cached?' (cached)':'');
   if(!u||!u.ok){ document.getElementById('seg').innerHTML=''; document.getElementById('tabs').innerHTML='';
     document.getElementById('content').innerHTML=`<div class="err">North America figures are not available.${u&&u.checks&&u.checks[0]?' '+esc(u.checks[0].t)+'.':''}</div>`; bindTips(); return; }
-  if(!(PER==='CUR'||PER==='QTD'||PER==='YTD'||u.months.some(m=>m.key===PER))) PER='CUR';
+  if(!(PER==='CUR'||PER==='QTD'||PER==='YTD'||isQ(PER)&&qOf(u.months,PER).length||u.months.some(m=>m.key===PER))) PER='CUR';
   const cm=u.months.find(m=>m.key===u.current);
   const opts=[{p:'CUR',t:cm.short+' to date'}].concat(u.months.filter(m=>m.key!==u.current).slice().reverse().map(m=>({p:m.key,t:m.short})))
-    .concat([{p:'QTD',t:'Quarter to date'},{p:'YTD',t:u.year+' YTD'}]);
-  document.getElementById('seg').innerHTML=opts.map(o=>`<button class="${o.p===PER?'on':''}" data-p="${o.p}">${o.t}</button>`).join('');
+    .concat(qBtns(u.months)).concat([{p:'YTD',t:u.year+' YTD'}]);
+  document.getElementById('seg').innerHTML=opts.map(o=>`<button class="${o.p===PER?'on':''}" data-p="${o.p}"${o.ti?` title="${esc(o.ti)}"`:''}>${o.t}</button>`).join('');
   const ks=uMonths(), tot=uRecs(ks).reduce((s,r)=>s+r.tot,0);
   const tabs=[{id:'sum',t:'Summary',s:F(tot)+' billed'},{id:'upl',t:'Placements',s:u.place.filter(p=>ks.includes(p.m)).length+' lines'},{id:'uchk',t:'Checks',s:(u.checks||[]).length+' items'}];
   if(!tabs.some(x=>x.id===TAB)) TAB='sum';
@@ -1207,11 +1215,11 @@ function paintGroup(){
   document.getElementById('mLede').innerHTML='<span class="lchip">All entities in <b>A$</b></span><span class="lchip">Each against its own multiples</span>'
     +INFO('Billings against fully loaded cost for every entity in Australian dollars, each measured against its own multiples, so effort can be compared across the group.'+(hasUS()?' North America is converted at the RBA monthly average AUD/USD rate.':'')+' A month counts as closed from the 15th of the following month.','Woods Group');
   document.getElementById('asat').textContent='Live at '+DATA.generated+(DATA.cached?' (cached)':'');
-  if(!DATA.months.some(m=>m.key===PER)&&!['CUR','QTD','YTD'].includes(PER)) PER='CUR';
+  if(!DATA.months.some(m=>m.key===PER)&&!['CUR','QTD','YTD'].includes(PER)&&!(isQ(PER)&&qOf(DATA.months,PER).length)) PER='CUR';
   const opts=[{p:'CUR',t:DATA.months.find(m=>m.key===DATA.current.key).short+' to date'}]
     .concat(DATA.months.filter(m=>m.key!==DATA.current.key).slice().reverse().map(m=>({p:m.key,t:m.short})))
-    .concat([{p:'QTD',t:'Quarter to date'},{p:'YTD',t:DATA.fy+' YTD'}]);
-  document.getElementById('seg').innerHTML=opts.map(o=>`<button class="${o.p===PER?'on':''}" data-p="${o.p}">${o.t}</button>`).join('');
+    .concat(qBtns(DATA.months)).concat([{p:'YTD',t:DATA.fy+' YTD'}]);
+  document.getElementById('seg').innerHTML=opts.map(o=>`<button class="${o.p===PER?'on':''}" data-p="${o.p}"${o.ti?` title="${esc(o.ti)}"`:''}>${o.t}</button>`).join('');
   TAB='sum';
   document.getElementById('tabs').innerHTML=`<button class="tab on" role="tab" data-p="sum">Group summary<span class="sub">A$</span></button>`;
   document.getElementById('content').innerHTML=gSummary();
@@ -1226,7 +1234,7 @@ function salesPaint(){
   if(ENT==='U'){ paintUSA(); return; }
   TIPS.length=0;
   document.getElementById('mTitle').textContent='Billings against cost, live';
-  if(!DATA.months.some(m=>m.key===PER)&&!['CUR','QTD','YTD'].includes(PER)) PER='CUR';
+  if(!DATA.months.some(m=>m.key===PER)&&!['CUR','QTD','YTD'].includes(PER)&&!(isQ(PER)&&qOf(DATA.months,PER).length)) PER='CUR';
   const e=DATA.ents[ENT], mm=M();
   document.getElementById('mName').textContent=e.name;
   document.getElementById('mBasis').textContent='Multiples '+DATA.mult.BASIS;
@@ -1239,8 +1247,8 @@ function salesPaint(){
   const seg=document.getElementById('seg');
   const opts=[{p:'CUR',t:DATA.months.find(m=>m.key===DATA.current.key).short+' to date'}]
     .concat(DATA.months.filter(m=>m.key!==DATA.current.key).slice().reverse().map(m=>({p:m.key,t:m.short})))
-    .concat([{p:'QTD',t:'Quarter to date'},{p:'YTD',t:DATA.fy+' YTD'}]);
-  seg.innerHTML=opts.map(o=>`<button class="${o.p===PER?'on':''}" data-p="${o.p}">${o.t}</button>`).join('');
+    .concat(qBtns(DATA.months)).concat([{p:'YTD',t:DATA.fy+' YTD'}]);
+  seg.innerHTML=opts.map(o=>`<button class="${o.p===PER?'on':''}" data-p="${o.p}"${o.ti?` title="${esc(o.ti)}"`:''}>${o.t}</button>`).join('');
   // tabs
   const ds=deptsOf(ENT).filter(d=>{const a=deptAgg(d.name);return a.c||a.b;});
   const tabs=[{id:'sum',t:'Summary',s:F(entAgg().b)+' billed'}]
@@ -1638,10 +1646,10 @@ function dashPage(){
 /* ---------- shell ---------- */
 function rSeg(){
   const us=rUS(), ms=us?U().months:DATA.months, cur=us?U().current:DATA.current.key;
-  if(!(PER==='CUR'||PER==='QTD'||PER==='YTD'||ms.some(m=>m.key===PER))) PER=defPer();
+  if(!(PER==='CUR'||PER==='QTD'||PER==='YTD'||isQ(PER)&&qOf(ms,PER).length||ms.some(m=>m.key===PER))) PER=defPer();
   const opts=[{p:'CUR',t:ms.find(m=>m.key===cur).short+' to date'}].concat(ms.filter(m=>m.key!==cur).slice().reverse().map(m=>({p:m.key,t:m.short})))
-    .concat([{p:'QTD',t:'Quarter to date'},{p:'YTD',t:(us?U().year:DATA.fy)+' YTD'}]);
-  document.getElementById('seg').innerHTML=opts.map(o=>`<button class="${o.p===PER?'on':''}" data-p="${o.p}">${o.t}</button>`).join('');
+    .concat(qBtns(ms)).concat([{p:'YTD',t:(us?U().year:DATA.fy)+' YTD'}]);
+  document.getElementById('seg').innerHTML=opts.map(o=>`<button class="${o.p===PER?'on':''}" data-p="${o.p}"${o.ti?` title="${esc(o.ti)}"`:''}>${o.t}</button>`).join('');
 }
 function rTabs(){
   let sub={};
@@ -1716,13 +1724,16 @@ function inflate(b64){
   const bin=atob(b64), u=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) u[i]=bin.charCodeAt(i);
   return new Response(new Blob([u]).stream().pipeThrough(new DecompressionStream('gzip'))).text().then(t=>JSON.parse(t));
 }
-function api(body){
+/* Google's web app front end sometimes drops or misroutes a reply (it then answers with a page, not JSON), so a failed call is retried twice */
+function api(body,tries){
   if(ZOK) body=Object.assign({z:1},body);
-  return fetch(CFG.API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body),
+  const once=()=>fetch(CFG.API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body),
     credentials:'omit',cache:'no-store',redirect:'follow',referrerPolicy:'no-referrer'})
     .then(r=>r.ok?r.json():{ok:false,error:'unavailable'})
     .then(r=>r&&r.dz?inflate(r.dz).then(d=>{r.data=d; delete r.dz; return r;}):r)
     .catch(()=>({ok:false,error:'unavailable'}));
+  const go=n=>once().then(r=>r&&r.error==='unavailable'&&n>0?new Promise(ok=>setTimeout(ok,(3-n)*2500+1500)).then(()=>go(n-1)):r);
+  return go(tries==null?2:tries);
 }
 /* a sign-in response carries a 30-day session and the first data load */
 function signedIn(r,pic){
