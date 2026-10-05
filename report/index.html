@@ -248,6 +248,12 @@
   .rnav button:hover{border-color:var(--ink)}
   .rnav button:focus-visible{outline:2px solid var(--bench);outline-offset:1px}
   .kpi .val.neg{color:var(--loss)}
+  .vtog{display:inline-flex;background:#ebe7de;border-radius:8px;padding:3px;gap:2px}
+  .vtog button{border:none;background:transparent;font-family:var(--sans);font-size:12.5px;font-weight:600;color:var(--body);padding:5px 12px;border-radius:6px;cursor:pointer}
+  .vtog button.on{background:var(--ink);color:#fff}
+  .vtog button:focus-visible,.lnkb:focus-visible{outline:2px solid var(--bench);outline-offset:1px}
+  .lnkb{background:none;border:none;font-family:var(--sans);font-size:12.5px;font-weight:600;color:var(--ink);text-decoration:underline;cursor:pointer;padding:0}
+  .tnote{font-size:12px;color:var(--mid);margin-top:8px;text-align:right}
   .kpis.k3{grid-template-columns:repeat(3,1fr)}@media(max-width:900px){.kpis.k3{grid-template-columns:repeat(2,1fr)}}@media(max-width:560px){.kpis.k3{grid-template-columns:1fr}}
   .three{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}@media(max-width:1000px){.three{grid-template-columns:1fr}}
   @media print{
@@ -1264,7 +1270,8 @@ function salesPaint(){
    Financial tabs read the Xero P&L (by month and account), the Xero balance sheet at
    each month end and the Xero bank summary. The Sales tab is the live dashboard.
    ===================================================================== */
-let RT='dash', PERSET=false;
+let RT='dash', PERSET=false, PLV='det', BSV='side';
+const vtog=(k,cur,opts)=>`<div class="vtog" role="group">${opts.map(([v,t])=>`<button type="button" data-${k}="${v}" class="${v===cur?'on':''}">${t}</button>`).join('')}</div>`;
 const RTABS=[{id:'dash',t:'Dashboard'},{id:'pl',t:'P&L'},{id:'bs',t:'Balance Sheet'},{id:'cf',t:'Cash Flow Summary'},{id:'sales',t:'Sales'}];
 const MNL=['January','February','March','April','May','June','July','August','September','October','November','December'];
 const kLong=k=>MNL[+k.slice(5,7)-1]+' '+k.slice(0,4);
@@ -1284,6 +1291,13 @@ const GRP=()=>ENT==='G';
 const FK=v=>{const a=Math.abs(v||0),s=v<0?'-':'';return a>=1e6?s+'$'+(a/1e6).toFixed(a>=1e7?0:1)+'m':a>=1e3?s+'$'+Math.round(a/1e3)+'k':s+'$'+Math.round(a);};
 const PTS=v=>(v>=0?'+':'')+(v*100).toFixed(1)+' pts';
 function defPer(){const ms=rYear(), i=ms.indexOf(rCur()); return i>0?ms[i-1]:'CUR';}
+/* the period to compare with: the prior month for a month, the prior quarter for a quarter (null for year to date) */
+const rQuarters=()=>{const ys=rYear(); return [1,2,3,4].map(n=>({n,h:'Q'+n,ks:ys.slice((n-1)*3,n*3)})).filter(q=>q.ks.length);};
+function rCmp(){ const ks=rKs();
+  if(ks.length===1) return {h:kShort(kPrev(ks[0])),long:kLong(kPrev(ks[0])),ks:[kPrev(ks[0])]};
+  if(isQ(PER)){ const n=+PER[1]; if(n>1){ const q=rQuarters()[n-2]; return {h:q.h,long:q.h+' ('+kShort(q.ks[0])+' to '+kShort(q.ks[2])+')',ks:q.ks}; }
+    const a=kPrev(ks[0]), b=kPrev(a), c=kPrev(b); return {h:'prior Q4',long:'the prior year\'s Q4 ('+kShort(c)+' to '+kShort(a)+')',ks:[c,b,a]}; }
+  return null; }
 const fxEnd=k=>{const f=((DATA.fx||{}).USDend)||{}; return f[k]||fxUSD(k);};
 const rAvg=(e,k,a)=>a&&e==='U'?(fxUSD(k)?1/fxUSD(k):0):1;
 const rEndR=(e,k,a)=>a&&e==='U'?(fxEnd(k)?1/fxEnd(k):0):1;
@@ -1318,7 +1332,13 @@ function plCols(){
     return [{h:kShort(k)+(rOpen(k)?' *':''),s:plSum(e,[k]),k},{h:kShort(p),s:plSum(e,[p]),k:p},{h:'Movement',mv:[0,1]},
       {h:'YTD to '+kShort(k),s:plSum(e,y),parts:y.map(x=>({l:kShort(x),s:plSum(e,[x])})),tot:true}];
   }
-  return ks.map(k=>({h:kShort(k)+(rOpen(k)?' *':''),s:plSum(e,[k]),k})).concat([{h:'Total',s:plSum(e,ks),parts:ks.map(k=>({l:kShort(k),s:plSum(e,[k])})),tot:true}]);
+  const byM=q=>q.map(k=>({l:kShort(k),s:plSum(e,[k])}));
+  if(isQ(PER)){ const last=ks[ks.length-1], y=rYear().filter(x=>x<=last), cm=rCmp(), cols=[{h:PER+(ks.some(rOpen)?' *':''),s:plSum(e,ks),parts:byM(ks)}];
+    const ps=cm&&plSum(e,cm.ks); if(ps&&!ps.miss.length) cols.push({h:cm.h,s:ps,parts:byM(cm.ks)},{h:'Movement',mv:[0,1]});
+    return cols.concat([{h:'YTD to '+kShort(last),s:plSum(e,y),parts:byM(y),tot:true}]); }
+  if(PER==='YTD'){ const qs=rQuarters(); return qs.map(q=>({h:q.h+(q.ks.some(rOpen)?' *':''),s:plSum(e,q.ks),parts:byM(q.ks)}))
+    .concat([{h:'Total',s:plSum(e,ks),parts:qs.map(q=>({l:q.h,s:plSum(e,q.ks)})),tot:true}]); }
+  return ks.map(k=>({h:kShort(k)+(rOpen(k)?' *':''),s:plSum(e,[k]),k})).concat([{h:'Total',s:plSum(e,ks),parts:byM(ks),tot:true}]);
 }
 function plTable(cols){
   const pn=esc(rPN());
@@ -1347,6 +1367,27 @@ function plTable(cols){
       +`<tr class="sub2"><td>${tot}</td>${cols.map(c=>cell(c,f,null,tot,{sec:true,exp})).join('')}</tr>`;};
   const calcGP=c=>CALC('Gross profit, '+esc(c.h.replace(' *','')),'',[['Trading income',F(c.s.rev)],['Less cost of sales',F(-c.s.cos)],['= Gross profit',F(c.s.gp),'s']]);
   const calcNP=c=>CALC('Net profit, '+esc(c.h.replace(' *','')),'',[['Gross profit',F(c.s.gp)],['Plus other income',F(c.s.oth)],['Less operating expenses',F(-c.s.opex)],['= Net profit',SG(c.s.np),'s']]);
+  if(PLV==='sum'){
+    /* summarised: section totals, with operating expenses split into payroll and everything else */
+    const fn=(c,f)=>c.mv?fn(cols[c.mv[0]],f)-fn(cols[c.mv[1]],f):f(c.s);
+    const pay=s=>Object.keys(s.L.opex).filter(isPayX).reduce((t,l)=>t+s.L.opex[l],0);
+    const R=(lab,f,o)=>{o=o||{}; return `<tr class="${o.cls||''}"><td>${lab}${o.info?INFO(o.info):''}</td>${cols.map(c=>{const v=fn(c,f), sg=o.exp?-1:1;
+      let tip='';
+      if(c.mv){const a=cols[c.mv[0]], b=cols[c.mv[1]]; tip=CALC(lab+': movement',pn,[[esc(a.h),F(fn(a,f))],['Less '+esc(b.h),F(-fn(b,f))],['= Movement',SG(v),'s']]);}
+      else if(c.parts&&c.parts.length>1) tip=BD(lab+', '+esc(c.h.replace(' *','')),GRP()&&c.tot?'By entity, A$':'By period',c.parts.map(p=>({l:p.l,v:f(p.s)})),{keepOrder:true,keepZero:true,total:v});
+      else if(o.acct&&lines) tip=BD(lab+', '+esc(c.h.replace(' *','')),'By account',o.acct(c.s),{total:v,max:18});
+      const cls=c.mv?(Math.abs(v)<0.5?'mut':(v*sg>=0?'pos':'neg')):(v<0?'neg':'');
+      return `<td class="${cls}"${tip}>${c.mv?(Math.abs(v)<0.5?'\u2013':SG(v).replace(/<[^>]+>/g,'')):F(v)}</td>`;}).join('')}</tr>`;};
+    const A=f=>s=>Object.keys(s.L[f]).map(l=>({l,v:s.L[f][l]}));
+    const body2=R('Trading income',s=>s.rev,{acct:A('rev')})+R('Less cost of sales',s=>s.cos,{exp:true,acct:A('cos')})
+      +R('Gross profit',s=>s.gp,{cls:'tot'})+`<tr class="pct"><td>Gross margin</td>${cols.map(c=>pctCell(c,'gp')).join('')}</tr>`
+      +(cols.some(c=>Math.abs(fn(c,s=>s.oth))>=0.5)?R('Plus other income',s=>s.oth,{acct:A('oth')}):'')
+      +(lines?R('Less wages, super and payroll costs',pay,{exp:true,acct:s=>Object.keys(s.L.opex).filter(isPayX).map(l=>({l,v:s.L.opex[l]})),info:'Operating expense accounts for wages, super, payroll tax, WorkCover, leave and other employment costs.'})
+        +R('Less other operating expenses',s=>s.opex-pay(s),{exp:true,acct:s=>Object.keys(s.L.opex).filter(l=>!isPayX(l)).map(l=>({l,v:s.L.opex[l]}))}):'')
+      +R('Total operating expenses',s=>s.opex,{cls:'sub2',exp:true,acct:A('opex')})
+      +R('Net profit',s=>s.np,{cls:'tot'})+`<tr class="pct"><td>Net margin</td>${cols.map(c=>pctCell(c,'np')).join('')}</tr>`;
+    return `<div class="tbl"><table class="fin">${head}<tbody>${body2}</tbody></table></div>`;
+  }
   const body=sec('rev','Trading income','Total trading income')+sec('cos','Less cost of sales','Total cost of sales',true)
     +`<tr class="tot"><td>Gross profit</td>${cols.map(c=>cell(c,'gp',null,'Gross profit',{calc:calcGP})).join('')}</tr>`
     +`<tr class="pct"><td>Gross margin</td>${cols.map(c=>pctCell(c,'gp')).join('')}</tr>`
@@ -1371,12 +1412,41 @@ function bsGroup(k){ const o=bsZero(), parts=[]; let any=false;
   rEnts().forEach(e=>{const b=bsAt(e,k,true); if(!b) return; any=true; parts.push({l:ENTNM[e],b}); o.d=o.d||b.d;
     BSS.forEach(([s])=>{Object.keys(b.L[s]).forEach(l=>{o.L[s][l]=(o.L[s][l]||0)+b.L[s][l];}); o.T[s]+=b.T[s];});});
   if(!any) return null; bsFin(o); o.parts=parts; return o; }
+/* consolidation: an account in one entity that names another entity in the group is an inter-entity balance */
+const ENTREF={R:/woods\s*&?\s*co\.?\s*recruitment\s*pty/i,S:/w\s*&\s*co\.?\s*search/i,U:/recruitment\s*llc/i};
+function bsCons(k){
+  const es=rEnts(), comb=bsGroup(k); if(!comb) return null;
+  const el=bsZero(), items=[];
+  const drop=(e,to,s,l,v,x)=>{el.L[s][l]=(el.L[s][l]||0)-v; el.T[s]-=v; items.push(Object.assign({e,to,s,l,v},x||{}));};
+  es.forEach(e=>{const b=bsAt(e,k,true); if(!b) return;
+    ['ca','fa','nca','cl','ncl'].forEach(s=>Object.keys(b.L[s]).forEach(l=>{const to=es.find(o=>o!==e&&ENTREF[o]&&ENTREF[o].test(l)); if(to&&Math.abs(b.L[s][l])>=0.005) drop(e,to,s,l,b.L[s][l]);}));});
+  /* an investment in a group entity is eliminated against that entity's share capital */
+  items.filter(i=>/^shares in|investment in/i.test(i.l)).forEach(i=>{const b=bsAt(i.to,k,true); if(!b) return;
+    Object.keys(b.L.eq).filter(l=>/share capital|issued capital/i.test(l)).forEach(l=>drop(i.to,i.e,'eq',l,b.L.eq[l],{cap:true}));});
+  bsFin(el);
+  const diff=el.net-el.eq; if(Math.abs(diff)>=0.5){ const n='Inter-entity balances that do not agree'; el.L.eq[n]=diff; el.T.eq+=diff; bsFin(el); }
+  const cons=bsZero(); cons.d=comb.d;
+  BSS.forEach(([s])=>{ new Set(Object.keys(comb.L[s]).concat(Object.keys(el.L[s]))).forEach(l=>{const v=(comb.L[s][l]||0)+(el.L[s][l]||0); if(Math.abs(v)>=0.005) cons.L[s][l]=v;}); cons.T[s]=comb.T[s]+el.T[s]; });
+  bsFin(cons);
+  /* the two sides of each pair: what A's books say B owes A, and what B's books say it owes A */
+  const pairs=[];
+  es.forEach((a,i)=>es.slice(i+1).forEach(b=>{
+    const side=(x,y)=>items.filter(t=>t.e===x&&t.to===y&&!t.cap&&!/^shares in|investment in/i.test(t.l)).reduce((t,it)=>t+(/^(ca|fa|nca)$/.test(it.s)?it.v:-it.v),0);
+    const ab=side(a,b), ba=side(b,a); if(Math.abs(ab)>=0.5||Math.abs(ba)>=0.5) pairs.push({a,b,ab,ba,diff:ab+ba,items:items.filter(t=>(t.e===a&&t.to===b)||(t.e===b&&t.to===a))});}));
+  return {comb,el,cons,items,pairs};
+}
 const isAR=l=>/receivable|debtor/i.test(l);
 const isAP=l=>/payable|creditor/i.test(l)&&!/gst|payg|tax|super|wage|payroll/i.test(l);
 const sumL=(b,s,f)=>Object.keys(b.L[s]).filter(f).reduce((t,l)=>t+b.L[s][l],0);
 
 function bsCols(){
   const ks=rKs(), end=ks[ks.length-1], st=kPrev(ks[0]), ys=rYS();
+  if(GRP()&&BSV==='cons'){
+    const c=bsCons(end), c0=bsCons(st);
+    const cols=[{h:'Combined',b:c&&c.comb,parts:true},{h:'Eliminations',b:c&&c.el},{h:'Consolidated',b:c&&c.cons,tot:true}];
+    if(c0) cols.push({h:'Consolidated '+kEnd(st),b:c0.cons},{h:'Movement',mv:[2,3]});
+    return {cols,end,cons:c};
+  }
   if(GRP()){
     const cols=rEnts().map(e=>({h:ENTNM[e],b:bsAt(e,end,true),e}));
     cols.push({h:'Combined',b:bsGroup(end),tot:true,parts:true}); return {cols,end};
@@ -1541,12 +1611,12 @@ function plPage(){
   const info='Xero profit and loss, standard layout, by account. '+(GRP()?'Each entity in A$ (North America at the RBA monthly average AUD/USD rate). Not consolidated: recharges and other transactions between the entities are not eliminated.':
     (rKs().length===1?'The month, the prior month, the movement and the year to date.':'Each month in the period and the total.'))+(rUS()?' North America reports in US$; its overheads come through Xero as "Other Income and Expense" and are shown as operating expenses.':'')+' * month not yet closed.';
   return finFlags()+(miss&&!cols.some(c=>c.s&&c.s.n)?flag('No Xero profit and loss for this period yet','','hi'):'')
-    +`<section class="blk"><div class="hd"><h2>Profit and loss, ${pn}${INFO(info)}</h2><div class="rt">${GRP()?'A$':rUS()?'US$':'A$'} · synced ${esc((DATA.xero||{}).syncedAt||'')}</div></div>${plTable(cols)}</section>`;
+    +`<section class="blk"><div class="hd"><h2>Profit and loss, ${pn}${INFO(info)}</h2><div class="rt">${vtog('plv',PLV,[['det','Detailed'],['sum','Summary']])}</div></div>${plTable(cols)}<div class="tnote">${GRP()?'A$':rUS()?'US$':'A$'} \u00b7 Xero synced ${esc((DATA.xero||{}).syncedAt||'')}</div></section>`;
 }
 function bsPage(){
-  const {cols,end}=bsCols(), pn=esc(rPN()), es=rEnts();
+  const {cols,end,cons}=bsCols(), pn=esc(rPN()), es=rEnts();
   if(!es.some(hasBS)) return finFlags();
-  const b=cols[0].b&&!GRP()?cols[0].b:GRP()?cols[cols.length-1].b:null;
+  const b=GRP()?(BSV==='cons'?cols[2].b:cols[cols.length-1].b):cols[0].b;
   let kp='';
   if(b){ const pl=GRP()?plGroup([end]):plSum(ENT,[end]), ar=sumL(b,'ca',isAR), ap=sumL(b,'cl',isAP), dim=new Date(+end.slice(0,4),+end.slice(5,7),0).getDate(), gst=rUS()?1:1.1;
     const dd=pl.rev?ar/(pl.rev*gst)*dim:0, cr=b.T.cl?(b.T.bank+b.T.ca)/b.T.cl:0;
@@ -1557,27 +1627,38 @@ function bsPage(){
       <div class="kpi"><div class="lab">Trade debtors${INFO('Accounts receivable on the balance sheet. Debtor days are receivables ÷ the month\'s trading income'+(rUS()?'':' grossed up for GST')+' × days in the month, so treat them as indicative (temp billings and timing distort them).')}</div><div class="val"${BD('Receivables','By account',Object.keys(b.L.ca).filter(isAR).map(l=>({l,v:b.L.ca[l]})),{total:ar})}>${F(ar)}</div><div class="sub">${dd?Math.round(dd)+' debtor days':''}</div></div>
       <div class="kpi"><div class="lab">Trade creditors</div><div class="val"${BD('Payables','By account',Object.keys(b.L.cl).filter(isAP).map(l=>({l,v:b.L.cl[l]})),{total:ap})}>${F(ap)}</div></div>
     </div>`; }
-  const info='Xero balance sheet, standard layout. '+(GRP()?'Side by side in A$, North America at the RBA month-end AUD/USD rate. Not consolidated: loans and balances between the entities are not eliminated, so the combined column overstates both assets and liabilities by those balances.':'At the end of the period, against the start of the period and the end of the last financial year.')+(rUS()?' North America\'s year runs to 31 December.':'');
-  return finFlags()+kp+`<section class="blk"><div class="hd"><h2>Balance sheet${INFO(info)}</h2><div class="rt">${GRP()?'A$ · ':''}${esc(cols[0].b?(cols[0].b.d?'As at '+dLong(cols[0].b.d):''):kEnd(end))}</div></div>${bsTable(cols)}</section>`;
+  const info='Xero balance sheet, standard layout. '+(GRP()?(BSV==='cons'?'Consolidated: the entities added together in A$ (North America at the RBA month-end AUD/USD rate), less balances between them. An account in one entity that names another entity in the group (for example "Loan - W&amp;Co Search Pty Ltd") is eliminated, and an investment in a group entity is eliminated against its share capital. Where the two sides do not agree, the difference shows in equity as "Inter-entity balances that do not agree" and in the table below. Entities outside the dashboard (Woods &amp; Co Education, USA CCORP) are not eliminated.':'Side by side in A$, North America at the RBA month-end AUD/USD rate. Not consolidated: switch to Consolidated to eliminate the balances between the entities.'):'At the end of the period, against the start of the period and the end of the last financial year.')+(rUS()?' North America\'s year runs to 31 December.':'');
+  const tog=GRP()?vtog('bsv',BSV,[['side','Side by side'],['cons','Consolidated']]):(Object.keys(DATA.ents).length>1?`<button type="button" class="lnkb" data-gocons="1">Consolidated group balance sheet \u2192</button>`:'');
+  let pt='';
+  if(cons&&cons.pairs.length){ const nm=e=>ENTNM[e];
+    pt=`<section class="blk"><div class="hd"><h2>Balances between the entities${INFO('Each pair\'s balance as recorded in each entity\'s Xero file, in A$ at the month-end rate. A positive figure means the first entity is owed money. The two sides should agree, so the difference should be nil; a difference needs a correcting entry or is timing or exchange.')}</h2><div class="rt">${esc(kEnd(end))} \u00b7 A$</div></div>
+      <div class="tbl"><table><thead><tr><th>Entities</th><th>Per first entity</th><th>Per second entity</th><th>Difference</th></tr></thead><tbody>
+      ${cons.pairs.map(p=>`<tr><td>${nm(p.a)} and ${nm(p.b)}</td><td${BD(esc(nm(p.a))+' books','Accounts with '+esc(nm(p.b)),p.items.filter(t=>t.e===p.a).map(t=>({l:t.l,v:/^(ca|fa|nca)$/.test(t.s)?t.v:-t.v})),{total:p.ab,signed:true})}>${F(p.ab)}</td>
+        <td${BD(esc(nm(p.b))+' books','Accounts with '+esc(nm(p.a)),p.items.filter(t=>t.e===p.b).map(t=>({l:t.l,v:/^(cl|ncl)$/.test(t.s)?t.v:-t.v})),{total:-p.ba,signed:true})}>${F(-p.ba)}</td>
+        <td class="${Math.abs(p.diff)<1?'mut':'neg'}">${F(Math.abs(p.diff)<0.5?0:p.diff)}</td></tr>`).join('')}
+      </tbody></table></div></section>`; }
+  return finFlags()+kp+`<section class="blk"><div class="hd"><h2>Balance sheet${GRP()&&BSV==='cons'?', consolidated':''}${INFO(info)}</h2><div class="rt">${tog}</div></div>${bsTable(cols)}<div class="tnote">${GRP()?'A$ \u00b7 ':''}${esc(cols[0].b&&cols[0].b.d?'As at '+dLong(cols[0].b.d):kEnd(end))}</div></section>`+pt;
 }
 function cfCols(){
   const ks=rKs(), es=rEnts();
   if(GRP()){ const cols=es.map(e=>({h:ENTNM[e],x:cfPeriod([e],ks,true)})); cols.push({h:'Combined',x:cfPeriod(es,ks,true),tot:true}); return cols; }
-  const cols=[{h:esc(rPN()).replace(/ \(.*\)$/,''),x:cfPeriod([ENT],ks)}];
-  if(ks.length===1){ const y=rYear().filter(k=>k<=ks[0]); if(y.length>1) cols.push({h:'YTD to '+kShort(ks[0]),x:cfPeriod([ENT],y)}); }
+  if(PER==='YTD'){ const qs=rQuarters(); return qs.map(q=>({h:q.h+(q.ks.some(rOpen)?' *':''),x:cfPeriod([ENT],q.ks)})).concat([{h:'YTD',x:cfPeriod([ENT],ks),tot:true}]); }
+  const last=ks[ks.length-1], cols=[{h:ks.length===1?kShort(last)+(rOpen(last)?' *':''):PER+(ks.some(rOpen)?' *':''),x:cfPeriod([ENT],ks)}];
+  const cm=rCmp(); if(cm){ const x=cfPeriod([ENT],cm.ks); if(!x.miss.length) cols.push({h:cm.h,x}); }
+  const y=rYear().filter(k=>k<=last); if(y.length>ks.length) cols.push({h:'YTD to '+kShort(last),x:cfPeriod([ENT],y),tot:true});
   return cols;
 }
 function cfPage(){
   const es=rEnts(), pn=esc(rPN()), ks=rKs();
   if(!es.some(hasBS)) return finFlags();
-  const cols=cfCols(), m=cols[GRP()?cols.length-1:0].x;
+  const cols=cfCols(), m=GRP()||PER==='YTD'?cols[cols.length-1].x:cols[0].x;
   const kp=`<div class="kpis">
     <div class="kpi"><div class="lab">Opening cash</div><div class="val">${m.open==null?'–':F(m.open)}</div><div class="sub">${kEnd(kPrev(ks[0]))}</div></div>
     <div class="kpi"><div class="lab">Cash received</div><div class="val">${F(m.rec)}</div><div class="sub">Trading and other income</div></div>
     <div class="kpi"><div class="lab">Cash paid</div><div class="val">${F(-m.paid)}</div><div class="sub">Suppliers, payroll and tax</div></div>
     <div class="kpi"><div class="lab">Net cash from operations</div><div class="val ${m.trade<0?'neg':''}">${F(m.trade)}</div><div class="sub">Other movements ${F(m.other+m.resid)}</div></div>
     <div class="kpi"><div class="lab">Closing cash</div><div class="val">${m.close==null?'–':F(m.close)}</div><div class="sub">${m.open!=null&&m.close!=null?SG(m.close-m.open)+' in the period':''}</div></div></div>`;
-  const miss=[...new Set(cols.flatMap(c=>c.x.miss))], nopl=[...new Set(cols.flatMap(c=>c.x.noPL))];
+  const miss=[...new Set(cols[GRP()?cols.length-1:0].x.miss)], nopl=[...new Set(cols.flatMap(c=>c.x.noPL))];
   const info='Starts from Xero\'s cash-basis P&amp;L (the profit and loss on payments only, as in Xero\'s Cash Summary), by account. The other cash movements are the change in every other balance sheet account between the month ends (trade debtors and creditors excluded, as they are already reflected in the cash-basis P&amp;L). Payroll posted by journal is matched to the payroll liabilities, so the lines below show what was actually paid. It ends at the cash at bank on the balance sheet.'+(GRP()?' Side by side in A$, not consolidated.':'');
   let h=finFlags()+(miss.length?flag('Balance sheet missing for '+miss.map(kLong).join(', '),'Those months are left out of the cash flow.','hi'):'')
     +(nopl.length?flag('Cash-basis P&amp;L missing for '+nopl.map(kLong).join(', '),'The change in cash for those months shows in the adjustments until the next Xero sync.','hi'):'')+kp
@@ -1603,43 +1684,46 @@ function salesHead(){
 }
 function dashPage(){
   const ks=rKs(), es=rEnts(), one=ks.length===1, pn=esc(rPN()), end=ks[ks.length-1];
-  const P=GRP()?plGroup(ks):plSum(ENT,ks), PP=one?(GRP()?plGroup([kPrev(end)]):plSum(ENT,[kPrev(end)])):null;
-  const chip=(v,pv,inv)=>PP&&pv!=null?`<span class="chip ${(v-pv)*(inv?-1:1)>=0?'up':'dn'}">${SG(v-pv).replace(/<[^>]+>/g,'')} vs ${kShort(kPrev(end))}</span>`:'';
+  const cm=rCmp(), P=GRP()?plGroup(ks):plSum(ENT,ks);
+  let PP=cm?(GRP()?plGroup(cm.ks):plSum(ENT,cm.ks)):null; if(PP&&(PP.miss.length||!PP.n)) PP=null;
+  const chip=(v,pv,inv)=>PP&&pv!=null?`<span class="chip ${(v-pv)*(inv?-1:1)>=0?'up':'dn'}">${SG(v-pv).replace(/<[^>]+>/g,'')} vs ${cm.h}</span>`:'';
   const B=GRP()?bsGroup(end):bsAt(ENT,end), B0=GRP()?bsGroup(kPrev(ks[0])):bsAt(ENT,kPrev(ks[0]));
   const S=salesHead();
   const byEnt=f=>GRP()?BD(f.t+', '+pn,'By entity, A$',es.map(e=>({l:ENTNM[e],v:f.v(plSum(e,ks,true))})),{total:f.v(P)}):(!one?BD(f.t+', '+pn,'By month',ks.map(k=>({l:kShort(k),v:f.v(plSum(ENT,[k]))})),{keepOrder:true,keepZero:true,total:f.v(P)}):(f.acct&&P.L[f.acct]?BD(f.t+', '+pn,'By account',Object.keys(P.L[f.acct]).map(l=>({l,v:P.L[f.acct][l]})),{total:f.v(P)}):''));
   const kpis=`<div class="kpis k3">
     <div class="kpi"><div class="lab">Trading income</div><div class="val"${byEnt({t:'Trading income',v:x=>x.rev,acct:'rev'})}>${F(P.rev)}</div>${chip(P.rev,PP&&PP.rev)}</div>
-    <div class="kpi"><div class="lab">Gross profit</div><div class="val"${byEnt({t:'Gross profit',v:x=>x.gp})}>${F(P.gp)}</div><div class="sub">${P.rev?PCT(P.gp/P.rev)+' margin':''}${PP&&PP.rev?' · '+kShort(kPrev(end))+' '+PCT(PP.gp/PP.rev):''}</div></div>
+    <div class="kpi"><div class="lab">Gross profit</div><div class="val"${byEnt({t:'Gross profit',v:x=>x.gp})}>${F(P.gp)}</div><div class="sub">${P.rev?PCT(P.gp/P.rev)+' margin':''}${PP&&PP.rev?' \u00b7 '+cm.h+' '+PCT(PP.gp/PP.rev):''}</div></div>
     <div class="kpi"><div class="lab">Net profit</div><div class="val ${P.np<0?'neg':''}"${byEnt({t:'Net profit',v:x=>x.np})}>${F(P.np)}</div>${chip(P.np,PP&&PP.np)}<div class="sub">${P.rev?PCT(P.np/P.rev)+' net margin':''}</div></div>
     <div class="kpi"><div class="lab">Cash at bank</div><div class="val"${B?BD('Cash at bank'+(B.d?', '+dLong(B.d):''),GRP()?'By entity, A$':'By account',GRP()?(B.parts||[]).map(p=>({l:p.l,v:p.b.T.bank})):Object.keys(B.L.bank).map(l=>({l,v:B.L.bank[l]})),{total:B.T.bank}):''}>${B?F(B.T.bank):'–'}</div>${B&&B0?`<span class="chip ${B.T.bank>=B0.T.bank?'up':'dn'}">${SG(B.T.bank-B0.T.bank).replace(/<[^>]+>/g,'')} in the period</span>`:''}</div>
-    <div class="kpi"><div class="lab">Net assets</div><div class="val">${B?F(B.net):'–'}</div><div class="sub">${B?'Working capital '+F(B.wc):''}</div></div>
+    <div class="kpi"><div class="lab">Net assets${GRP()?INFO('Consolidated: balances between the entities are eliminated (see the Balance Sheet tab).'):''}</div><div class="val">${B?F(GRP()?((bsCons(end)||{}).cons||B).net:B.net):'–'}</div><div class="sub">${B?'Working capital '+F(B.wc):''}</div></div>
     <div class="kpi"><div class="lab">${S.lab}${INFO('From the Sales tab: '+(rUS()?'permanent fees on the North America billing sheet':'billings on the sales sheet')+' against the fee team\'s fully loaded cost. Break-even '+S.be.toFixed(2)+'×.')}</div><div class="val"${S.tip}>${F(S.b)}</div><div class="sub"><span class="${S.m>=S.be?'pos':'neg'}">${X(S.m)}</span> against ${S.be.toFixed(2)}× break-even</div></div>
   </div>`;
   /* headlines */
   const hl=[];
-  if(P.n){ hl.push([`Net profit ${F(P.np)} for ${pn}`+(PP&&PP.n?`, ${P.np>=PP.np?'up':'down'} ${F(Math.abs(P.np-PP.np))} on ${kLong(kPrev(end))}`:''),P.np>=0?'ok':'hi']);
-    if(P.rev) hl.push([`Trading income ${F(P.rev)} at a ${PCT(P.gp/P.rev)} gross margin`+(PP&&PP.rev?` (${kShort(kPrev(end))}: ${F(PP.rev)}, ${PCT(PP.gp/PP.rev)})`:''),'']);
+  if(P.n){ hl.push([`Net profit ${F(P.np)} for ${pn}`+(PP&&PP.n?`, ${P.np>=PP.np?'up':'down'} ${F(Math.abs(P.np-PP.np))} on ${cm.long}`:''),P.np>=0?'ok':'hi']);
+    if(P.rev) hl.push([`Trading income ${F(P.rev)} at a ${PCT(P.gp/P.rev)} gross margin`+(PP&&PP.rev?` (${cm.h}: ${F(PP.rev)}, ${PCT(PP.gp/PP.rev)})`:''),'']);
     const ex=Object.keys(P.L.opex).map(l=>({l,v:P.L.opex[l],p:PP?PP.L.opex[l]||0:0})).sort((a,b)=>Math.abs(b.v-b.p)-Math.abs(a.v-a.p))[0];
-    if(PP&&ex&&Math.abs(ex.v-ex.p)>=1000) hl.push([`Largest expense movement: ${esc(ex.l)} ${F(ex.v)}, ${ex.v>=ex.p?'up':'down'} ${F(Math.abs(ex.v-ex.p))} on ${kShort(kPrev(end))}`,ex.v>ex.p?'':'ok']); }
+    if(PP&&ex&&Math.abs(ex.v-ex.p)>=1000) hl.push([`Largest expense movement: ${esc(ex.l)} ${F(ex.v)}, ${ex.v>=ex.p?'up':'down'} ${F(Math.abs(ex.v-ex.p))} on ${cm.h}`,ex.v>ex.p?'':'ok']); }
   if(B&&B0){ const cf=cfPeriod(es,ks,GRP()); const drv=CFGRP.filter(([g])=>g!=='tax').map(([g,l])=>[l,gsum(cf,g)]).sort((a,b)=>Math.abs(b[1])-Math.abs(a[1]))[0];
     hl.push([`Cash at bank ${F(B.T.bank)}, ${B.T.bank>=B0.T.bank?'up':'down'} ${F(Math.abs(B.T.bank-B0.T.bank))} in the period: ${F(cf.trade)} net cash from operations`+(drv&&Math.abs(drv[1])>=1000?`; largest other movement ${drv[0].toLowerCase()} (${F(drv[1])})`:''),B.T.bank>=B0.T.bank?'ok':'hi']); }
   if(!GRP()&&!rUS()){ const below=deptsOf(ENT).filter(d=>d.fee).map(d=>({d,a:deptAgg(d.name)})).filter(x=>x.a.c&&x.a.b<x.a.bev);
     hl.push([`Fee team ${X(S.m)} against ${S.be.toFixed(2)}× break-even`+(below.length?`; below break-even: ${below.map(x=>esc(x.d.label)).join(', ')}`:'; every fee department at or above break-even'),S.m>=S.be?'ok':'hi']); }
   else hl.push([`${S.lab} ${F(S.b)} at ${X(S.m)} against ${S.be.toFixed(2)}× break-even`,S.m>=S.be?'ok':'hi']);
   /* charts for the year */
-  const yr=rYear(), on=k=>ks.includes(k);
-  const ym=k=>GRP()?plGroup([k]):plSum(ENT,[k]);
-  const yv=yr.map(k=>({k,s:ym(k)})).filter(x=>x.s.n);
-  const rc=barChart(yv.map(x=>({l:kShort(x.k).slice(0,3),v:x.s.rev,on:on(x.k),tip:CALC('Trading income, '+kLong(x.k)+(rOpen(x.k)?' (not closed)':''),'',[['Trading income',F(x.s.rev)],['Gross profit',F(x.s.gp)],['Gross margin',x.s.rev?PCT(x.s.gp/x.s.rev):'–']])})),{label:'Trading income by month'});
-  const nc=barChart(yv.map(x=>({l:kShort(x.k).slice(0,3),v:x.s.np,on:on(x.k),tip:xNP('Net profit, '+kLong(x.k)+(rOpen(x.k)?' (not closed)':''),'',x.s)})),{label:'Net profit by month'});
-  const cash=yr.map(k=>{const b=GRP()?bsGroup(k):bsAt(ENT,k);return {l:kShort(k).slice(0,3),v:b?b.T.bank:null,on:on(k),tip:b?BD('Cash at bank, '+(b.d?dLong(b.d):kEnd(k)),GRP()?'By entity, A$':'By account',GRP()?(b.parts||[]).map(p=>({l:p.l,v:p.b.T.bank})):Object.keys(b.L.bank).map(l=>({l,v:b.L.bank[l]})),{total:b.T.bank}):''};});
+  /* a quarter or the year shows the year quarter by quarter; a month shows it month by month */
+  const qv=isQ(PER)||PER==='YTD', on=k=>ks.includes(k), unit=qv?'quarter':'month';
+  const per=qv?rQuarters().map(q=>({l:q.h,ks:q.ks,long:q.h+' ('+kShort(q.ks[0])+(q.ks.length>1?' to '+kShort(q.ks[q.ks.length-1]):'')+')'})):rYear().map(k=>({l:kShort(k).slice(0,3),ks:[k],long:kLong(k)}));
+  const ym=p=>GRP()?plGroup(p.ks):plSum(ENT,p.ks), pon=p=>p.ks.every(on), pop=p=>p.ks.some(rOpen)?' (not closed)':'';
+  const yv=per.map(p=>Object.assign({},p,{s:ym(p)})).filter(x=>x.s.n);
+  const rc=barChart(yv.map(x=>({l:x.l,v:x.s.rev,on:pon(x),tip:CALC('Trading income, '+x.long+pop(x),'',[['Trading income',F(x.s.rev)],['Gross profit',F(x.s.gp)],['Gross margin',x.s.rev?PCT(x.s.gp/x.s.rev):'\u2013']])})),{label:'Trading income by '+unit});
+  const nc=barChart(yv.map(x=>({l:x.l,v:x.s.np,on:pon(x),tip:xNP('Net profit, '+x.long+pop(x),'',x.s)})),{label:'Net profit by '+unit});
+  const cash=per.map(p=>{const k=p.ks[p.ks.length-1], b=GRP()?bsGroup(k):bsAt(ENT,k);return {l:p.l,v:b?b.T.bank:null,on:pon(p),tip:b?BD('Cash at bank, '+(b.d?dLong(b.d):kEnd(k)),GRP()?'By entity, A$':'By account',GRP()?(b.parts||[]).map(p=>({l:p.l,v:p.b.T.bank})):Object.keys(b.L.bank).map(l=>({l,v:b.L.bank[l]})),{total:b.T.bank}):''};});
   const cur=GRP()?'A$':rUS()?'US$':'A$';
   return finFlags()+kpis
     +`<section class="blk"><div class="hd"><h2>Headlines${INFO('Worked out from the figures on the other tabs.')}</h2><div class="rt">${pn}</div></div>${hl.map(([t,c])=>`<div class="flag ${c}"><div class="ft">${t}</div></div>`).join('')}</section>`
     +`<section class="blk"><div class="hd"><h2>The year so far</h2><div class="rt">${cur} · selected period highlighted</div></div>
-      <div class="three"><div class="chc"><div class="cht">Trading income by month</div>${rc}</div><div class="chc"><div class="cht">Net profit by month</div>${nc}</div>
-      ${cash.some(c=>c.v!=null)?`<div class="chc"><div class="cht">Cash at bank, month end</div>${lineChart(cash,{label:'Cash at bank by month end'})}</div>`:''}</div></section>`
+      <div class="three"><div class="chc"><div class="cht">Trading income by ${unit}</div>${rc}</div><div class="chc"><div class="cht">Net profit by ${unit}</div>${nc}</div>
+      ${cash.some(c=>c.v!=null)?`<div class="chc"><div class="cht">Cash at bank, ${unit} end</div>${lineChart(cash,{label:'Cash at bank by month end'})}</div>`:''}</div></section>`
     +(!GRP()&&!rUS()?`<section class="blk"><div class="hd"><h2>Department scorecard${INFO('From the Sales tab: each fee department\'s billings against its people\'s fully loaded cost.')}</h2><div class="rt">${pn}</div></div>${scorecard()}</section>`:'');
 }
 
@@ -1688,7 +1772,11 @@ function paint(){
 }
 function goRT(id){ if(!RTABS.some(t=>t.id===id)) return; RT=id; paint(); window.scrollTo({top:0}); }
 document.getElementById('rtabs').addEventListener('click',ev=>{const b=ev.target.closest('[data-r]'); if(b) goRT(b.dataset.r);});
-document.getElementById('content').addEventListener('click',ev=>{const b=ev.target.closest('.rnav [data-r]'); if(b) goRT(b.dataset.r);});
+document.getElementById('content').addEventListener('click',ev=>{const b=ev.target.closest('.rnav [data-r]'); if(b){ goRT(b.dataset.r); return; }
+  const v=ev.target.closest('[data-plv],[data-bsv],[data-gocons]'); if(!v) return;
+  if(v.dataset.plv) PLV=v.dataset.plv; if(v.dataset.bsv) BSV=v.dataset.bsv;
+  if(v.dataset.gocons&&DATA.ents&&Object.keys(DATA.ents).length>1){ ENT='G'; BSV='cons'; setEnts(); }
+  const y=window.scrollY; paint(); window.scrollTo({top:y}); });
 document.addEventListener('keydown',ev=>{ if(ev.altKey||ev.ctrlKey||ev.metaKey||/INPUT|SELECT|TEXTAREA/.test((ev.target||{}).tagName||'')) return;
   const i=RTABS.findIndex(t=>t.id===RT); if(ev.key==='ArrowRight'&&RTABS[i+1]) goRT(RTABS[i+1].id); if(ev.key==='ArrowLeft'&&RTABS[i-1]) goRT(RTABS[i-1].id); });
 
