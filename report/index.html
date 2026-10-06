@@ -1888,7 +1888,7 @@ const ss={get:k=>{try{return JSON.parse(sessionStorage.getItem(k)||'null');}catc
 const $=id=>document.getElementById(id);
 function msg(t,ok){const m=$('gmsg');m.textContent=t||'';m.className=ok?'ok':'';}
 function lock(t){
-  SESSION=null; DATA=null; ls.set(SKEY,null); ss.set(DKEY,null); document.body.classList.add('locked');
+  SESSION=null; DATA=null; ls.set(SKEY,null); ls.set(DKEY,null); ss.set(DKEY,null); document.body.classList.add('locked');
   $('content').innerHTML=''; $('who').hidden=true; msg(t); useGoogle();
 }
 function showWho(){
@@ -1923,7 +1923,7 @@ function signedIn(r,pic){
   got(r.data);
 }
 function got(d){
-  DATA=d; ss.set(DKEY,{at:Date.now(),e:SESSION&&SESSION.e,d:d});
+  DATA=d; ls.set(DKEY,{at:Date.now(),e:SESSION&&SESSION.e,d:d}); ss.set(DKEY,null);
   document.body.classList.remove('locked'); showWho(); setEnts(); paint();
   const btn=$('refresh'); btn.disabled=false; btn.textContent='Refresh data';
 }
@@ -1966,7 +1966,8 @@ function start(){
   const s=ls.get(SKEY);
   if(!(s&&s.t&&s.x>Date.now()+60000)){ ls.set(SKEY,null); document.body.classList.add('locked'); useGoogle(); return; }
   SESSION=s; ME={name:s.n,email:s.e,pic:s.p};
-  const c=ss.get(DKEY);
+  /* the last data loaded on this device (kept in this browser only, removed on sign-out) shows straight away, then updates quietly */
+  const c=ls.get(DKEY)||ss.get(DKEY);
   if(c&&c.d&&c.e===s.e){ got(c.d); if(Date.now()-c.at>FRESH_MS) load(false,true); return; }
   document.body.classList.remove('locked'); showWho(); load(false);
 }
