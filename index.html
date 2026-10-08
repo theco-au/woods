@@ -117,6 +117,15 @@
   .segs{display:flex;align-items:center;gap:10px 12px;flex-wrap:wrap}
   .seglab{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:#8f8a80;font-weight:700}
   .seglab+.pseg{margin-right:8px}
+  .btn2{border:1px solid var(--line);background:var(--card);border-radius:8px;padding:7px 14px;font:600 13px var(--sans);color:var(--ink);cursor:pointer}.btn2:hover{background:#f4f1ea}
+  .piew{display:flex;gap:18px;align-items:center;flex-wrap:wrap}.pie{width:200px;height:200px;flex:none}.pie path{stroke:#fff;stroke-width:1}
+  .pie .pt1{font:700 17px var(--mono);fill:var(--ink);text-anchor:middle}.pie .pt2{font:12px var(--sans);fill:var(--mid);text-anchor:middle}
+  .plg{flex:1;min-width:180px;font-size:13px}.plg div{display:grid;grid-template-columns:14px 1fr auto 44px;gap:8px;align-items:center;padding:4px 0;border-bottom:1px solid var(--line2)}
+  .plg i{width:11px;height:11px;border-radius:3px}.plg b{font:600 12.5px var(--mono);color:var(--ink)}.plg em{font:12px var(--mono);color:var(--mid);font-style:normal;text-align:right}
+  .hbs{display:flex;flex-direction:column;gap:10px;padding:6px 0}.hbr{display:grid;grid-template-columns:150px 1fr 96px;gap:10px;align-items:center;font-size:13px}
+  .hbl{color:var(--body)}.hbt{position:relative;height:16px;background:#f0ede6;border-radius:4px}.hbv{position:absolute;top:0;bottom:0;border-radius:4px}
+  .hz{position:absolute;top:-3px;bottom:-3px;width:1.5px;background:#8a857a}.hbn{font:600 12.5px var(--mono);text-align:right;color:var(--ink)}
+  @media(max-width:700px){.hbr{grid-template-columns:100px 1fr 84px}}
 
   main{padding:32px 0 80px}
   h2{font-size:19px;color:var(--ink);font-weight:700;letter-spacing:-.015em;line-height:1.25}
@@ -541,7 +550,7 @@ function bars(rows,teamRow){
    ${all.map(r=>{const a=r.a,c=a.c,b=a.b,cw=c/mx*100,bw=b/mx*100,bev=a.bev/mx*100,tg=a.tgt/mx*100,sup=!r.team&&isSup(r)&&!(b>0&&!r.agg);
      const seg=b>=c?`<div class="seg cost" style="left:0;width:${cw}%"></div><div class="seg gain" style="left:${cw}%;width:${Math.max(bw-cw,0)}%"></div>`
                    :`<div class="seg cost" style="left:0;width:${bw}%"></div><div class="seg short" style="left:${bw}%;width:${Math.max(cw-bw,0)}%"></div>`;
-     return `<div class="row"${TIP(r.tip||(r.team?teamTip(r):empTip(r)))}>
+     return `<div class="row"${r.tip?r.tip:TIP(r.team?teamTip(r):empTip(r))}>
        <div class="who"><div class="nm">${esc(r.name)}${a.est?'<span class="est">est.</span>':''}</div><div class="rl">${esc(r.role||'')}</div></div>
        <div class="track"><div class="base"></div>${seg}
          ${c?`${two?`<div class="bevm" style="left:${Math.min(bev,99.5)}%"></div>`:''}<div class="bench" style="left:${Math.min(tg,99.4)}%"><b>${F(a.tgt)}</b></div>`:''}</div>
@@ -556,6 +565,7 @@ function bars(rows,teamRow){
 const DCOL={'SALES SUPPORT & SERVICE':1,'PROPERTY':2,'CONSTRUCTION':3,'HOSPITALITY':4,'FINANCIAL SERVICES':5,'SEARCH':6};
 const KS=v=>{const a=Math.abs(v||0),t=a>=1e6?'$'+(a/1e6).toFixed(a>=1e7?0:1)+'m':a>=1e3?'$'+Math.round(a/1e3)+'k':'$'+Math.round(a);return v<0&&Math.round(a)?'('+t+')':t;};
 let LM='b';   // department chart measure
+let SKP=false;   // SEEK breakdown by person shown
 const LMS=[['b','Billings'],['m','Billings per $1 of cost'],['ct','Contribution']];
 const lmVal=(a,m)=>m==='m'?(a.c?a.b/a.c:null):m==='ct'?a.ct:a.b;
 const lmFmt=(v,m)=>m==='m'?(v==null?'–':v.toFixed(2)+'×'):F(v);
@@ -617,6 +627,36 @@ function deptLineSection(ents,note){
   const info='Each fee department, month by month across the year. Billings (GP) from the sales sheet; billings per $1 of cost is billings ÷ fully loaded employment cost; contribution is billings less commission, cost, a per-head share of overhead and SEEK ads posted.'+(MODE==='live'?' The current month is to date and drawn dashed.':' Finished months only.')+(note||'');
   return `<section class="blk"><div class="hd"><h2>Departments, month by month${INFO(info)}</h2><div class="rt">${lmTog()}</div></div>
     <div class="chc">${mLine(D,LM,{ref,refLab:ref!=null?'Break-even '+ref.toFixed(2)+'×':''})}</div></section>`;
+}
+/* billings share (donut) and contribution (bars) by fee department */
+function donut(items,o){
+  o=o||{}; const tot=items.reduce((t,i)=>t+Math.max(0,i.v),0); if(!tot) return '<div class="mut" style="padding:20px">No billings in this period.</div>';
+  const R=88, r=54, cx=110, cy=110; let a0=-Math.PI/2, s=`<svg class="pie" viewBox="0 0 220 220" role="img" aria-label="${esc(o.label||'')}">`;
+  items.filter(i=>i.v>0).forEach(i=>{ const f=i.v/tot, a1=a0+f*2*Math.PI-(f<1?0.012:0), lg=a1-a0>Math.PI?1:0;
+    const p=(ang,rad)=>(cx+rad*Math.cos(ang)).toFixed(2)+','+(cy+rad*Math.sin(ang)).toFixed(2);
+    const d=f>=0.9999?`M${cx-R},${cy}a${R},${R} 0 1,0 ${2*R},0a${R},${R} 0 1,0 ${-2*R},0M${cx-r},${cy}a${r},${r} 0 1,1 ${2*r},0a${r},${r} 0 1,1 ${-2*r},0`
+      :`M${p(a0,R)}A${R},${R} 0 ${lg},1 ${p(a1,R)}L${p(a1,r)}A${r},${r} 0 ${lg},0 ${p(a0,r)}Z`;
+    s+=`<path d="${d}" fill="${i.c}" fill-rule="evenodd"${i.tip||''}/>`; a0=a0+f*2*Math.PI; });
+  s+=`<text x="${cx}" y="${cy-4}" class="pt1">${KS(tot)}</text><text x="${cx}" y="${cy+14}" class="pt2">${esc(o.mid||'total')}</text></svg>`;
+  const leg=`<div class="plg">${items.map(i=>`<div><i style="background:${i.c}"></i><span>${esc(i.l)}</span><b>${F(i.v)}</b><em>${tot?PCT(Math.max(0,i.v)/tot):''}</em></div>`).join('')}</div>`;
+  return `<div class="piew">${s}${leg}</div>`;
+}
+function hBars(items,o){
+  o=o||{}; if(!items.length) return '';
+  const mx=Math.max(0,...items.map(i=>i.v)), mn=Math.min(0,...items.map(i=>i.v)), span=(mx-mn)||1, z=(-mn)/span*100;
+  return `<div class="hbs">${items.map(i=>{const w=Math.abs(i.v)/span*100, l=i.v>=0?z:z-w;
+    return `<div class="hbr"${i.tip||''}><div class="hbl">${esc(i.l)}</div><div class="hbt"><span class="hz" style="left:${z}%"></span><span class="hbv" style="left:${l}%;width:${w}%;background:${i.c}"></span></div><div class="hbn ${i.v<0?'neg':''}">${F(i.v)}</div></div>`;}).join('')}</div>`;
+}
+function deptShareSection(ents){
+  const sE=ENT, rows=[];
+  ents.filter(e=>DATA.ents[e]&&e!=='U').forEach(en=>{ENT=en; deptsOf(en).filter(d=>d.fee).forEach(d=>{const a=deptAgg(d.name); if(a.b||a.c) rows.push({d,a,en});});});
+  ENT=sE; if(!rows.length) return '';
+  const pn=esc(perName()), col=r=>'var(--d'+(DCOL[r.d.name]||7)+')';
+  const pie=donut(rows.slice().sort((p,q)=>q.a.b-p.a.b).map(r=>({l:r.d.label,v:r.a.b,c:col(r)})),{label:'Billings by department',mid:'billings'});
+  const ct=hBars(rows.slice().sort((p,q)=>q.a.ct-p.a.ct).map(r=>({l:r.d.label,v:r.a.ct,c:col(r),
+    tip:CALC(esc(r.d.label)+': contribution',pn,[['Billings (GP)',F(r.a.b)],['Less commission accrued (sheet)',F(-r.a.ca)],['Less cost of employment',F(-r.a.c)],['Less share of overhead',F(-r.a.oh)],r.a.ad?['Less SEEK ads',F(-r.a.ad)]:null,['= Contribution',SG(r.a.ct),'s']])})));
+  return `<section class="blk"><div class="hd"><h2>Billings and contribution by department${INFO('Left: each fee department\'s share of billings (GP) on the sales sheet. Right: contribution, being billings less commission accrued, cost of employment, a per-head share of overhead and SEEK ads posted. Hover a bar for the workings.')}</h2><div class="rt">${pn}</div></div>
+    <div class="two"><div class="chc"><div class="cht">Billings by department</div>${pie}</div><div class="chc"><div class="cht">Contribution by department</div>${ct}</div></div></section>`;
 }
 /* one department's recruiters month by month (same chart as departments, one line per person) */
 const PCOL=['#2a78d6','#eb6834','#1baf7a','#eda100','#e87ba4','#008300','#7b5cc4','#8c6d3f','#4fa3b8','#8a857a'];
@@ -701,19 +741,20 @@ function seekSection(ents){
   const sMon=ks.reduce((t,k)=>{const b=(sk.byMonth||{})[k]||{}; return t+ents.reduce((s,en)=>s+(b[en]||0),0);},0);
   return `<section class="blk"><div class="hd"><h2>SEEK advertising, ${pn}${INFO(info)}</h2><div class="rt">SEEK report to ${esc(dLongS(lastAd))}</div></div>
     ${after.length?flag('No SEEK ads loaded after '+esc(dLongS(lastAd)),'Months after that show no ad cost until the next SEEK ad usage report is added.'):''}
-    <div class="two"><div class="tbl"><table><thead><tr><th>Department</th><th style="width:34%"></th><th>Ads</th><th>Spend</th><th>% of billings</th></tr></thead><tbody>
+    <div class="tbl"><table><thead><tr><th>Department</th><th style="width:34%"></th><th>Ads</th><th>Spend</th><th>% of billings</th></tr></thead><tbody>
       ${rows.map(r=>`<tr><td><i class="sw" style="background:var(--d${r.col})"></i>${esc(r.d.label)}</td><td class="tx"><div class="hb"><span style="width:${(r.a.ad/mx*100).toFixed(1)}%;background:var(--d${r.col})"></span></div></td><td>${r.a.adN}</td>
         <td${BD(esc(r.d.label)+': SEEK ads',pn+' · by person',r.a.mem.filter(e=>e.a.ad).map(e=>({l:e.name,s:(e.a.adN||0)+' ads',v:e.a.ad})).concat(r.a.adO?[{l:'Former staff',s:Object.keys(r.a.adW).join(', '),v:r.a.adO}]:[]),{total:r.a.ad})}>${F(r.a.ad)}</td>
         <td class="mut"${r.a.b?CALC(esc(r.d.label)+': ads as % of billings',pn,[['SEEK ads',F(r.a.ad)],['÷ Billings (GP)',F(r.a.b)],['= Share',pct(r.a.ad,r.a.b),'s'],r.a.ad?['Billings per $1 of ads',X(r.a.b/r.a.ad)]:null]):''}>${pct(r.a.ad,r.a.b)}</td></tr>`).join('')}
       <tr class="tot"><td>Total</td><td></td><td>${T.n}</td><td>${F(T.ad)}</td><td>${pct(T.ad,T.b)}</td></tr>
       ${xadv>0?`<tr class="sub"><td>Xero Job Advertisements, same months${INFO('Cost of sales account in Xero. SEEK is most of it; the rest is other job boards and timing.')}</td><td></td><td></td><td>${F(xadv)}</td><td class="mut"${CALC('SEEK share of Job Advertisements',pn,[['SEEK ads (all posters)',F(sMon)],['÷ Xero Job Advertisements',F(xadv)],['= SEEK share',PCT(sMon/xadv),'s']])}>${PCT(sMon/xadv)} SEEK</td></tr>`:''}
     </tbody></table></div>
-    <div class="tbl"><table><thead><tr><th>Posted by</th><th>Ads</th><th>Spend</th><th>Own billings</th><th>% of billings</th></tr></thead><tbody>
-      ${ppl.slice(0,14).map(p=>`<tr><td><i class="sw" style="background:var(--d${DCOL[p.d.name]||7})"></i><b style="color:var(--ink)">${esc(p.e.name)}</b><br><span class="mut" style="font-size:12px">${esc(p.old?p.e.role:p.d.label)}</span></td>
+    <div style="margin:12px 0"><button type="button" class="btn2" data-skp="1">${SKP?'Hide':'Show'} the breakdown by person (${ppl.length})</button></div>
+    ${SKP?`<div class="tbl"><table><thead><tr><th>Posted by</th><th>Ads</th><th>Spend</th><th>Own billings</th><th>% of billings</th></tr></thead><tbody>
+      ${ppl.map(p=>`<tr><td><i class="sw" style="background:var(--d${DCOL[p.d.name]||7})"></i><b style="color:var(--ink)">${esc(p.e.name)}</b><br><span class="mut" style="font-size:12px">${esc(p.old?p.e.role:p.d.label)}</span></td>
         <td>${p.old?'–':p.e.a.adN}</td><td${p.old?'':BD(esc(p.e.name)+': SEEK ads',pn+' · by month',ks.map(k=>({l:mShort(k),s:((p.e.adN||{})[k]||0)+' ads',v:(p.e.ads||{})[k]||0})),{keepOrder:true,total:p.e.a.ad})}>${F(p.e.a.ad)}</td>
         <td>${p.e.a.b?F(p.e.a.b):'<span class="mut">'+(isSup(p.e)?'desk support':'nil')+'</span>'}</td><td class="mut">${p.e.a.b?pct(p.e.a.ad,p.e.a.b):'–'}</td></tr>`).join('')}
-      ${ppl.length>14?`<tr class="sub"><td>${ppl.length-14} others</td><td></td><td>${F(ppl.slice(14).reduce((t,p)=>t+p.e.a.ad,0))}</td><td></td><td></td></tr>`:''}
-    </tbody></table></div></div></section>`;
+      <tr class="tot"><td>Total</td><td>${ppl.reduce((t,p)=>t+(p.old?0:p.e.a.adN||0),0)}</td><td>${F(ppl.reduce((t,p)=>t+p.e.a.ad,0))}</td><td></td><td></td></tr>
+    </tbody></table></div>`:''}</section>`;
 }
 const dLongS=d=>{if(!d) return '–'; const M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; return (+d.slice(8,10))+' '+M[+d.slice(5,7)-1]+' '+d.slice(0,4);};
 
@@ -851,8 +892,8 @@ function summary(){
     ${teamRows.map(tr=>`<div style="margin-bottom:12px">${bars([],tr)}</div>`).join('')}${bars(rows)}
   </section>
   <section class="blk"><div class="hd"><h2>Department scorecard${INFO('Each fee department\'s billings against its people\'s fully loaded cost. Hover any figure for the breakdown by person.')}</h2><div class="rt">${pn}</div></div>${scorecard()}</section>
+  ${deptShareSection([ENT])}
   ${seekSection([ENT])}
-  ${npBridge(ENT)}
   ${xeroSection()}
   <section class="blk"><div class="hd"><h2>Month by month${INFO('Each month\'s billings and fee-team cost against the current multiples. Closed months use FoundU pays normalised to a calendar month; the current month is estimated.')}</h2><div class="rt">${DATA.fy}</div></div>${monthTable()}</section>
   ${quarterSection()}`;
@@ -1379,6 +1420,7 @@ function gSummary(){
     <tr class="tot"><td>Woods Group</td><td${E('Billings',r=>r.b)}>${F(T.b)}</td><td${E('Fee-team cost',r=>r.c)}>${F(T.c)}</td><td${CALC('Multiple, Woods Group',pn,[['Billings',F(T.b)],['÷ Fee-team cost',F(T.c)],['= Billings per $1 of cost',X(T.c?T.b/T.c:0),'s']])}>${T.c?X(T.b/T.c):'—'}</td><td${E('Gap to break-even',r=>r.b-r.bev,{signed:true,sort:'val'})}>${F(T.b-T.bev)}</td><td${E('Gap to target',r=>r.b-r.tgt,{signed:true,sort:'val'})}>${F(T.b-T.tgt)}</td><td${E('Contribution',r=>r.ct,{signed:true,sort:'val'})}>${F(T.ct)}</td><td${xks.length?E('Xero net profit',r=>r.xnp,{signed:true,sort:'val'}):''}>${xks.length?F(T.xnp):'—'}</td></tr>
     </tbody></table></div></section>
   ${deptLineSection(['R','S'],' Recruitment and W&amp;Co Search departments together, in A$.')}
+  ${deptShareSection(['R','S'])}
   ${seekSection(['R','S'])}
   <section class="blk"><div class="hd"><h2>Month by month${INFO('Each month\'s billings and cost by entity, in A$. * includes estimated cost (the current month, or North America after the last payroll loaded).')}</h2><div class="rt">${DATA.fy} · A$</div></div>${gMonthTable(ents)}</section>
   ${summaryLevel?'':`<section class="blk"><div class="hd"><h2>Every fee earner in the group, ${pn}${INFO('Each person against their own entity\'s break-even multiple, so the gaps can be compared across Recruitment, Search and North America. Coordinators and desk support are left out; their cost is still in the entity figures above. A department that bills only as a team line on the sales sheet (Search) shows as one team row.')}</h2><div class="rt">Ranked by gap to break-even · A$</div></div>
@@ -1555,7 +1597,7 @@ function start(){
 }
 document.getElementById('tabs').addEventListener('click',ev=>{const b=ev.target.closest('.tab');if(!b)return;TAB=b.dataset.p;paint();window.scrollTo({top:0});});
 document.getElementById('seg').addEventListener('click',ev=>{const b=ev.target.closest('button');if(!b)return;PER=b.dataset.p;paint();});
-document.getElementById('content').addEventListener('click',ev=>{const b=ev.target.closest('[data-lm]');if(!b)return;LM=b.dataset.lm;const y=window.scrollY;paint();window.scrollTo({top:y});});
+document.getElementById('content').addEventListener('click',ev=>{const sk=ev.target.closest('[data-skp]');if(sk){SKP=!SKP;const y=window.scrollY;paint();window.scrollTo({top:y});return;}const b=ev.target.closest('[data-lm]');if(!b)return;LM=b.dataset.lm;const y=window.scrollY;paint();window.scrollTo({top:y});});
 document.getElementById('entsel').addEventListener('change',ev=>{ENT=ev.target.value;TAB='sum';PER='CUR';paint();window.scrollTo({top:0});});
 document.getElementById('refresh').addEventListener('click',()=>load(true));
 {const xo=document.getElementById('xon'); xo.checked=XON;
