@@ -761,7 +761,7 @@ function deptTips(d,a,pn){
     h:BD(lab+': on payroll',pn+' · cost in the period',a.mem.filter(e=>e.a.c>0&&!e.agg).map(e=>({l:e.name,s:e.role||'',v:e.a.c})),{total:a.c}),
     bl:BD(lab+': billed',pn,a.mem.filter(e=>e.a.b>0).map(e=>({l:e.name,v:e.a.b})).concat(team),{total:a.b}),
     ct:CALC(lab+': contribution',pn,[['Billings (GP)',F(a.b)],['Less commission accrued (sheet)',F(-a.ca)],['Less cost of employment',F(-a.c)],['Less share of overhead',F(-a.oh)],a.ad?['Less SEEK ads',F(-a.ad)]:null,['= Contribution',SG(a.ct),'s']],
-      'Overhead is non-payroll Xero operating expenses per head, shared by everyone on payroll.')};
+      'Overhead is non-payroll Xero operating expenses per head, shared by everyone on payroll'+((DATA.ovhPeople||[]).length?', plus the cost of people on payroll with no department ('+DATA.ovhPeople.map(p=>esc(p.name)).join(', ')+').':'.'))};
 }
 function scorecard(){
   const fee=deptsOf(ENT).filter(d=>d.fee), non=deptsOf(ENT).filter(d=>!d.fee), t=entAgg(), mm=M(), g=goal(), pn=esc(perName());
