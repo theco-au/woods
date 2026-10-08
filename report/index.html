@@ -1553,7 +1553,7 @@ function salesPaint(){
    Financial tabs read the Xero P&L (by month and account), the Xero balance sheet at
    each month end and the Xero bank summary. The Sales tab is the live dashboard.
    ===================================================================== */
-let RT='dash', PERSET=false, PLV='det', BSV='side', PLG='side', BSD='det'; const COLL=new Set();
+let PLREV=false; let RT='dash', PERSET=false, PLV='det', BSV='side', PLG='side', BSD='det'; const COLL=new Set();
 const vtog=(k,cur,opts)=>`<div class="vtog" role="group">${opts.map(([v,t])=>`<button type="button" data-${k}="${v}" class="${v===cur?'on':''}">${t}</button>`).join('')}</div>`;
 const RTABS=[{id:'dash',t:'Dashboard'},{id:'pl',t:'P&L'},{id:'bs',t:'Balance Sheet'},{id:'cf',t:'Cash Flow Summary'},{id:'calc',t:'Calcs'},{id:'sales',t:'Sales'}];
 const MNL=['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -1683,7 +1683,8 @@ function plTable(cols){
       const cls=c.mv?(Math.abs(v)<0.5?'mut':(v*sg>=0?'pos':'neg')):(v<0?'neg':'');
       return `<td class="${cls}"${tip}>${c.mv?(Math.abs(v)<0.5?'\u2013':SG(v).replace(/<[^>]+>/g,'')):F(v)}</td>`;}).join('')}</tr>`;};
     const A=f=>s=>Object.keys(s.L[f]).map(l=>({l,v:s.L[f][l]}));
-    const body2=R('Trading income',s=>s.rev,{acct:A('rev')})+R('Less cost of sales',s=>s.cos,{exp:true,acct:A('cos')})
+    const revN=PLREV&&lines?(()=>{const o=[];cols.forEach(c=>{if(c.s) Object.keys(c.s.L.rev).forEach(l=>{if(!o.includes(l)&&Math.abs(c.s.L.rev[l])>=0.5)o.push(l);});});return o;})():[];
+    const body2=revN.map(l=>R(esc(l),s=>s.L.rev[l]||0,{cls:'ln'})).join('')+R(revN.length?'Total trading income':'Trading income',s=>s.rev,{acct:A('rev'),cls:revN.length?'sub2':''})+R('Less cost of sales',s=>s.cos,{exp:true,acct:A('cos')})
       +R('Gross profit',s=>s.gp,{cls:'tot'})+`<tr class="pct"><td>Gross margin</td>${cols.map(c=>pctCell(c,'gp')).join('')}</tr>`
       +(cols.some(c=>Math.abs(fn(c,s=>s.oth))>=0.5)?R('Plus other income',s=>s.oth,{acct:A('oth')}):'')
       +(lines?R('Less wages, super and payroll costs',pay,{exp:true,acct:s=>Object.keys(s.L.opex).filter(isPayX).map(l=>({l,v:s.L.opex[l]})),info:'Operating expense accounts for wages, super, payroll tax, WorkCover, leave and other employment costs.'})
@@ -2098,24 +2099,27 @@ function dashPage(){
   const per=(qsel?ks:rYear()).map(k=>({l:kShort(k).slice(0,3),ks:[k],long:kLong(k)}));
   const ym=p=>GRP()?plConsSum(p.ks):plSum(ENT,p.ks), pon=p=>p.ks.every(on), pop=p=>'';
   const yv=per.map(p=>Object.assign({},p,{s:ym(p)})).filter(x=>x.s.n);
-  const rc=gBars(yv.map(x=>({l:x.l,on:pon(x),vs:[x.s.rev,x.s.gp],tip:CALC('Trading income, '+x.long,'',[['Trading income',F(x.s.rev)],['Gross profit',F(x.s.gp)],['Gross margin',x.s.rev?PCT(x.s.gp/x.s.rev):'\u2013']])})),[['Trading income','#2a78d6'],['Gross profit','#1baf7a']],{label:'Trading income and gross profit by month'});
-  const nc=gBars(yv.map(x=>({l:x.l,on:pon(x),vs:[x.s.np],tip:xNP('Net profit, '+x.long,'',x.s)})),[['Net profit','#1baf7a','#d0583f']],{label:'Net profit by month'});
+  /* trading income + gross profit and net profit bar charts removed 8 Oct 2026 (may return): see report.js.pre5 */
   const mv=per.map(p=>{const k=p.ks[0], b=GRP()?bsGroup(k):bsAt(ENT,k), b0=GRP()?bsGroup(kPrev(k)):bsAt(ENT,kPrev(k)); return b&&b0?{l:p.l,on:pon(p),vs:[b.T.bank-b0.T.bank],tip:CALC('Net cash movement, '+p.long,'',[['Cash at bank, '+kEnd(kPrev(k)),F(b0.T.bank)],['Cash at bank, '+kEnd(k),F(b.T.bank)],['= Movement',SG(b.T.bank-b0.T.bank),'s']])}:null;}).filter(Boolean);
   const mc=mv.length?gBars(mv,[['Net cash movement','#2a78d6','#d0583f']],{label:'Net cash movement by month'}):'';
   const cash=per.map(p=>{const k=p.ks[p.ks.length-1], b=GRP()?bsGroup(k):bsAt(ENT,k);return {l:p.l,v:b?b.T.bank:null,on:pon(p),tip:b?BD('Cash at bank, '+(b.d?dLong(b.d):kEnd(k)),GRP()?'By entity, A$':'By account',GRP()?(b.parts||[]).map(p=>({l:p.l,v:p.b.T.bank})):Object.keys(b.L.bank).map(l=>({l,v:b.L.bank[l]})),{total:b.T.bank}):''};});
   const cur=GRP()?'A$':rUS()?'US$':'A$';
+  /* summarised P&L for the period, with the trading income accounts shown */
+  const plSumm=(()=>{ const sv=PLV, sr=PLREV; PLV='sum'; PLREV=true; let t=''; try{ t=plTable(plCols()); }finally{ PLV=sv; PLREV=sr; } return t; })();
+  const cfSumm=es.some(hasBS)?cfTable(cfCols()):'';
+  const dE=GRP()?['R','S']:[ENT];
   return finFlags()+kpis
-    +(rUS()?'':deptLineSection(GRP()?['R','S']:[ENT],GRP()?' Recruitment and W&amp;Co Search departments together, in A$.':''))
     +(()=>{ const ms=rUS()?U().months:DATA.months, pl=k=>GRP()?plConsSum([k]):plSum(ENT,[k]), rows=ms.map(m=>({m,s:pl(m.key)}));
       if(!rows.some(r=>r.s.n)) return '';
-      const D={ms,series:[{key:'inc',name:'Trading income',colv:'#4a463e',a:rows.map(r=>({b:r.s.n?r.s.rev+r.s.oth:null}))},{key:'cost',name:'Costs',colv:'#c4735a',a:rows.map(r=>({b:r.s.n?r.s.cos+r.s.opex:null}))},{key:'np',name:'Net profit',colv:'#59a37c',a:rows.map(r=>({b:r.s.n?r.s.np:null}))}]};
-      return `<section class="blk"><div class="hd"><h2>Income and costs, month by month${INFO('Xero profit and loss: trading and other income, cost of sales plus operating expenses, and the net profit between them. Finished months only'+(GRP()?'; Group consolidated in A$.':'.'))}</h2><div class="rt">${cur}</div></div><div class="chc">${mLine(D,'b',{sub:cur,noTotal:true,label:'Income, costs and net profit by month',h:260})}</div></section>`; })()
-    +`<section class="blk"><div class="hd"><h2>${qsel?pn+', month by month':'The year so far'}</h2><div class="rt">${cur}${qsel?'':' · selected period highlighted'}</div></div>
-      <div class="two"><div class="chc"><div class="cht">Trading income and gross profit</div>${rc}</div><div class="chc"><div class="cht">Net profit</div>${nc}</div></div>
-      ${cash.some(c=>c.v!=null)?`<div class="two" style="margin-top:16px"><div class="chc"><div class="cht">Net cash movement</div>${mc}</div><div class="chc"><div class="cht">Cash at bank, month end</div>${lineChart(cash,{label:'Cash at bank by month end'})}</div></div>`:''}</section>`
-    +(!rUS()?`<section class="blk"><div class="hd"><h2>Departments against cost, ${pn}${INFO('From the Sales tab: each fee department\'s billings against its people\'s fully loaded cost, with the break-even and target marks.')}</h2><div class="rt">Sorted by billings</div></div>${deptBars(GRP()?['R','S']:[ENT])}</section>`+seekSection(GRP()?['R','S']:[ENT]):'')
-    +(!GRP()&&!rUS()?`<section class="blk"><div class="hd"><h2>Department scorecard${INFO('From the Sales tab: each fee department\'s billings against its people\'s fully loaded cost.')}</h2><div class="rt">${pn}</div></div>${scorecard()}</section>`:'')
-    +(!rUS()?deptShareSection(GRP()?['R','S']:[ENT]):'');
+      const D={ms,series:[{key:'rev',name:'Revenue',colv:'#2a78d6',a:rows.map(r=>({b:r.s.n?r.s.rev:null}))},{key:'gp',name:'Gross profit',colv:'#1baf7a',a:rows.map(r=>({b:r.s.n?r.s.gp:null}))},{key:'np',name:'Net profit',colv:'#4a463e',a:rows.map(r=>({b:r.s.n?r.s.np:null}))}]};
+      return `<section class="blk"><div class="hd"><h2>Income and costs, month by month${INFO('Xero profit and loss: revenue (trading income), gross profit (revenue less cost of sales) and net profit (gross profit plus other income less operating expenses)'+(GRP()?'; Group consolidated in A$.':'.'))}</h2><div class="rt">${cur}</div></div><div class="chc">${mLine(D,'b',{sub:cur,noTotal:true,label:'Revenue, gross profit and net profit by month',h:260})}</div></section>`; })()
+    +(plSumm?`<section class="blk"><div class="hd"><h2>Summarised profit and loss, ${pn}${INFO('Xero profit and loss in summary, with each trading income account shown. The full detail is on the P&amp;L tab.')}</h2><div class="rt">${cur}</div></div>${plSumm}</section>`:'')
+    +(cash.some(c=>c.v!=null)?`<section class="blk"><div class="hd"><h2>Cash, ${qsel?pn+', month by month':'month by month'}</h2><div class="rt">${cur}${qsel?'':' · selected period highlighted'}</div></div>
+      <div class="two"><div class="chc"><div class="cht">Net cash movement</div>${mc}</div><div class="chc"><div class="cht">Cash at bank, month end</div>${lineChart(cash,{label:'Cash at bank by month end'})}</div></div></section>`:'')
+    +(cfSumm?`<section class="blk"><div class="hd"><h2>Summarised cash flow, ${pn}${INFO('From Xero\'s cash-basis P&amp;L and the change in the other balance sheet accounts, ending at cash at bank. The full detail is on the Cash Flow Summary tab.')}</h2><div class="rt">${cur}</div></div>${cfSumm}</section>`:'')
+    +(rUS()?'':deptLineSection(dE,GRP()?' Recruitment and W&amp;Co Search departments together, in A$.':''))
+    +(!rUS()?`<section class="blk"><div class="hd"><h2>Departments against cost, ${pn}${INFO('From the Sales tab: each fee department\'s billings against its people\'s fully loaded cost, with the break-even and target marks.')}</h2><div class="rt">Sorted by billings</div></div>${deptBars(dE)}</section>`+seekSection(dE)+deptShareSection(dE):'')
+    +(!GRP()&&!rUS()?`<section class="blk"><div class="hd"><h2>Department scorecard${INFO('From the Sales tab: each fee department\'s billings against its people\'s fully loaded cost.')}</h2><div class="rt">${pn}</div></div>${scorecard()}</section>`:'');
 }
 
 /* ---------- shell ---------- */
