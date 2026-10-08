@@ -618,6 +618,62 @@ function deptLineSection(ents,note){
   return `<section class="blk"><div class="hd"><h2>Departments, month by month${INFO(info)}</h2><div class="rt">${lmTog()}</div></div>
     <div class="chc">${mLine(D,LM,{ref,refLab:ref!=null?'Break-even '+ref.toFixed(2)+'×':''})}</div></section>`;
 }
+/* one department's recruiters month by month (same chart as departments, one line per person) */
+const PCOL=['#2a78d6','#eb6834','#1baf7a','#eda100','#e87ba4','#008300','#7b5cc4','#8c6d3f','#4fa3b8','#8a857a'];
+function recruiterLineSection(dn){
+  const ms=DATA.months, sP=PER, by={}, order=[];
+  ms.forEach((m,i)=>{PER=m.key; const a=deptAgg(dn);
+    a.mem.forEach(e=>{ if(isSup(e)&&!e.a.b) return; const k=e.key||e.name; if(!by[k]){by[k]={name:e.name,a:ms.map(()=>({b:null,c:0,ct:null}))};order.push(k);} by[k].a[i]={b:e.a.b,c:e.a.c,ct:e.a.ct}; });
+    if(a.team){ if(!by._team){by._team={name:'Team line',a:ms.map(()=>({b:null,c:0,ct:null}))};order.push('_team');} by._team.a[i]={b:a.team,c:0,ct:a.team}; } });
+  PER=sP;
+  const tot=k=>by[k].a.reduce((t,x)=>t+(x.b||0),0);
+  const keys=order.filter(k=>by[k].a.some(x=>x.b||x.c)).sort((p,q)=>tot(q)-tot(p));
+  if(!keys.length) return '';
+  const series=keys.map((k,i)=>({key:k,name:by[k].name,colv:PCOL[i%PCOL.length],a:by[k].a.map(x=>({b:x.b==null&&!x.c?null:(x.b||0),c:x.c,ct:x.ct==null&&!x.c?null:x.ct}))}));
+  const info='Each person in the department, month by month across the year: billings (GP) from the sales sheet, billings per $1 of their fully loaded cost, and contribution (billings less commission accrued, cost, overhead share and SEEK ads posted). Coordinators who do not bill are left out.'+(MODE==='live'?' The current month is to date and drawn dashed.':' Finished months only.');
+  return `<section class="blk"><div class="hd"><h2>Recruiters, month by month${INFO(info)}</h2><div class="rt">${lmTog()}</div></div>
+    <div class="chc">${mLine({ms,series},LM,{ref:LM==='m'?M().be:null,refLab:LM==='m'?'Break-even '+M().be.toFixed(2)+'×':'',label:'Recruiters month by month'})}</div></section>`;
+}
+/* from the departments' contribution to Xero net profit, for one entity and the selected months */
+const PEOPLE_RE=/wages|salar|superannuation|payroll tax|workcover|annual leave|long service|commission|bonus|termination/i;
+function npBridge(en){
+  if(!en||en==='U'||en==='G'||!DATA.ents[en]) return '';
+  const ks=perMonths(), X=(DATA.xero||{})[en]||{}, miss=ks.filter(k=>!X[k]);
+  if(miss.length===ks.length) return '';
+  const sE=ENT; ENT=en;
+  const ds=deptsOf(en).map(d=>({d,a:deptAgg(d.name)}));
+  ENT=sE;
+  const fee=ds.filter(x=>x.d.fee), non=ds.filter(x=>!x.d.fee&&(x.a.c||x.a.b));
+  const sum=(arr,f)=>arr.reduce((t,x)=>t+f(x.a),0), all=ds;
+  const B=sum(all,a=>a.b), C=sum(all,a=>a.c), CA=sum(all,a=>a.ca), OH=sum(all,a=>a.oh), AD=sum(all,a=>a.ad);
+  const x={rev:0,cos:0,oth:0,opex:0,np:0,ppl:0,L:{rev:{},cos:{},oth:{},ppl:{},ovh:{}}};
+  ks.forEach(k=>{const r=X[k]; if(!r) return; ['rev','cos','oth','opex','np'].forEach(f=>x[f]+=r[f]||0);
+    const ln=r.lines||{}; [['rev','rev'],['cos','cos'],['oth','oth']].forEach(([f,g])=>(ln[f]||[]).forEach(([l,v])=>{x.L[g][l]=(x.L[g][l]||0)+v;}));
+    (ln.opex||[]).forEach(([l,v])=>{const g=PEOPLE_RE.test(l)?'ppl':'ovh'; x.L[g][l]=(x.L[g][l]||0)+v; if(g==='ppl') x.ppl+=v;});});
+  const xOvh=x.opex-x.ppl, ctFee=sum(fee,a=>a.ct), ctNon=sum(non,a=>a.ct);
+  /* temp (labour hire) revenue and its cost of sales, shown as one margin line */
+  const TR=/temp|contract|labour hire/i, tsum=o=>Object.keys(o).filter(l=>TR.test(l)).reduce((t,l)=>t+o[l],0);
+  const tRev=tsum(x.L.rev), tCos=tsum(x.L.cos), nt=o=>{const r={};Object.keys(o).filter(l=>!TR.test(l)).forEach(l=>r[l]=o[l]);return r;};
+  const L=(o)=>Object.keys(o).map(l=>({l,v:o[l]}));
+  const rows=[
+    ['Fee departments\' contribution',ctFee,BD('Fee departments\' contribution',esc(perName()),fee.map(z=>({l:z.d.label,v:z.a.ct})),{signed:true,total:ctFee})],
+    ['Non-fee departments (cost and overhead share)',ctNon,non.length?BD('Non-fee departments',esc(perName()),non.map(z=>({l:z.d.label,v:z.a.ct})),{signed:true,total:ctNon}):''],
+    ['Temp margin (Xero temp revenue less temp cost of sales)',tRev-tCos,CALC('Temp margin',esc(perName()),[['Temp revenue',F(tRev)],['Less temp cost of sales',F(-tCos)],['= Temp margin',SG(tRev-tCos),'s']],'Billings on the dashboard are permanent fees only.')],
+    ['Permanent fees: Xero against the sales sheet',x.rev-tRev-B,CALC('Permanent fees and other revenue',esc(perName()),[['Xero trading income excluding temp',F(x.rev-tRev)],['Less billings (GP), sales sheet',F(-B)],['= Difference',SG(x.rev-tRev-B),'s']],'Invoice timing against start-date crediting, credit notes, sales sheet errors and other revenue accounts. Xero by account: '+L(nt(x.L.rev)).map(z=>esc(z.l)+' '+F(z.v)).join('; ')+'.')],
+    ['Other income',x.oth,L(x.L.oth).length?BD('Other income','Xero, by account',L(x.L.oth),{total:x.oth}):''],
+    ['Cost of sales other than temp and SEEK ads',-(x.cos-tCos)+AD,CALC('Cost of sales other than temp and SEEK ads',esc(perName()),[['Xero cost of sales excluding temp',F(-(x.cos-tCos))],['Add back SEEK ads already in contribution',F(AD)],['= Difference',SG(-(x.cos-tCos)+AD),'s']],'Other job boards, the Search recharge and similar. Xero by account: '+L(nt(x.L.cos)).map(z=>esc(z.l)+' '+F(z.v)).join('; ')+'.')],
+    ['Wages and on-costs: dashboard against Xero',C+CA-x.ppl,CALC('Wages and on-costs',esc(perName()),[['Cost of employment in contribution',F(C)],['Commission accrued (sales sheet)',F(CA)],['Less Xero wages, super, payroll tax, WorkCover and commission',F(-x.ppl)],['= Difference',SG(C+CA-x.ppl),'s']],'Normalised pays (days ÷ 7 ÷ pays) and Settings rates against Xero as posted; commission accrued against commission paid. Xero by account: '+L(x.L.ppl).map(z=>esc(z.l)+' '+F(z.v)).join('; ')+'.')],
+    ['Overhead: per-head share against Xero',OH-xOvh,CALC('Overhead',esc(perName()),[['Overhead share in contribution',F(OH)],['Less Xero non-payroll operating expenses (incl. interest)',F(-xOvh)],['= Difference',SG(OH-xOvh),'s']],'Includes interest (left out of overhead), months not yet closed carried from the last closed month, and the cost of people with no department.')]];
+  const tot=rows.reduce((t,r)=>t+r[1],0), resid=x.np-tot;
+  const info='Reconciles the departments\' contribution to Xero net profit for '+esc(DATA.ents[en].name||en)+'. Contribution is a management measure (sales sheet billings, normalised payroll, overhead per head); each line shows where it differs from the ledger. Hover a line for the workings.';
+  return `<section class="blk"><div class="hd"><h2>Contribution to net profit${INFO(info)}</h2><div class="rt">${esc(perName())}</div></div>
+    ${miss.length?flag('Xero not synced for '+miss.map(mShort).join(', '),'Those months are left out of the Xero side.','hi'):''}
+    <div class="tbl"><table><thead><tr><th>Item</th><th>Amount</th></tr></thead><tbody>
+    ${rows.map(([l,v,t])=>`<tr><td>${l}</td><td class="${v<0?'neg':''}"${t||''}>${F(v)}</td></tr>`).join('')}
+    <tr class="tot"><td>Xero net profit</td><td class="${x.np<0?'neg':''}">${F(x.np)}</td></tr>
+    <tr class="sub"><td>Remaining variance</td><td>${F(Math.abs(resid)<0.5?0:resid)}</td></tr>
+    </tbody></table></div></section>`;
+}
 /* departments as bars: billings against cost, break-even and target (the same marks as the people bars) */
 function deptBars(ents){
   const rows=[]; const sE=ENT;
@@ -796,6 +852,7 @@ function summary(){
   </section>
   <section class="blk"><div class="hd"><h2>Department scorecard${INFO('Each fee department\'s billings against its people\'s fully loaded cost. Hover any figure for the breakdown by person.')}</h2><div class="rt">${pn}</div></div>${scorecard()}</section>
   ${seekSection([ENT])}
+  ${npBridge(ENT)}
   ${xeroSection()}
   <section class="blk"><div class="hd"><h2>Month by month${INFO('Each month\'s billings and fee-team cost against the current multiples. Closed months use FoundU pays normalised to a calendar month; the current month is estimated.')}</h2><div class="rt">${DATA.fy}</div></div>${monthTable()}</section>
   ${quarterSection()}`;
@@ -961,6 +1018,7 @@ function deptPage(dn){
     return {v:c3?X(b3/c3):'—',t:c3?CALC(lab+': last 3 closed months',(r[0]?r[0].ks.map(mShort).join(', '):''),[['Billings (GP)',F(b3)],['÷ Cost of employment',F(c3)],['= Billings per $1 of cost',X(b3/c3),'s']]):''};})();
   return kp+`<section class="blk"><div class="hd"><h2>${lab}</h2><div class="rt">${pn}</div></div>
     ${d.fee?bars(rows,team):''}</section>
+    ${d.fee?recruiterLineSection(dn):''}
     ${d.fee&&PER==='CUR'?trackSection([d]):''}
     <section class="blk"><div class="hd"><h2>Cost build and contribution${INFO(info)}</h2><div class="rt">${pn}</div></div>
     <div class="tbl cmp"><table><thead><tr><th>Name</th><th>Base pay</th><th>Super</th><th>On-costs</th><th>Cost</th><th>Comm. paid</th>
