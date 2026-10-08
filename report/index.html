@@ -1852,6 +1852,9 @@ function bsCons(k,ents){
 }
 const isAR=l=>/receivable|debtor/i.test(l);
 const isAP=l=>/payable|creditor/i.test(l)&&!/gst|payg|tax|super|wage|payroll/i.test(l);
+/* trade debtors and creditors on the balance sheet: the Xero control accounts only (sundry creditors and accruals sit in other liabilities) */
+const isTAR=l=>/accounts receivable|trade debtor/i.test(l);
+const isTAP=l=>/accounts payable|trade creditor/i.test(l);
 const sumL=(b,s,f)=>Object.keys(b.L[s]).filter(f).reduce((t,l)=>t+b.L[s][l],0);
 
 function bsCols(){
@@ -1892,8 +1895,8 @@ function bsTable(cols){
   const C=(lab,rows)=>c=>CALC(lab+', '+nm(c),'',rows(c));
   if(BSD==='sum'){
     /* summarised: each account goes to one line, so the lines add to the section totals */
-    const cat=(s,l)=>s==='bank'?'cash':s==='fa'?'fa':(s==='ca'||s==='nca')?(isFinL(l)?'aloan':isAR(l)?'ar':'aoth')
-      :(s==='cl'||s==='ncl')?(isAP(l)?'ap':isTaxL(l)?'tax':isFinL(l)?'lloan':'loth'):s==='eq'?(isEarn(l)?'earn':'cap'):'x';
+    const cat=(s,l)=>s==='bank'?'cash':s==='fa'?'fa':(s==='ca'||s==='nca')?(isFinL(l)?'aloan':isTAR(l)?'ar':'aoth')
+      :(s==='cl'||s==='ncl')?(isTAP(l)?'ap':isTaxL(l)?'tax':isFinL(l)?'lloan':'loth'):s==='eq'?(isEarn(l)?'earn':'cap'):'x';
     const acc=(b,k)=>{const o=[]; BSS.forEach(([s])=>Object.keys(b.L[s]).forEach(l=>{if(cat(s,l)===k) o.push({l,v:b.L[s][l]});})); return o;};
     const val=(b,k)=>k==='cr'?((b.T.cl)?(b.T.bank+b.T.ca)/b.T.cl:null):b[k]!=null&&typeof b[k]==='number'?b[k]:acc(b,k).reduce((t,x)=>t+x.v,0);
     const g=(c,k)=>c.mv?(()=>{const a=g(cols[c.mv[0]],k), b=g(cols[c.mv[1]],k); return a==null||b==null?null:a-b;})():!c.b?null:val(c.b,k);
@@ -2248,14 +2251,14 @@ function bsPage(){
   if(!es.some(hasBS)) return finFlags();
   const b=GRP()?(BSV==='cons'?cols[2].b:cols[cols.length-1].b):cols[0].b;
   let kp='';
-  if(b){ const pl=GRP()?plGroup([end]):plSum(ENT,[end]), ar=sumL(b,'ca',isAR), ap=sumL(b,'cl',isAP), dim=new Date(+end.slice(0,4),+end.slice(5,7),0).getDate(), gst=rUS()?1:1.1;
+  if(b){ const pl=GRP()?plGroup([end]):plSum(ENT,[end]), ar=sumL(b,'ca',isTAR), ap=sumL(b,'cl',isTAP), dim=new Date(+end.slice(0,4),+end.slice(5,7),0).getDate(), gst=rUS()?1:1.1;
     const dd=pl.rev?ar/(pl.rev*gst)*dim:0, cr=b.T.cl?(b.T.bank+b.T.ca)/b.T.cl:0;
     kp=`<div class="kpis">
       <div class="kpi"><div class="lab">Net assets${INFO('Total assets less total liabilities.')}</div><div class="val">${F(b.net)}</div></div>
       <div class="kpi"><div class="lab">Cash at bank</div><div class="val"${BD('Cash at bank','By account',Object.keys(b.L.bank).map(l=>({l,v:b.L.bank[l]})),{total:b.T.bank})}>${F(b.T.bank)}</div></div>
       <div class="kpi"><div class="lab">Working capital${INFO('Bank and current assets less current liabilities.')}</div><div class="val"${CALC('Working capital','',[['Bank',F(b.T.bank)],['Current assets',F(b.T.ca)],['Less current liabilities',F(-b.T.cl)],['= Working capital',F(b.wc),'s']])}>${F(b.wc)}</div><div class="sub">Current ratio ${cr.toFixed(2)}</div></div>
       <div class="kpi"><div class="lab">Trade debtors${INFO('Accounts receivable on the balance sheet. Debtor days are receivables ÷ the month\'s trading income'+(rUS()?'':' grossed up for GST')+' × days in the month, so treat them as indicative (temp billings and timing distort them).')}</div><div class="val"${BD('Receivables','By account',Object.keys(b.L.ca).filter(isAR).map(l=>({l,v:b.L.ca[l]})),{total:ar})}>${F(ar)}</div><div class="sub">${dd?Math.round(dd)+' debtor days':''}</div></div>
-      <div class="kpi"><div class="lab">Trade creditors</div><div class="val"${BD('Payables','By account',Object.keys(b.L.cl).filter(isAP).map(l=>({l,v:b.L.cl[l]})),{total:ap})}>${F(ap)}</div></div>
+      <div class="kpi"><div class="lab">Trade creditors</div><div class="val"${BD('Payables','By account',Object.keys(b.L.cl).filter(isTAP).map(l=>({l,v:b.L.cl[l]})),{total:ap})}>${F(ap)}</div></div>
     </div>`; }
   const info='Xero balance sheet, standard layout. '+(GRP()?(BSV==='cons'?'Consolidated: the entities added together in A$ (North America at the RBA month-end AUD/USD rate), less balances between them. An account in one entity that names another entity in the group (for example "Loan - W&amp;Co Search Pty Ltd") is eliminated, and an investment in a group entity is eliminated against its share capital. Where the two sides do not agree, the difference shows in equity as "Inter-entity balances that do not agree" and in the table below. Entities outside the dashboard (Woods &amp; Co Education, USA CCORP) are not eliminated.':'Side by side in A$, North America at the RBA month-end AUD/USD rate. Not consolidated: switch to Consolidated to eliminate the balances between the entities.'):'At the end of the period, against the start of the period and the end of the last financial year.')+(rUS()?' North America\'s year runs to 31 December.':'');
   const tog=(GRP()?vtog('bsv',BSV,[['side','Side by side'],['cons','Consolidated']]):(Object.keys(DATA.ents).length>1?`<button type="button" class="lnkb" data-gocons="1">Consolidated group balance sheet \u2192</button>`:''))+' '+vtog('bsd',BSD,[['det','Detailed'],['sum','Summary']]);
