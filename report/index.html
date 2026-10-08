@@ -103,7 +103,7 @@
   svg.mlc .yl{font:11px var(--mono);fill:var(--mid);text-anchor:end}svg.mlc .xl{font:11.5px var(--sans);fill:var(--mid);text-anchor:middle}
   svg.mlc .sl{fill:none;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}svg.mlc .sl.pt{stroke-dasharray:5 4}
   svg.mlc .mk{stroke-width:2;fill:#fff}svg.mlc .mk.pt{fill:#fff}
-  svg.mlc .el{font:600 11.5px var(--sans);fill:var(--ink)}svg.mlc .ek{stroke-width:3;stroke-linecap:round}
+  svg.mlc .el{font:600 11.5px var(--sans);fill:var(--ink)}svg.mlc .ev{font:600 11px var(--mono);fill:var(--mid)}svg.mlc .ek{stroke-width:3;stroke-linecap:round}
   svg.mlc .rf{stroke:var(--bench);stroke-width:1.5;stroke-dasharray:6 4}svg.mlc .rfl{font:600 11px var(--sans);fill:var(--bench)}
   svg.mlc .xh{stroke:#8a857a;stroke-width:1;opacity:0}svg.mlc .hcol:hover .xh,svg.mlc .hcol:focus-within .xh{opacity:.6}
   svg.mlc .hr{fill:transparent;cursor:crosshair}svg.mlc .hr:focus{outline:none}
@@ -272,6 +272,24 @@
   footer .logo{height:22px;margin-bottom:14px}footer .logo path{fill:#e4e0d6}
   footer b{color:#ddd8cd;font-weight:600}
   footer p{max-width:92ch;margin-top:9px}
+  .cht{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:6px}
+  .lnd-n b.neg{color:var(--loss)}.lnd-n b.pos{color:#13865d}
+  table.heat thead th{background:var(--card)}
+  .enote{font-size:13.5px;color:var(--body);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:11px 16px;margin:0 0 34px}
+  .land{padding:16px 18px 12px}.lnd-n{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
+  .lnd-n div{display:flex;flex-direction:column;gap:2px;font-size:12.5px}.lnd-n b{font:700 19px var(--mono);color:var(--ink)}
+  .lnd-t{position:relative;height:22px;background:#f0ede6;border-radius:6px;margin-bottom:10px}
+  .lnd-b,.lnd-p{position:absolute;top:0;bottom:0}.lnd-b{left:0;background:#2a78d6;border-radius:6px 0 0 6px}.lnd-p{background:#a9c8ee}
+  .lnd-m{position:absolute;top:-5px;bottom:-5px;width:3px;margin-left:-1.5px;background:var(--ink);border-radius:2px}.lnd-m.be{background:#8a857a;width:2px}
+  @media(max-width:700px){.lnd-n{grid-template-columns:repeat(2,1fr)}}
+  table.heat td,table.heat th{text-align:center;padding:7px 6px;font:600 12px var(--mono);white-space:nowrap}
+  table.heat td:first-child,table.heat th:first-child{text-align:left;font:13px var(--sans);min-width:170px;background:var(--card)}
+  table.heat td{border-bottom:2px solid var(--card);border-right:2px solid var(--card)}table.heat td.hz0{color:#c9c3b6;background:#faf8f4}
+  table.heat tr.tot td{background:#f4f1ea;color:var(--ink)}
+  .snav{position:sticky;top:0;z-index:20;display:flex;gap:4px 14px;flex-wrap:wrap;background:rgba(245,243,238,.96);backdrop-filter:blur(4px);border-bottom:1px solid var(--line);padding:9px 0;margin:-14px 0 24px}
+  .snav a{font:600 12.5px var(--sans);color:var(--body);text-decoration:none;white-space:nowrap}.snav a:hover{color:var(--ink);text-decoration:underline}
+  #content>section.blk{scroll-margin-top:56px}
+  @media print{.snav{display:none}}
 
   /* management report */
   .xtog{display:none!important}
@@ -319,10 +337,38 @@
   .hd .rt .vtog+.vtog,.hd .rt .lnkb+.vtog{margin-left:8px}
   .kpis.k3{grid-template-columns:repeat(3,1fr)}@media(max-width:900px){.kpis.k3{grid-template-columns:repeat(2,1fr)}}@media(max-width:560px){.kpis.k3{grid-template-columns:1fr}}
   .three{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}@media(max-width:1000px){.three{grid-template-columns:1fr}}
+  /* scorecard sparklines, ageing, movers, exports (8 Oct 2026) */
+  .spk{display:block;width:100%;height:34px;margin-top:10px}
+  .xbtn{font:600 12px var(--sans);color:#f2efe8;background:transparent;border:1px solid #5d5850;border-radius:7px;padding:5px 11px;cursor:pointer}
+  .xbtn:hover{border-color:#f2efe8}.xbtn:focus-visible{outline:2px solid var(--bench);outline-offset:1px}
+  .agebar{display:flex;height:22px;border-radius:6px;overflow:hidden;gap:2px;margin:6px 0 12px;background:var(--card)}
+  .agebar span{display:block;height:100%;min-width:3px}
+  .h3s{font-size:14px;font-weight:700;color:var(--ink);margin:18px 0 8px}
+  tr.hl td{background:#fbf6ea}
+  .rk{display:inline-flex;width:18px;height:18px;border-radius:50%;background:var(--ink);color:#fff;font:700 11px var(--sans);align-items:center;justify-content:center;margin-right:8px;vertical-align:1px}
+  #xpAll{display:none}
+  .xp-cover{background:var(--black);color:#f2efe8;border-radius:14px;padding:34px 36px 40px;margin-bottom:28px}
+  .xp-cover .hd-row{margin-bottom:60px}.xp-cover .hd-meta{color:#bdb7ab}
+  .xp-k{font:700 12px var(--sans);letter-spacing:.12em;text-transform:uppercase;color:#bdb7ab;margin-bottom:10px}
+  .xp-t{font-size:40px;font-weight:800;letter-spacing:-.03em;color:#fff;line-height:1.05}
+  .xp-p{font-size:22px;font-weight:600;color:#f2efe8;margin:8px 0 26px}.xp-d{font-size:13px;color:#bdb7ab}
+  .xp-h{font-size:26px;font-weight:800;letter-spacing:-.02em;color:var(--ink);margin:6px 0 16px;padding-bottom:10px;border-bottom:2px solid var(--ink)}
+  .xp-page{margin-bottom:40px}
+  body.xstatic .info,body.xstatic .xbtn,body.xstatic .rnav,#xpAll .info,#xpAll .rnav,#xpAll .xbtn{display:none!important}
+  body.xstatic main{padding-top:28px}
+  @page{size:A4 landscape;margin:11mm}
   @media print{
-    .entbar,.perbar,#rtabs,.stabs,.rnav,.info,footer{display:none!important}
+    *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .entbar,.perbar,#rtabs,.stabs,.rnav,.info,.xbtn,footer,.tip{display:none!important}
     header.top{background:#fff;color:#000;padding:0}header.top h1{color:#000}.logo path{fill:#000}
-    main{padding:12px 0}.blk{break-inside:avoid}body{background:#fff}
+    main{padding:12px 0}.kpis,.chc,.two,.three,tr,.kpi{break-inside:avoid}.blk{break-inside:auto;margin-bottom:22px}.hd,h3,.cht{break-after:avoid}body{background:#fff}
+    .wrap{max-width:none;padding:0}
+    body.xprint>*:not(#xpAll){display:none!important}
+    body.xprint #xpAll{display:block}
+    .xp-page{break-before:page;margin:0}
+    .xp-cover{min-height:170mm;margin:0;display:flex;flex-direction:column;justify-content:space-between}
+    .xp-cover .logo path{fill:#f2efe8}
+    .two .chc,.chc,.kpi{box-shadow:none}
   }
 </style>
 </head>
@@ -661,7 +707,7 @@ function mLine(D,m,o){
   const ends=S.map(s=>{let i=s.v.length-1; while(i>=0&&s.v[i]==null) i--; return i<0?null:{s,yy:y(s.v[i]),v:s.v[i]};}).filter(Boolean).sort((a,b)=>a.yy-b.yy);
   ends.forEach((e,i)=>{ if(i&&e.yy-ends[i-1].yy<14) e.yy=ends[i-1].yy+14; });
   for(let i=ends.length-1;i>=0;i--){ if(ends[i].yy>T+h){ends[i].yy=T+h;} if(i<ends.length-1&&ends[i+1].yy-ends[i].yy<14) ends[i].yy=ends[i+1].yy-14; }
-  ends.forEach(e=>{g+=`<line x1="${L+w+8}" x2="${L+w+18}" y1="${e.yy}" y2="${e.yy}" style="stroke:${scol(e.s)}" class="ek"/><text x="${L+w+23}" y="${e.yy+4}" class="el">${esc(e.s.name)}</text>`;});
+  ends.forEach(e=>{g+=`<line x1="${L+w+8}" x2="${L+w+18}" y1="${e.yy}" y2="${e.yy}" style="stroke:${scol(e.s)}" class="ek"/><text x="${L+w+23}" y="${e.yy+4}" class="el">${esc(e.s.name.length>17?e.s.name.slice(0,16).trim()+'…':e.s.name)} <tspan class="ev">${m==='m'?e.v.toFixed(2)+'×':KS(e.v)}</tspan></text>`;});
   /* hover columns */
   ms.forEach((mo,i)=>{ const x0=i?(x(i-1)+x(i))/2:L-10, x1=i<n-1?(x(i)+x(i+1))/2:L+w+10;
     const items=S.map(s=>({l:s.name,v:s.v[i]==null?0:s.v[i],f:lmFmt(s.v[i],m)}));
@@ -704,11 +750,13 @@ function deptShareSection(ents){
   ents.filter(e=>DATA.ents[e]&&e!=='U').forEach(en=>{ENT=en; deptsOf(en).filter(d=>d.fee).forEach(d=>{const a=deptAgg(d.name); if(a.b||a.c) rows.push({d,a,en});});});
   ENT=sE; if(!rows.length) return '';
   const pn=esc(perName()), col=r=>'var(--d'+(DCOL[r.d.name]||7)+')';
+  const ph=rows.filter(r=>r.a.billers&&r.a.b).map(r=>({l:r.d.label,v:r.a.b/r.a.billers,c:col(r),tip:CALC(esc(r.d.label)+': billings per fee earner',pn,[['Billings (GP)',F(r.a.b)],['\u00f7 Fee earners with cost (coordinators left out)',String(r.a.billers)],['= Per fee earner',F(r.a.b/r.a.billers),'s']])})).sort((p,q)=>q.v-p.v);
   const pie=donut(rows.slice().sort((p,q)=>q.a.b-p.a.b).map(r=>({l:r.d.label,v:r.a.b,c:col(r)})),{label:'Billings by department',mid:'billings'});
   const ct=hBars(rows.slice().sort((p,q)=>q.a.ct-p.a.ct).map(r=>({l:r.d.label,v:r.a.ct,c:col(r),
     tip:CALC(esc(r.d.label)+': contribution',pn,[['Billings (GP)',F(r.a.b)],['Less commission accrued (sheet)',F(-r.a.ca)],['Less cost of employment',F(-r.a.c)],['Less share of overhead',F(-r.a.oh)],r.a.ad?['Less SEEK ads',F(-r.a.ad)]:null,['= Contribution',SG(r.a.ct),'s']])})));
   return `<section class="blk"><div class="hd"><h2>Billings and contribution by department${INFO('Left: each fee department\'s share of billings (GP) on the sales sheet. Right: contribution, being billings less commission accrued, cost of employment, a per-head share of overhead and SEEK ads posted. Hover a bar for the workings.')}</h2><div class="rt">${pn}</div></div>
-    <div class="two"><div class="chc"><div class="cht">Billings by department</div>${pie}</div><div class="chc"><div class="cht">Contribution by department</div>${ct}</div></div></section>`;
+    <div class="two"><div class="chc"><div class="cht">Billings by department</div>${pie}</div><div class="chc"><div class="cht">Contribution by department</div>${ct}</div></div>
+    ${ph.length?`<div class="chc" style="margin-top:16px"><div class="cht">Billings per fee earner</div>${hBars(ph,{})}</div>`:''}</section>`;
 }
 /* one department's recruiters month by month (same chart as departments, one line per person) */
 const PCOL=['#2a78d6','#eb6834','#1baf7a','#eda100','#e87ba4','#008300','#7b5cc4','#8c6d3f','#4fa3b8','#8a857a'];
@@ -784,7 +832,7 @@ function seekSection(ents){
     a.mem.forEach(e=>{ if(e.a.ad) ppl.push({e,d}); });
     if(a.adO) ppl.push({e:{name:'Former staff',a:{ad:a.adO,adN:0,b:0},role:Object.keys(a.adW).join(', ')},d,old:true});});});
   ENT=sE;
-  if(!rows.some(r=>r.a.ad)) return `<section class="blk"><div class="hd"><h2>SEEK advertising${INFO('Job ads from the SEEK ad usage report, charged to the person who posted them in the month posted.')}</h2><div class="rt">${pn}</div></div>${flag('No SEEK ads in this period','The SEEK ad usage report loaded runs from '+esc(dLongS(sk.from))+' to '+esc(dLongS(lastAd))+'. Add the next report to the Seek_Ads_Manual tab to bring later months in.')}</section>`;
+  if(!rows.some(r=>r.a.ad)) return `<div class="enote"><b>SEEK advertising:</b> no ads in ${pn}. The ad usage report loaded runs from ${esc(dLongS(sk.from))} to ${esc(dLongS(lastAd))}.</div>`;
   const T=rows.reduce((t,r)=>({ad:t.ad+r.a.ad,n:t.n+r.a.adN,b:t.b+r.a.b}),{ad:0,n:0,b:0}), mx=Math.max(...rows.map(r=>r.a.ad),1);
   const pct=(ad,b)=>b?PCT(ad/b):'–';
   ppl.sort((p,q)=>q.e.a.ad-p.e.a.ad);
@@ -936,13 +984,15 @@ function summary(){
   </div>
   ${hasEst()?flag(esc(DATA.months.find(m=>m.key===c.key).label)+' is in progress','Cost is estimated for '+c.day+' of '+c.days+' days from salaries. Billings are whatever the sales sheet holds today, so the month will look short of target until placements are entered.'):''}
   ${DATA.viewer&&DATA.viewer.level==='summary'?flag('Department view','Individual pay is not shown at your access level. Each department\'s payroll appears as one line.'):''}
-  ${PER==='CUR'?fwdNote(fee):''}
+  ${PER==='CUR'?landSection(fee):''}
+  ${PER==='CUR'?fwdSection(fee):''}
   ${PER==='CUR'?trackSection(fee):''}
   ${deptLineSection([ENT])}
   ${fee.length>1?`<section class="blk"><div class="hd"><h2>Departments against cost, ${pn}${INFO('Each fee department\'s billings against its people\'s fully loaded cost, with the break-even and target marks. Hover a bar for the figures.')}</h2><div class="rt">Sorted by billings</div></div>${deptBars([ENT])}</section>`:''}
   <section class="blk"><div class="hd"><h2>Every fee earner, ${pn}${INFO('Each person\'s billings against their fully loaded cost. Everyone carries the same multiple: break-even is cost × '+mm.be.toFixed(2)+(g?' and target is cost × '+mm.tg.toFixed(2):'')+', '+esc(DATA.mult.BASIS)+'. Coordinators are desk support: their cost counts in the department, not as an individual target. Hover a row for the cost build.')}</h2><div class="rt">Sorted by billings</div></div>
     ${teamRows.map(tr=>`<div style="margin-bottom:12px">${bars([],tr)}</div>`).join('')}${bars(rows)}
   </section>
+  ${heatSection(fee)}
   <section class="blk"><div class="hd"><h2>Department scorecard${INFO('Each fee department\'s billings against its people\'s fully loaded cost. Hover any figure for the breakdown by person.')}</h2><div class="rt">${pn}</div></div>${scorecard()}</section>
   ${deptShareSection([ENT])}
   ${seekSection([ENT])}
@@ -951,6 +1001,60 @@ function summary(){
   ${quarterSection()}`;
 }
 function deptBill(d,keys){const t=DATA.team[d.name]||{};return DATA.emps.filter(e=>e.dept===d.name).reduce((a,e)=>a+keys.reduce((b,k)=>b+(e.bill[k]||0),0),0)+keys.reduce((b,k)=>b+(t[k]||0),0);}
+/* ---------- business days, projected month-end, forward starts, heatmap (8 Oct 2026) ---------- */
+const dimK=k=>new Date(+k.slice(0,4),+k.slice(5,7),0).getDate();
+const bDays=(k,a,b)=>{const y=+k.slice(0,4),m=+k.slice(5,7)-1; let n=0; for(let d=a;d<=b;d++){const w=new Date(y,m,d).getDay(); if(w&&w<6) n++;} return n;};
+function landSection(fee){
+  if(MODE!=='live') return '';
+  const c=DATA.current, k=c.key, ks=DATA.months.map(m=>m.key), i=ks.indexOf(k), prev=ks.slice(Math.max(0,i-3),i);
+  if(!prev.length||!fee.length) return '';
+  const bill=kk=>fee.reduce((s,d)=>s+deptBill(d,[kk]),0);
+  const pb=prev.map(kk=>({k:kk,b:bill(kk),d:bDays(kk,1,dimK(kk))})), pB=pb.reduce((s,x)=>s+x.b,0), pD=pb.reduce((s,x)=>s+x.d,0), rate=pD?pB/pD:0;
+  const done=bDays(k,1,c.day), rem=bDays(k,c.day+1,c.days), now=bill(k), proj=now+rate*rem;
+  const mm=M(), g=goal(), cost=DATA.emps.filter(e=>fee.some(d=>d.name===e.dept)).reduce((s,e)=>s+monthCost(e,k),0), be=cost*mm.be, tg=cost*mm.tg, ref=g?tg:be, gap=proj-ref;
+  const mo=DATA.months.find(m=>m.key===k), mx=Math.max(proj,ref,1)*1.04, P=v=>(v/mx*100).toFixed(2)+'%';
+  const wk=CALC('Projected month-end, '+esc(mo.label),'Billed so far plus the recent daily rate for the business days left',[['Billed so far ('+done+' business days)',F(now)],['Average billings per business day, '+pb.map(x=>mShort(x.k)).join(', '),F(rate)],['× Business days left',String(rem)],['= Projected month-end',F(proj),'s'],[g?'Target (full-month cost × '+mm.tg.toFixed(2)+')':'Break-even (full-month cost × '+mm.be.toFixed(2)+')',F(ref)],['= '+(gap>=0?'Ahead':'Short'),SG(gap),'s']],'Weekdays only; public holidays are not taken out. Billings already entered for later in the month are in billed so far, so the projection leans high early in the month.');
+  return `<section class="blk"><div class="hd"><h2>Projected month-end, ${esc(mo.label)}${INFO('Billed so far plus the average billings per business day over the last three months, times the business days left. A run-rate guide, not a forecast.')}</h2><div class="rt">${rem} business day${rem===1?'':'s'} left</div></div>
+    <div class="chc land"${wk}>
+      <div class="lnd-n"><div><span class="mut">Billed so far</span><b>${F(now)}</b></div><div><span class="mut">Landing at</span><b>${F(proj)}</b></div><div><span class="mut">${g?'Target':'Break-even'}</span><b>${F(ref)}</b></div><div><span class="mut">${gap>=0?'Ahead':'Short'}</span><b class="${gap>=0?'pos':'neg'}">${F(Math.abs(gap))}</b></div></div>
+      <div class="lnd-t"><span class="lnd-b" style="width:${P(now)}"></span><span class="lnd-p" style="left:${P(now)};width:${P(Math.max(0,proj-now))}"></span>${g?`<span class="lnd-m be" style="left:${P(be)}" title="Break-even"></span>`:''}<span class="lnd-m" style="left:${P(ref)}"></span></div>
+      <div class="mlg"><span><i style="background:#2a78d6"></i>Billed so far</span><span><i style="background:#a9c8ee"></i>Projected rest of month</span><span><i style="background:var(--ink)"></i>${g?'Target':'Break-even'}</span>${g?'<span><i style="background:#8a857a"></i>Break-even</span>':''}</div>
+    </div></section>`;
+}
+function fwdSection(fee){
+  const c=DATA.current, f=DATA.fwdBill||{}, fk=(DATA.fwd||[]).map(m=>m.key);
+  if(!fk.some(k=>fee.some(d=>(f[d.name]||{})[k]))) return '';
+  const ml=k=>k===c.key?monthLab(k):(((DATA.fwd||[]).find(m=>m.key===k)||{}).label||k), ms=[c.key].concat(fk), val=(d,k)=>k===c.key?deptBill(d,[k]):((f[d.name]||{})[k]||0);
+  const R=ms.map(k=>({k,parts:fee.map(d=>({d,v:val(d,k)})).filter(p=>p.v>0)})).map(r=>Object.assign(r,{t:r.parts.reduce((s,p)=>s+p.v,0)}));
+  const mx=Math.max(1,...R.map(r=>r.t));
+  return `<section class="blk"><div class="hd"><h2>Starts on the sales sheet, this month and ahead${INFO('Billings entered on the sales sheet by start month. This month is billed so far; later months are placements already entered that start then, and are not counted in any other figure until the month starts.')}</h2><div class="rt">By department</div></div>
+    <div class="chc"><div class="hbs">${R.map(r=>`<div class="hbr"${BD(esc(ml(r.k)),r.k===c.key?'Billed so far':'Entered on the sales sheet',fee.map(d=>({l:d.label,v:val(d,r.k)})),{total:r.t})}><div class="hbl">${esc(ml(r.k))}${r.k===c.key?' <span class="mut">to date</span>':''}</div><div class="hbt">${(()=>{let x=0; return r.parts.map(p=>{const h=`<span class="hbv" style="left:${(x/mx*100).toFixed(2)}%;width:${(p.v/mx*100).toFixed(2)}%;background:var(--d${DCOL[p.d.name]||7});border-radius:0"></span>`; x+=p.v; return h;}).join('');})()}</div><div class="hbn">${F(r.t)}</div></div>`).join('')}</div>
+    <div class="mlg" style="margin-top:10px">${fee.map(d=>`<span><i style="background:var(--d${DCOL[d.name]||7})"></i>${esc(d.label)}</span>`).join('')}</div></div></section>`;
+}
+function heatSection(fee){
+  if(ENT==='G'||!fee.length) return '';
+  const ms=DATA.months, cur=DATA.current.key, dn=fee.map(d=>d.name);
+  const P=DATA.emps.filter(e=>dn.includes(e.dept)&&!e.agg).map(e=>({n:e.name,d:e.dept,v:ms.map(m=>e.bill[m.key]||0),c:ms.map(m=>monthCost(e,m.key))}));
+  fee.forEach(d=>{const t=DATA.team[d.name]||{}; const v=ms.map(m=>t[m.key]||0); if(v.some(Boolean)) P.push({n:d.label+' team line',d:d.name,v,c:ms.map(()=>0),team:true});});
+  const R=P.filter(p=>p.v.some(Boolean)).map(p=>Object.assign(p,{t:p.v.reduce((s,v)=>s+v,0)})).sort((a,b)=>b.t-a.t);
+  if(!R.length) return '';
+  const mx=Math.max(1,...R.map(r=>Math.max(...r.v))), lo=[234,242,251], hi=[22,82,160];
+  const bg=v=>{const t=Math.sqrt(v/mx); return 'rgb('+lo.map((a,i)=>Math.round(a+(hi[i]-a)*t)).join(',')+')';};
+  const cell=(r,i)=>{const v=r.v[i], m=ms[i]; if(!v) return `<td class="hz0">–</td>`; const t=Math.sqrt(v/mx), c=r.c[i];
+    return `<td style="background:${bg(v)};color:${t>0.55?'#fff':'var(--ink)'}"${CALC(esc(r.n)+', '+esc(m.label)+(m.key===cur?' to date':''),'',[['Billings (GP)',F(v)]].concat(c?[['Cost of employment',F(c)],['Billings per $1 of cost',X(v/c)]]:[]))}>${KS(v)}</td>`;};
+  return `<section class="blk"><div class="hd"><h2>Billings by person, month by month${INFO('Billings (GP) from the sales sheet for each person in the fee departments, by month. Darker is higher. Hover a cell for cost and the multiple.')}</h2><div class="rt">${esc(DATA.fy)}</div></div>
+    <div class="tbl"><table class="heat"><thead><tr><th>Person</th>${ms.map(m=>`<th>${esc(m.label.slice(0,3))}${m.key===cur&&MODE==='live'?'*':''}</th>`).join('')}<th>Total</th></tr></thead><tbody>
+    ${R.map(r=>`<tr><td><i class="sw" style="background:var(--d${DCOL[r.d]||7})"></i>${esc(r.n)}</td>${ms.map((m,i)=>cell(r,i)).join('')}<td><b>${KS(r.t)}</b></td></tr>`).join('')}
+    <tr class="tot"><td>Total</td>${ms.map((m,i)=>`<td>${KS(R.reduce((s,r)=>s+r.v[i],0))}</td>`).join('')}<td>${KS(R.reduce((s,r)=>s+r.t,0))}</td></tr></tbody></table></div></section>`;
+}
+/* sticky jump list for a long summary page */
+function addSnav(){
+  const cn=document.getElementById('content'); if(!cn) return;
+  const hs=[...cn.querySelectorAll(':scope > section.blk > .hd h2')]; if(hs.length<4) return;
+  const nav=document.createElement('nav'); nav.className='snav'; nav.setAttribute('aria-label','Sections');
+  hs.forEach((h,i)=>{const sec=h.closest('section'); sec.id='sec'+i; const a=document.createElement('a'); a.href='#sec'+i; a.textContent=(h.childNodes[0].textContent||'').split(',')[0].trim(); nav.appendChild(a);});
+  cn.insertBefore(nav,cn.firstChild);
+}
 function fwdNote(fee){
   const ks=(DATA.fwd||[]).map(m=>m.key), f=DATA.fwdBill||{};
   const tot=ks.map(k=>({k,v:fee.reduce((s,d)=>s+((f[d.name]||{})[k]||0),0)})).filter(x=>x.v);
@@ -1546,6 +1650,7 @@ function salesPaint(){
   if(!tabs.some(x=>x.id===TAB)) TAB='sum';
   document.getElementById('tabs').innerHTML=tabs.map(p=>`<button class="tab${p.id===TAB?' on':''}" role="tab" data-p="${esc(p.id)}">${esc(p.t)}<span class="sub">${p.s}</span></button>`).join('');
   document.getElementById('content').innerHTML=TAB==='sum'?summary():TAB==='chk'?checks():deptPage(TAB);
+  if(TAB==='sum') addSnav();
   bindTips();
 }
 /* =====================================================================
@@ -1555,7 +1660,7 @@ function salesPaint(){
    ===================================================================== */
 let PLREV=false; let RT='dash', PERSET=false, PLV='det', BSV='side', PLG='side', BSD='det'; const COLL=new Set();
 const vtog=(k,cur,opts)=>`<div class="vtog" role="group">${opts.map(([v,t])=>`<button type="button" data-${k}="${v}" class="${v===cur?'on':''}">${t}</button>`).join('')}</div>`;
-const RTABS=[{id:'dash',t:'Dashboard'},{id:'pl',t:'P&L'},{id:'bs',t:'Balance Sheet'},{id:'cf',t:'Cash Flow Summary'},{id:'calc',t:'Calcs'},{id:'sales',t:'Sales'}];
+const RTABS=[{id:'dash',t:'Dashboard'},{id:'pl',t:'P&L'},{id:'bs',t:'Balance Sheet'},{id:'cf',t:'Cash Flow Summary'},{id:'calc',t:'Calcs'},{id:'sales',t:'Sales'},{id:'apar',t:'Debtors & Creditors'}];
 const MNL=['January','February','March','April','May','June','July','August','September','October','November','December'];
 const kLong=k=>MNL[+k.slice(5,7)-1]+' '+k.slice(0,4);
 const kShort=k=>MNL[+k.slice(5,7)-1].slice(0,3)+' '+k.slice(2,4);
@@ -1942,6 +2047,136 @@ function gBars(items,ser,o){
   s+='</svg>';
   return (n>1?`<div class="mlg">${ser.map(z=>`<span><i style="background:${z[1]}"></i>${esc(z[0])}</span>`).join('')}</div>`:'')+s;
 }
+/* ---------- small charts and helpers (8 Oct 2026) ---------- */
+/* monthly profit goal (Recruitment only; North America and Search have none) */
+function goalPM(){ if(ENT!=='R') return 0; const r=((DATA.mult||{}).derive||{}).R||[]; return r.length?(r[0].goal||0):0; }
+/* sparkline for a scorecard: the year's months, selected ones darker */
+function spark(vals,on,col){
+  const pts=vals.map((v,i)=>({v,i})).filter(p=>p.v!=null); if(pts.length<2) return '';
+  const W=200,H=34,mx=Math.max(...pts.map(p=>p.v)),mn=Math.min(...pts.map(p=>p.v)),sp=(mx-mn)||1, x=i=>4+(W-8)*i/Math.max(vals.length-1,1), y=v=>3+(H-6)*(mx-v)/sp;
+  const z=mn<0&&mx>0?`<line x1="4" x2="${W-4}" y1="${y(0)}" y2="${y(0)}" stroke="#d8d2c6" stroke-width="1"/>`:'';
+  return `<svg class="spk" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true">${z}<polyline fill="none" stroke="${col}" stroke-width="1.6" stroke-linejoin="round" points="${pts.map(p=>x(p.i)+','+y(p.v)).join(' ')}"/>${pts.filter(p=>on[p.i]).map(p=>`<circle cx="${x(p.i)}" cy="${y(p.v)}" r="2.6" fill="${col}"/>`).join('')}</svg>`;
+}
+/* stacked bars: series stack upwards per month (positive values) */
+function sBars(items,ser,o){
+  o=o||{}; const W=440,H=230,L=52,R=6,T=12,B=26, w=W-L-R, h=H-T-B;
+  const tot=items.map(i=>i.vs.reduce((t,v)=>t+Math.max(0,v||0),0)), mx=Math.max(1,...tot);
+  const y=v=>T+h*(1-v/mx), step=w/Math.max(items.length,1), bw=Math.min(30,step*0.62);
+  let s=`<svg class="ch" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(o.label||'')}">`;
+  [0,mx/2,mx].forEach(v=>{s+=`<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" class="${v===0?'zl':'gl'}"/><text x="${L-8}" y="${y(v)+4}" class="yl">${FK(v)}</text>`;});
+  items.forEach((it,i)=>{const x=L+step*i+(step-bw)/2; let acc=0;
+    it.vs.forEach((v0,j)=>{const v=Math.max(0,v0||0); if(!v) return; const y1=y(acc+v), hh=y(acc)-y1; acc+=v;
+      s+=`<rect x="${x}" y="${y1}" width="${bw}" height="${Math.max(1,hh-1)}" rx="2" fill="${ser[j][1]}"${it.on?'':' opacity="0.38"'}${it.tip||''}/>`;});
+    s+=`<text x="${x+bw/2}" y="${H-9}" class="xl">${esc(it.l)}</text>`;});
+  s+='</svg>';
+  return `<div class="mlg">${ser.map(z=>`<span><i style="background:${z[1]}"></i>${esc(z[0])}</span>`).join('')}</div>`+s;
+}
+/* revenue mix (permanent and Search fees, temp kept out) and overheads by month, then the largest overhead movers */
+function mixOvhSection(yk,ks,on){
+  if(rUS()) return '';
+  const pl=k=>GRP()?plConsSum([k]):plSum(ENT,[k]), M=yk.map(k=>({k,s:pl(k)})).filter(x=>x.s.n&&!x.s.noLines);
+  if(!M.length) return '';
+  const isSr=l=>/search/i.test(l), isTp=l=>/temp|contract|labour hire/i.test(l);
+  const rv=(s,f)=>Object.keys(s.L.rev).filter(f).reduce((t,l)=>t+s.L.rev[l],0);
+  const mixSer=ENT==='S'?[['Search fees','#008300']]:[['Permanent fees','#2a78d6'],['Search fees','#008300']];
+  const mix=sBars(M.map(x=>{const p=rv(x.s,l=>!isSr(l)&&!isTp(l)), sr=rv(x.s,isSr), i=yk.indexOf(x.k);
+    return {l:kShort(x.k).slice(0,3),on:on[i],vs:ENT==='S'?[p+sr]:[p,sr],tip:CALC('Fees, '+kLong(x.k),'Temp revenue left out',ENT==='S'?[['Search fees',F(p+sr)]]:[['Permanent fees',F(p)],['Search fees',F(sr)],['= Fees',F(p+sr),'s']])};}),mixSer,{label:'Fees by month'});
+  /* overheads: non-payroll operating expenses, the six largest accounts for the year and the rest */
+  const ov=s=>{const o={}; Object.keys(s.L.opex).filter(l=>!isPayX(l)).forEach(l=>{o[l]=s.L.opex[l];}); return o;};
+  const yr={}; M.forEach(x=>{const o=ov(x.s); Object.keys(o).forEach(l=>{yr[l]=(yr[l]||0)+o[l];});});
+  const top=Object.keys(yr).sort((a,b)=>yr[b]-yr[a]).slice(0,6), cols=['#2a78d6','#eb6834','#1baf7a','#eda100','#e87ba4','#7b5cc4','#b8b2a6'];
+  const oser=top.map((l,i)=>[l,cols[i]]).concat([['Other','#b8b2a6']]);
+  const ovc=sBars(M.map(x=>{const o=ov(x.s), rest=Object.keys(o).filter(l=>!top.includes(l)).reduce((t,l)=>t+o[l],0), i=yk.indexOf(x.k);
+    return {l:kShort(x.k).slice(0,3),on:on[i],vs:top.map(l=>o[l]||0).concat([rest]),tip:BD('Overheads, '+kLong(x.k),'Non-payroll operating expenses',Object.keys(o).map(l=>({l,v:o[l]})),{total:Object.keys(o).reduce((t,l)=>t+o[l],0),max:12})};}),oser,{label:'Overheads by month'});
+  /* largest movers: the selected period against the comparison period */
+  const cm=rCmp(); let mv='';
+  if(cm){ const a=ov(GRP()?plConsSum(ks):plSum(ENT,ks)), b=ov(GRP()?plConsSum(cm.ks):plSum(ENT,cm.ks));
+    const rows=[...new Set(Object.keys(a).concat(Object.keys(b)))].map(l=>({l,a:a[l]||0,b:b[l]||0})).map(r=>Object.assign(r,{d:r.a-r.b})).filter(r=>Math.abs(r.d)>=1).sort((p,q)=>Math.abs(q.d)-Math.abs(p.d)).slice(0,8);
+    if(rows.length) mv=`<section class="blk"><div class="hd"><h2>Largest overhead movements${INFO('Against '+esc(cm.long||cm.h)+'. '+'Non-payroll operating expense accounts with the largest change on the comparison period. The three largest are marked.')}</h2><div class="rt">${GRP()?'A$':'A$'}</div></div>
+      <div class="tbl"><table><thead><tr><th>Account</th><th>${esc(rPN())}</th><th>${esc(cm.h)}</th><th>Movement</th></tr></thead><tbody>
+      ${rows.map((r,i)=>`<tr${i<3?' class="hl"':''}><td>${i<3?'<span class="rk">'+(i+1)+'</span>':''}${esc(r.l)}</td><td>${F(r.a)}</td><td>${F(r.b)}</td><td class="${r.d>0?'neg':'pos'}">${SG(r.d).replace(/<[^>]+>/g,'')}</td></tr>`).join('')}</tbody></table></div></section>`; }
+  return `<section class="blk"><div class="hd"><h2>Fees and overheads, month by month${INFO('Left: fees from Xero by month, permanent recruitment and Search (temp is left out; see the P&amp;L tab). Right: non-payroll operating expenses by month, the six largest accounts for the year and the rest together.')}</h2><div class="rt">A$</div></div>
+    <div class="two"><div class="chc"><div class="cht">Fees by month</div>${mix}</div><div class="chc"><div class="cht">Overheads by month</div>${ovc}</div></div></section>`+mv;
+}
+/* temp (labour hire): revenue and gross profit by month, for the P&L tab */
+function tempSectionWrap(h){ return h+tempSection(); }
+function tempSection(){
+  if(rUS()||ENT==='S') return '';
+  const TR=/temp|contract|labour hire/i, yk=rYear(), ks=rKs();
+  const M=yk.map(k=>{const s=GRP()?plConsSum([k]):plSum(ENT,[k]); if(!s.n||s.noLines) return null; const r=Object.keys(s.L.rev).filter(l=>TR.test(l)).reduce((t,l)=>t+s.L.rev[l],0), c=Object.keys(s.L.cos).filter(l=>TR.test(l)).reduce((t,l)=>t+s.L.cos[l],0); return {k,r,g:r-c};}).filter(Boolean);
+  if(!M.some(x=>x.r)) return '';
+  const it=f=>M.map(x=>({l:kShort(x.k).slice(0,3),on:ks.includes(x.k),vs:[f(x)],tip:CALC('Temp, '+kLong(x.k),'',[['Temp revenue',F(x.r)],['Temp gross profit',F(x.g)],['Margin',x.r?PCT(x.g/x.r):'–']])}));
+  return `<section class="blk"><div class="hd"><h2>Temp (labour hire), month by month${INFO('Xero revenue and cost of sales accounts for temporary and contract staff. Kept apart from the permanent recruitment figures elsewhere in the report.')}</h2><div class="rt">A$</div></div>
+    <div class="two"><div class="chc"><div class="cht">Temp revenue</div>${gBars(it(x=>x.r),[['Temp revenue','#7b5cc4']],{label:'Temp revenue by month'})}</div><div class="chc"><div class="cht">Temp gross profit</div>${gBars(it(x=>x.g),[['Temp gross profit','#1baf7a','#d0583f']],{label:'Temp gross profit by month'})}</div></div></section>`;
+}
+/* ---------- aged receivables and payables ---------- */
+const AGEB=['Current','1 to 30 days','31 to 60 days','61 to 90 days','Over 90 days'], AGEC=['#1baf7a','#eda100','#eb6834','#d0583f','#9b2c1c'];
+const sumB=b=>b.reduce((t,v)=>t+v,0);
+/* one entity, or the group in A$ (North America at the month-end rate), as at the end of month k */
+function agedFor(k){
+  const es=rEnts(), A=DATA.aged||{}; let any=false;
+  const o={asAt:'',ar:{b:[0,0,0,0,0],n:0,c:{}},ap:{b:[0,0,0,0,0],n:0,c:{}}};
+  es.forEach(e=>{const x=(A[e]||{})[k]; if(!x) return; any=true; o.asAt=x.asAt; const r=GRP()?rEndR(e,k,true):1;
+    ['ar','ap'].forEach(t=>{x[t].b.forEach((v,i)=>{o[t].b[i]+=v*r;}); o[t].n+=x[t].n;
+      x[t].c.forEach(c=>{const nm=c[0]+(GRP()?' ('+ENTNM[e]+')':''); const z=o[t].c[nm]=o[t].c[nm]||[0,0,0,0,0,0]; for(let i=0;i<5;i++) z[i]+=c[i+1]*r; z[5]+=c[6];});});});
+  if(!any) return null;
+  ['ar','ap'].forEach(t=>{o[t].c=Object.keys(o[t].c).map(n=>[n].concat(o[t].c[n])).sort((a,b)=>sumB(b.slice(1,6))-sumB(a.slice(1,6)));});
+  return o;
+}
+function ageBar(b){
+  const t=sumB(b); if(!t) return '<div class="mut">Nothing outstanding.</div>';
+  return `<div class="agebar">${b.map((v,i)=>v>0?`<span style="width:${(v/t*100).toFixed(2)}%;background:${AGEC[i]}"${BD(AGEB[i],'',[{l:AGEB[i],v}],{total:v})}></span>`:'').join('')}</div>
+    <div class="mlg">${AGEB.map((l,i)=>`<span><i style="background:${AGEC[i]}"></i>${l} <b class="mono">${F(b[i])}</b> <em class="mut">${PCT(b[i]/t)}</em></span>`).join('')}</div>`;
+}
+function ageTable(rows,lim){
+  const r=lim?rows.slice(0,lim):rows, T=[0,0,0,0,0]; rows.forEach(c=>{for(let i=0;i<5;i++) T[i]+=c[i+1];});
+  return `<div class="tbl"><table><thead><tr><th>Contact</th>${AGEB.map(l=>`<th>${l}</th>`).join('')}<th>Total</th></tr></thead><tbody>
+    ${r.map(c=>`<tr><td>${esc(c[0])}</td>${[1,2,3,4,5].map(i=>`<td class="${c[i]&&i>=3?'neg':c[i]?'':'mut'}">${c[i]?F(c[i]):'–'}</td>`).join('')}<td><b>${F(sumB(c.slice(1,6)))}</b></td></tr>`).join('')}
+    ${lim&&rows.length>lim?'':`<tr class="tot"><td>Total</td>${T.map(v=>`<td>${F(v)}</td>`).join('')}<td>${F(sumB(T))}</td></tr>`}</tbody></table></div>`;
+}
+function debtorsSection(end){
+  const A=agedFor(end); if(!A) return '';
+  const od=A.ar.c.map(c=>c.concat([c[2]+c[3]+c[4]+c[5]])).filter(c=>c[7]>0.5).sort((a,b)=>b[7]-a[7]).slice(0,10);
+  return `<section class="blk"><div class="hd"><h2>Debtors ageing, ${esc(dLong(A.asAt))}${INFO('Xero sales invoices outstanding at the date, less payments, credit notes and prepayments allocated by then, aged by due date. The full lists of debtors and creditors are on the Debtors &amp; Creditors tab.')}</h2><div class="rt">${F(sumB(A.ar.b))} owed by ${A.ar.c.length} customer${A.ar.c.length===1?'':'s'}</div></div>
+    <div class="chc">${ageBar(A.ar.b)}</div>
+    ${od.length?`<h3 class="h3s">Ten largest overdue balances</h3>${ageTable(od.map(c=>c.slice(0,7)),10)}`:''}</section>`;
+}
+function aparPage(){
+  const end=rKs()[rKs().length-1], A=agedFor(end);
+  if(!A) return flag('Aged receivables and payables are not synced yet','They come from Xero sales invoices and bills through the nightly sync, once the Xero connection has the invoices permission (run xero_authorize in the Data Sync project and approve).','hi');
+  const ar=sumB(A.ar.b), ap=sumB(A.ap.b);
+  return `<div class="kpis"><div class="kpi"><div class="lab">Debtors</div><div class="val">${F(ar)}</div><div class="sub">${A.ar.n} invoices · ${PCT(ar?(A.ar.b[2]+A.ar.b[3]+A.ar.b[4])/ar:0)} over 30 days</div></div>
+      <div class="kpi"><div class="lab">Creditors</div><div class="val">${F(ap)}</div><div class="sub">${A.ap.n} bills · ${PCT(ap?(A.ap.b[2]+A.ap.b[3]+A.ap.b[4])/ap:0)} over 30 days</div></div>
+      <div class="kpi"><div class="lab">Net</div><div class="val ${ar-ap<0?'neg':''}">${F(ar-ap)}</div><div class="sub">As at ${esc(dLong(A.asAt))}</div></div></div>
+    <section class="blk"><div class="hd"><h2>Aged receivables${INFO('Xero sales invoices outstanding at the date, less payments, credit notes, prepayments and overpayments allocated by then, aged by due date. Foreign currency invoices at their own rate'+(GRP()?'; North America converted at the month-end rate.':'.'))}</h2><div class="rt">As at ${esc(dLong(A.asAt))}</div></div>
+      <div class="chc" style="margin-bottom:14px">${ageBar(A.ar.b)}</div>${ageTable(A.ar.c)}</section>
+    <section class="blk"><div class="hd"><h2>Aged payables${INFO('Xero bills outstanding at the date, less payments and credits allocated by then, aged by due date.')}</h2><div class="rt">As at ${esc(dLong(A.asAt))}</div></div>
+      <div class="chc" style="margin-bottom:14px">${ageBar(A.ap.b)}</div>${ageTable(A.ap.c)}</section>`;
+}
+/* ---------- exports: the whole report for the period, as PDF (print) or a standalone HTML file ---------- */
+function fullReport(){
+  const sRT=RT, parts=[];
+  RTABS.forEach(t=>{ RT=t.id; let h='';
+    try{ if(t.id==='sales'){ salesPaint(); h=document.getElementById('content').innerHTML; }
+      else { TIPS.length=0; h=t.id==='pl'?plPage():t.id==='bs'?bsPage():t.id==='cf'?cfPage():t.id==='calc'?calcPage():t.id==='apar'?aparPage():dashPage(); } }catch(e){ console.error(e); h=''; }
+    if(h) parts.push(`<section class="xp-page"><h1 class="xp-h">${esc(t.t)}</h1>${h}</section>`); });
+  RT=sRT;
+  const e=ENT==='G'?'Woods Group':DATA.ents[ENT].name, logos=((document.querySelector('header.top .hd-row')||{}).outerHTML||'').replace(/Management report · live/,'Management report').replace(/ id="[^"]*"/g,'');
+  const cover=`<section class="xp-cover">${logos}<div class="xp-ct"><div class="xp-k">Management report</div><div class="xp-t">${esc(e)}</div><div class="xp-p">${esc(rPN())}</div><div class="xp-d">Prepared by The Co. Accountants &amp; Business Advisors · ${esc(DATA.generated)}</div></div></section>`;
+  const html=cover+parts.join('').replace(/ data-tip="\d+"/g,'').replace(/<nav class="(?:rnav|snav)"[^>]*>[\s\S]*?<\/nav>/g,'').replace(/<button[^>]*data-(skp|lm|plv|bsv|bsd|plg|gocons|goplc)[^>]*>[\s\S]*?<\/button>/g,'');
+  paint(); return {html,name:('Woods Group Management Report '+e+' '+rPN()).replace(/[^\w ]+/g,'').replace(/\s+/g,'_')};
+}
+function exportPDF(){
+  const r=fullReport(); let box=document.getElementById('xpAll'); if(!box){ box=document.createElement('div'); box.id='xpAll'; document.body.appendChild(box); }
+  box.innerHTML=r.html; document.body.classList.add('xprint'); const t=document.title; document.title=r.name;
+  const done=()=>{document.body.classList.remove('xprint'); box.innerHTML=''; document.title=t; window.removeEventListener('afterprint',done);};
+  window.addEventListener('afterprint',done); setTimeout(()=>window.print(),150);
+}
+function exportHTML(){
+  const r=fullReport(), css=[...document.querySelectorAll('style')].map(x=>x.textContent).join('\n'), fonts=[...document.querySelectorAll('link[rel="stylesheet"],link[rel="preconnect"]')].map(x=>x.outerHTML).join('');
+  const doc=`<!doctype html><html lang="en-AU"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Woods Group Management Report</title>${fonts}<style>${css}<\/style></head><body class="xstatic"><main><div class="wrap">${r.html}</div></main></body></html>`;
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([doc],{type:'text/html'})); a.download=r.name+'.html'; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove();},1000);
+}
 /* ---------- Calcs tab: how each number is worked out ---------- */
 const cnote=t=>`<p class="cnote">${t}</p>`;
 function calcPage(){
@@ -2006,7 +2241,7 @@ function plPage(){
   const info='Xero profit and loss, standard layout, by account. '+(GRP()?(PLG==='cons'?'Consolidated in A$ (North America at the RBA monthly average AUD/USD rate). W&amp;Co Search fees that Recruitment pays Search ("Recruitment Cost - W&amp;Co. Search") are eliminated against the same amount of Search\'s Recruitment Fees; the client revenue stays in Recruitment. Profit is unchanged.':'Each entity in A$ (North America at the RBA monthly average AUD/USD rate). Not consolidated: switch to Consolidated to eliminate the fees between Recruitment and W&amp;Co Search.'):
     (rKs().length===1?'The month, the prior month, the movement and the year to date.':'Each month in the period and the total.'))+(rUS()?' North America reports in US$; its overheads come through Xero as "Other Income and Expense" and are shown as operating expenses.':'')+' * month not yet closed.';
   return finFlags()+(miss&&!cols.some(c=>c.s&&c.s.n)?flag('No Xero profit and loss for this period yet','','hi'):'')
-    +`<section class="blk"><div class="hd"><h2>Profit and loss, ${pn}${INFO(info)}</h2><div class="rt">${GRP()?vtog('plg',PLG,[['side','Side by side'],['cons','Consolidated']]):(Object.keys(DATA.ents).length>1?`<button type="button" class="lnkb" data-goplc="1">Consolidated group P&amp;L \u2192</button>`:'')} ${vtog('plv',PLV,[['det','Detailed'],['sum','Summary']])}</div></div>${plTable(cols)}${GRP()&&PLG==='cons'?(()=>{const e=cols.filter(c=>c.s&&c.s.elim).map(c=>esc(c.h.replace(' *',''))+' '+F(c.s.elim)); return e.length?`<div class="tnote">Eliminated between Recruitment and W&amp;Co Search: ${e.join(' \u00b7 ')}</div>`:'';})():''}<div class="tnote">${GRP()?'A$':rUS()?'US$':'A$'} \u00b7 Xero synced ${esc((DATA.xero||{}).syncedAt||'')}</div></section>`;
+    +`<section class="blk"><div class="hd"><h2>Profit and loss, ${pn}${INFO(info)}</h2><div class="rt">${GRP()?vtog('plg',PLG,[['side','Side by side'],['cons','Consolidated']]):(Object.keys(DATA.ents).length>1?`<button type="button" class="lnkb" data-goplc="1">Consolidated group P&amp;L \u2192</button>`:'')} ${vtog('plv',PLV,[['det','Detailed'],['sum','Summary']])}</div></div>${plTable(cols)}${GRP()&&PLG==='cons'?(()=>{const e=cols.filter(c=>c.s&&c.s.elim).map(c=>esc(c.h.replace(' *',''))+' '+F(c.s.elim)); return e.length?`<div class="tnote">Eliminated between Recruitment and W&amp;Co Search: ${e.join(' \u00b7 ')}</div>`:'';})():''}<div class="tnote">${GRP()?'A$':rUS()?'US$':'A$'} \u00b7 Xero synced ${esc((DATA.xero||{}).syncedAt||'')}</div></section>`+tempSection();
 }
 function bsPage(){
   const {cols,end,cons}=bsCols(), pn=esc(rPN()), es=rEnts();
@@ -2085,11 +2320,16 @@ function dashPage(){
   const B=GRP()?bsGroup(end):bsAt(ENT,end), B0=GRP()?bsGroup(kPrev(ks[0])):bsAt(ENT,kPrev(ks[0]));
   const S=salesHead();
   const byEnt=f=>GRP()?BD(f.t+', '+pn,'By entity, A$',es.map(e=>({l:ENTNM[e],v:f.v(plSum(e,ks,true))})),{total:f.v(P)}):(!one?BD(f.t+', '+pn,'By month',ks.map(k=>({l:kShort(k),v:f.v(plSum(ENT,[k]))})),{keepOrder:true,keepZero:true,total:f.v(P)}):(f.acct&&P.L[f.acct]?BD(f.t+', '+pn,'By account',Object.keys(P.L[f.acct]).map(l=>({l,v:P.L[f.acct][l]})),{total:f.v(P)}):''));
+  const yk=rYear(), ykI=yk.map(k=>ks.includes(k)), ypl=k=>GRP()?plConsSum([k]):plSum(ENT,[k]);
+  const yS=yk.map(k=>{const x=ypl(k); return x.n?x:null;}), yB=yk.map(k=>{const b=GRP()?bsGroup(k):bsAt(ENT,k); return b?b.T.bank:null;});
+  const SPK={rev:spark(yS.map(x=>x&&x.rev),ykI,'#2a78d6'),gp:spark(yS.map(x=>x&&x.gp),ykI,'#1baf7a'),np:spark(yS.map(x=>x&&x.np),ykI,'#4a463e'),cash:spark(yB,ykI,'#2a78d6')};
+  const gpm=goalPM(), ytdK=yk.filter(k=>k<=end), ytdNP=gpm?(GRP()?plConsSum(ytdK):plSum(ENT,ytdK)).np:0, ytdG=gpm*ytdK.length;
+  const goalChip=gpm?`<div class="sub"><span class="chip ${ytdNP>=ytdG?'up':'dn'}"${CALC('Net profit against the profit goal','January to '+esc(kLong(end)),[['Net profit, year to date',F(ytdNP)],['Profit goal ('+F(gpm)+' a month × '+ytdK.length+')',F(ytdG)],['= '+(ytdNP>=ytdG?'Ahead':'Behind'),SG(ytdNP-ytdG),'s']])}>YTD ${FK(ytdNP)} vs goal ${FK(ytdG)}</span></div>`:'';
   const kpis=`<div class="kpis k3">
-    <div class="kpi"><div class="lab">Trading income</div><div class="val"${byEnt({t:'Trading income',v:x=>x.rev,acct:'rev'})}>${F(P.rev)}</div>${chip(P.rev,PP&&PP.rev)}</div>
-    <div class="kpi"><div class="lab">Gross profit</div><div class="val"${byEnt({t:'Gross profit',v:x=>x.gp})}>${F(P.gp)}</div><div class="sub">${P.rev?PCT(P.gp/P.rev)+' margin':''}${PP&&PP.rev?' \u00b7 '+cm.h+' '+PCT(PP.gp/PP.rev):''}</div></div>
-    <div class="kpi"><div class="lab">Net profit</div><div class="val ${P.np<0?'neg':''}"${byEnt({t:'Net profit',v:x=>x.np})}>${F(P.np)}</div>${chip(P.np,PP&&PP.np)}<div class="sub">${P.rev?PCT(P.np/P.rev)+' net margin':''}</div></div>
-    <div class="kpi"><div class="lab">Cash at bank</div><div class="val"${B?BD('Cash at bank'+(B.d?', '+dLong(B.d):''),GRP()?'By entity, A$':'By account',GRP()?(B.parts||[]).map(p=>({l:p.l,v:p.b.T.bank})):Object.keys(B.L.bank).map(l=>({l,v:B.L.bank[l]})),{total:B.T.bank}):''}>${B?F(B.T.bank):'–'}</div>${B&&B0?`<span class="chip ${B.T.bank>=B0.T.bank?'up':'dn'}">${SG(B.T.bank-B0.T.bank).replace(/<[^>]+>/g,'')} in the period</span>`:''}</div>
+    <div class="kpi"><div class="lab">Trading income</div><div class="val"${byEnt({t:'Trading income',v:x=>x.rev,acct:'rev'})}>${F(P.rev)}</div>${chip(P.rev,PP&&PP.rev)}${SPK.rev}</div>
+    <div class="kpi"><div class="lab">Gross profit</div><div class="val"${byEnt({t:'Gross profit',v:x=>x.gp})}>${F(P.gp)}</div><div class="sub">${P.rev?PCT(P.gp/P.rev)+' margin':''}${PP&&PP.rev?' \u00b7 '+cm.h+' '+PCT(PP.gp/PP.rev):''}</div>${SPK.gp}</div>
+    <div class="kpi"><div class="lab">Net profit</div><div class="val ${P.np<0?'neg':''}"${byEnt({t:'Net profit',v:x=>x.np})}>${F(P.np)}</div>${chip(P.np,PP&&PP.np)}<div class="sub">${P.rev?PCT(P.np/P.rev)+' net margin':''}</div>${goalChip}${SPK.np}</div>
+    <div class="kpi"><div class="lab">Cash at bank</div><div class="val"${B?BD('Cash at bank'+(B.d?', '+dLong(B.d):''),GRP()?'By entity, A$':'By account',GRP()?(B.parts||[]).map(p=>({l:p.l,v:p.b.T.bank})):Object.keys(B.L.bank).map(l=>({l,v:B.L.bank[l]})),{total:B.T.bank}):''}>${B?F(B.T.bank):'–'}</div>${B&&B0?`<span class="chip ${B.T.bank>=B0.T.bank?'up':'dn'}">${SG(B.T.bank-B0.T.bank).replace(/<[^>]+>/g,'')} in the period</span>`:''}${SPK.cash}</div>
     <div class="kpi"><div class="lab">Net assets${GRP()?INFO('Consolidated: balances between the entities are eliminated (see the Balance Sheet tab).'):''}</div><div class="val">${B?F(GRP()?((bsCons(end)||{}).cons||B).net:B.net):'–'}</div><div class="sub">${B?'Working capital '+F(B.wc):''}</div></div>
     <div class="kpi"><div class="lab">${S.lab}${INFO('From the Sales tab: '+(rUS()?'permanent fees on the North America billing sheet':'billings on the sales sheet')+' against the fee team\'s fully loaded cost. Break-even '+S.be.toFixed(2)+'×.')}</div><div class="val"${S.tip}>${F(S.b)}</div><div class="sub"><span class="${S.m>=S.be?'pos':'neg'}">${X(S.m)}</span> against ${S.be.toFixed(2)}× break-even</div></div>
   </div>`;
@@ -2101,7 +2341,7 @@ function dashPage(){
   const yv=per.map(p=>Object.assign({},p,{s:ym(p)})).filter(x=>x.s.n);
   /* trading income + gross profit and net profit bar charts removed 8 Oct 2026 (may return): see report.js.pre5 */
   const mv=per.map(p=>{const k=p.ks[0], b=GRP()?bsGroup(k):bsAt(ENT,k), b0=GRP()?bsGroup(kPrev(k)):bsAt(ENT,kPrev(k)); return b&&b0?{l:p.l,on:pon(p),vs:[b.T.bank-b0.T.bank],tip:CALC('Net cash movement, '+p.long,'',[['Cash at bank, '+kEnd(kPrev(k)),F(b0.T.bank)],['Cash at bank, '+kEnd(k),F(b.T.bank)],['= Movement',SG(b.T.bank-b0.T.bank),'s']])}:null;}).filter(Boolean);
-  const mc=mv.length?gBars(mv,[['Net cash movement','#2a78d6','#d0583f']],{label:'Net cash movement by month'}):'';
+  const mc=mv.length?gBars(mv,[['Net cash movement','#1baf7a','#d0583f']],{label:'Net cash movement by month'}):'';
   const cash=per.map(p=>{const k=p.ks[p.ks.length-1], b=GRP()?bsGroup(k):bsAt(ENT,k);return {l:p.l,v:b?b.T.bank:null,on:pon(p),tip:b?BD('Cash at bank, '+(b.d?dLong(b.d):kEnd(k)),GRP()?'By entity, A$':'By account',GRP()?(b.parts||[]).map(p=>({l:p.l,v:p.b.T.bank})):Object.keys(b.L.bank).map(l=>({l,v:b.L.bank[l]})),{total:b.T.bank}):''};});
   const cur=GRP()?'A$':rUS()?'US$':'A$';
   /* summarised P&L for the period, with the trading income accounts shown */
@@ -2112,14 +2352,16 @@ function dashPage(){
     +(()=>{ const ms=rUS()?U().months:DATA.months, pl=k=>GRP()?plConsSum([k]):plSum(ENT,[k]), rows=ms.map(m=>({m,s:pl(m.key)}));
       if(!rows.some(r=>r.s.n)) return '';
       const D={ms,series:[{key:'rev',name:'Revenue',colv:'#2a78d6',a:rows.map(r=>({b:r.s.n?r.s.rev:null}))},{key:'gp',name:'Gross profit',colv:'#1baf7a',a:rows.map(r=>({b:r.s.n?r.s.gp:null}))},{key:'np',name:'Net profit',colv:'#4a463e',a:rows.map(r=>({b:r.s.n?r.s.np:null}))}]};
-      return `<section class="blk"><div class="hd"><h2>Income and costs, month by month${INFO('Xero profit and loss: revenue (trading income), gross profit (revenue less cost of sales) and net profit (gross profit plus other income less operating expenses)'+(GRP()?'; Group consolidated in A$.':'.'))}</h2><div class="rt">${cur}</div></div><div class="chc">${mLine(D,'b',{sub:cur,noTotal:true,label:'Revenue, gross profit and net profit by month',h:260})}</div></section>`; })()
+      return `<section class="blk"><div class="hd"><h2>Income and costs, month by month${INFO('Xero profit and loss: revenue (trading income), gross profit (revenue less cost of sales) and net profit (gross profit plus other income less operating expenses)'+(GRP()?'; Group consolidated in A$.':'.'))}</h2><div class="rt">${cur}</div></div><div class="chc">${mLine(D,'b',{sub:cur,noTotal:true,label:'Revenue, gross profit and net profit by month',h:260,ref:gpm||null,refLab:gpm?'Profit goal '+FK(gpm)+' a month':''})}</div></section>`; })()
     +(plSumm?`<section class="blk"><div class="hd"><h2>Summarised profit and loss, ${pn}${INFO('Xero profit and loss in summary, with each trading income account shown. The full detail is on the P&amp;L tab.')}</h2><div class="rt">${cur}</div></div>${plSumm}</section>`:'')
+    +mixOvhSection(yk,ks,ykI)
     +(cash.some(c=>c.v!=null)?`<section class="blk"><div class="hd"><h2>Cash, ${qsel?pn+', month by month':'month by month'}</h2><div class="rt">${cur}${qsel?'':' · selected period highlighted'}</div></div>
       <div class="two"><div class="chc"><div class="cht">Net cash movement</div>${mc}</div><div class="chc"><div class="cht">Cash at bank, month end</div>${lineChart(cash,{label:'Cash at bank by month end'})}</div></div></section>`:'')
     +(cfSumm?`<section class="blk"><div class="hd"><h2>Summarised cash flow, ${pn}${INFO('From Xero\'s cash-basis P&amp;L and the change in the other balance sheet accounts, ending at cash at bank. The full detail is on the Cash Flow Summary tab.')}</h2><div class="rt">${cur}</div></div>${cfSumm}</section>`:'')
     +(rUS()?'':deptLineSection(dE,GRP()?' Recruitment and W&amp;Co Search departments together, in A$.':''))
     +(!rUS()?`<section class="blk"><div class="hd"><h2>Departments against cost, ${pn}${INFO('From the Sales tab: each fee department\'s billings against its people\'s fully loaded cost, with the break-even and target marks.')}</h2><div class="rt">Sorted by billings</div></div>${deptBars(dE)}</section>`+seekSection(dE)+deptShareSection(dE):'')
-    +(!GRP()&&!rUS()?`<section class="blk"><div class="hd"><h2>Department scorecard${INFO('From the Sales tab: each fee department\'s billings against its people\'s fully loaded cost.')}</h2><div class="rt">${pn}</div></div>${scorecard()}</section>`:'');
+    +(!GRP()&&!rUS()?`<section class="blk"><div class="hd"><h2>Department scorecard${INFO('From the Sales tab: each fee department\'s billings against its people\'s fully loaded cost.')}</h2><div class="rt">${pn}</div></div>${scorecard()}</section>`:'')
+    +debtorsSection(end);
 }
 
 /* ---------- shell ---------- */
@@ -2132,7 +2374,7 @@ function rTabs(){
   let sub={};
   try{ const ks=rKs(), es=rEnts(), end=ks[ks.length-1];
     const P=GRP()?plGroup(ks):plSum(ENT,ks), B=GRP()?bsGroup(end):bsAt(ENT,end);
-    sub={dash:esc(rPN()).replace(/ \(.*\)$/,''),pl:P.n?'Net profit '+FK(P.np):'No Xero figures',bs:B?'Net assets '+FK(B.net):'Not synced',cf:B?'Cash '+FK(B.T.bank):'Not synced',sales:FK(salesHead().b)+' billed',calc:'Margins, bridges, multiples'};
+    sub={dash:esc(rPN()).replace(/ \(.*\)$/,''),pl:P.n?'Net profit '+FK(P.np):'No Xero figures',bs:B?'Net assets '+FK(B.net):'Not synced',cf:B?'Cash '+FK(B.T.bank):'Not synced',sales:FK(salesHead().b)+' billed',calc:'Margins, bridges, multiples',apar:(()=>{const A=agedFor(rKs()[rKs().length-1]);return A?'Debtors '+FK(sumB(A.ar.b)):'Not synced';})()};
   }catch(e){}
   document.getElementById('rtabs').innerHTML=RTABS.map(t=>`<button class="tab${t.id===RT?' on':''}" role="tab" data-r="${t.id}">${esc(t.t)}<span class="sub">${sub[t.id]||''}</span></button>`).join('');
 }
@@ -2149,22 +2391,23 @@ function paint(){
   document.getElementById('tabs').innerHTML='';
   rSeg();
   const e=ENT==='G'?{name:'Woods Group'}:DATA.ents[ENT];
-  const T={dash:'Management report',pl:'Profit and loss',bs:'Balance sheet',cf:'Cash flow summary',calc:'How the numbers are calculated'}[RT];
+  const T={dash:'Management report',pl:'Profit and loss',bs:'Balance sheet',cf:'Cash flow summary',calc:'How the numbers are calculated',apar:'Aged receivables and payables'}[RT];
   document.getElementById('mTitle').textContent=T;
   document.getElementById('mName').textContent=e.name;
   document.getElementById('mBasis').textContent=GRP()?'A$ · North America converted at RBA rates':rUS()?'US dollars · calendar year':'A$ · calendar year, finished months';
-  document.getElementById('mLede').innerHTML=`<span class="lchip">${esc(rPN())}</span>`
+  document.getElementById('mLede').innerHTML=`<span class="lchip">${esc(rPN())}</span><button type="button" class="xbtn" data-xp="pdf">Download PDF</button><button type="button" class="xbtn" data-xp="html">Download HTML</button>`
     +INFO('Profit and loss, balance sheet and bank summary come from Xero, synced nightly, before month-end review. Sales figures come from the sales sheets, FoundU and Gusto (read only). '+(GRP()?'The Group view shows each entity side by side in A$ and is not consolidated.':''),esc(e.name));
   document.getElementById('asat').textContent='Live at '+DATA.generated+(DATA.cached?' (cached)':'');
   rTabs();
   let h='';
-  try{ h=RT==='pl'?plPage():RT==='bs'?bsPage():RT==='cf'?cfPage():RT==='calc'?calcPage():dashPage(); }
+  try{ h=RT==='pl'?plPage():RT==='bs'?bsPage():RT==='cf'?cfPage():RT==='calc'?calcPage():RT==='apar'?aparPage():dashPage(); }
   catch(err){ console.error(err); h=`<div class="err">This page could not be drawn from the data loaded.</div>`; }
   document.getElementById('content').innerHTML=h+rNav();
   bindTips();
 }
 function goRT(id){ if(!RTABS.some(t=>t.id===id)) return; RT=id; paint(); window.scrollTo({top:0}); }
 document.getElementById('rtabs').addEventListener('click',ev=>{const b=ev.target.closest('[data-r]'); if(b) goRT(b.dataset.r);});
+document.getElementById('mLede').addEventListener('click',ev=>{const x=ev.target.closest('[data-xp]'); if(!x) return; x.dataset.xp==='pdf'?exportPDF():exportHTML();});
 document.getElementById('content').addEventListener('click',ev=>{const b=ev.target.closest('.rnav [data-r]'); if(b){ goRT(b.dataset.r); return; }
   const tg=ev.target.closest('tr.tg'); if(tg){ const k=tg.dataset.sec; COLL.has(k)?COLL.delete(k):COLL.add(k); const y=window.scrollY; paint(); window.scrollTo({top:y}); return; }
   const v=ev.target.closest('[data-plv],[data-bsd],[data-bsv],[data-plg],[data-gocons],[data-goplc]'); if(!v) return;
