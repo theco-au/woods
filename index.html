@@ -1133,7 +1133,7 @@ function deptPage(dn){
     +(d.fee?' Contribution is billings less commission accrued on the sales sheet, cost and a per-head share of non-payroll overhead from Xero, and the SEEK ads posted (job advertising, from the SEEK ad usage report). The 3-month multiple covers the last three closed months.':'');
   const r3T=(()=>{const r=a.mem.map(e=>Object.assign(roll3(e),{n:e.name})).filter(x=>x.c);const c3=r.reduce((s,x)=>s+x.c,0),b3=r.reduce((s,x)=>s+x.b,0);
     return {v:c3?X(b3/c3):'—',t:c3?CALC(lab+': last 3 closed months',(r[0]?r[0].ks.map(mShort).join(', '):''),[['Billings (GP)',F(b3)],['÷ Cost of employment',F(c3)],['= Billings per $1 of cost',X(b3/c3),'s']]):''};})();
-  return (typeof noteBlock==='function'?noteBlock('dept',dn,'Note on '+d.label):'')+kp+`<section class="blk"><div class="hd"><h2>${lab}</h2><div class="rt">${pn}</div></div>
+  return (typeof noteBlock==='function'?noteBlock('dept',dn,'Note: '+d.label):'')+kp+`<section class="blk"><div class="hd"><h2>${lab}</h2><div class="rt">${pn}</div></div>
     ${d.fee?bars(rows,team):''}</section>
     ${d.fee?recruiterLineSection(dn):''}
     ${d.fee&&PER==='CUR'?trackSection([d]):''}
