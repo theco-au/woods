@@ -729,7 +729,7 @@ function mLine(D,m,o){
   const x=i=>L+(n>1?w*i/(n-1):w/2), y=v=>T+h*(mx-v)/(mx-mn);
   let g=`<svg class="mlc" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(o.label||'Departments month by month')}">`;
   for(let v=mn;v<=mx+1e-9;v+=st) g+=`<line x1="${L}" x2="${L+w}" y1="${y(v)}" y2="${y(v)}" class="${Math.abs(v)<1e-9?'zl':'gl'}"/><text x="${L-8}" y="${y(v)+4}" class="yl">${lmAx(v,m)}</text>`;
-  if(o.ref!=null) g+=`<line x1="${L}" x2="${L+w}" y1="${y(o.ref)}" y2="${y(o.ref)}" class="rf"/><text x="${L+4}" y="${y(o.ref)-5}" class="rfl">${esc(o.refLab||'')}</text>`;
+  if(o.ref!=null){ const rx=o.refFrom>0?x(Math.min(o.refFrom,n-1)):L; g+=`<line x1="${rx}" x2="${L+w}" y1="${y(o.ref)}" y2="${y(o.ref)}" class="rf"/><text x="${rx+4}" y="${y(o.ref)-5}" class="rfl">${esc(o.refLab||'')}</text>`; }
   ms.forEach((mo,i)=>{g+=`<text x="${x(i)}" y="${H-8}" class="xl">${mo.label.slice(0,3)}${part(mo.key)?'*':''}</text>`;});
   /* lines: solid between finished months, dashed into a month still in progress */
   S.forEach(s=>{
@@ -2088,6 +2088,8 @@ function gBars(items,ser,o){
 }
 /* ---------- small charts and helpers (8 Oct 2026) ---------- */
 /* monthly profit goal (Recruitment only; North America and Search have none) */
+/* the $100k a month profit goal starts in July 2026: January to June are treated as on goal (goal = actual profit) */
+const GOAL_FROM='2026-07';
 function goalPM(){ if(ENT!=='R') return 0; const r=((DATA.mult||{}).derive||{}).R||[]; return r.length?(r[0].goal||0):0; }
 /* sparkline for a scorecard: the year's months, selected ones darker */
 function spark(vals,on,col){
@@ -2488,8 +2490,9 @@ function dashPage(){
   const yk=rYear(), ykI=yk.map(k=>ks.includes(k)), ypl=k=>GRP()?plConsSum([k]):plSum(ENT,[k]);
   const yS=yk.map(k=>{const x=ypl(k); return x.n?x:null;}), yB=yk.map(k=>{const b=GRP()?bsGroup(k):bsAt(ENT,k); return b?b.T.bank:null;});
   const SPK={rev:spark(yS.map(x=>x&&x.rev),ykI,'#2a78d6'),gp:spark(yS.map(x=>x&&x.gp),ykI,'#1baf7a'),np:spark(yS.map(x=>x&&x.np),ykI,'#4a463e'),cash:spark(yB,ykI,'#2a78d6')};
-  const gpm=goalPM(), ytdK=yk.filter(k=>k<=end), ytdNP=gpm?(GRP()?plConsSum(ytdK):plSum(ENT,ytdK)).np:0, ytdG=gpm*ytdK.length;
-  const goalChip=gpm?`<div class="sub"><span class="chip ${ytdNP>=ytdG?'up':'dn'}"${CALC('Net profit against the profit goal','January to '+esc(kLong(end)),[['Net profit, year to date',F(ytdNP)],['Profit goal ('+F(gpm)+' a month × '+ytdK.length+')',F(ytdG)],['= '+(ytdNP>=ytdG?'Ahead':'Behind'),SG(ytdNP-ytdG),'s']])}>YTD ${FK(ytdNP)} vs goal ${FK(ytdG)}</span></div>`:'';
+  const gpm=goalPM(), ytdK=yk.filter(k=>k<=end), npOf=ks2=>(GRP()?plConsSum(ks2):plSum(ENT,ks2)).np, ytdNP=gpm?npOf(ytdK):0;
+  const preK=ytdK.filter(k=>k<GOAL_FROM), postK=ytdK.filter(k=>k>=GOAL_FROM), preNP=gpm&&preK.length?npOf(preK):0, ytdG=gpm?preNP+gpm*postK.length:0;
+  const goalChip=gpm?`<div class="sub"><span class="chip ${ytdNP>=ytdG?'up':'dn'}"${CALC('Net profit against the profit goal','January to '+esc(kLong(end)),[['Net profit, year to date',F(ytdNP)]].concat(preK.length?[['Goal, '+kShort(preK[0])+' to '+kShort(preK[preK.length-1])+' (actual profit, taken as on goal)',F(preNP)]]:[]).concat(postK.length?[['Goal from '+kShort(GOAL_FROM)+' ('+F(gpm)+' a month × '+postK.length+')',F(gpm*postK.length)]]:[]).concat([['= Profit goal, year to date',F(ytdG),'s'],['= '+(ytdNP>=ytdG?'Ahead':'Behind'),SG(ytdNP-ytdG),'s']]))}>YTD ${FK(ytdNP)} vs goal ${FK(ytdG)}</span></div>`:'';
   const kpis=`<div class="kpis k3">
     <div class="kpi"><div class="lab">Trading income</div><div class="val"${byEnt({t:'Trading income',v:x=>x.rev,acct:'rev'})}>${F(P.rev)}</div>${chip(P.rev,PP&&PP.rev)}${SPK.rev}</div>
     <div class="kpi"><div class="lab">Gross profit</div><div class="val"${byEnt({t:'Gross profit',v:x=>x.gp})}>${F(P.gp)}</div><div class="sub">${P.rev?PCT(P.gp/P.rev)+' margin':''}${PP&&PP.rev?' \u00b7 '+cm.h+' '+PCT(PP.gp/PP.rev):''}</div>${SPK.gp}</div>
@@ -2517,7 +2520,7 @@ function dashPage(){
     +(()=>{ const ms=rUS()?U().months:DATA.months, pl=k=>GRP()?plConsSum([k]):plSum(ENT,[k]), rows=ms.map(m=>({m,s:pl(m.key)}));
       if(!rows.some(r=>r.s.n)) return '';
       const D={ms,series:[{key:'rev',name:'Revenue',colv:'#2a78d6',a:rows.map(r=>({b:r.s.n?r.s.rev:null}))},{key:'gp',name:'Gross profit',colv:'#1baf7a',a:rows.map(r=>({b:r.s.n?r.s.gp:null}))},{key:'np',name:'Net profit',colv:'#4a463e',a:rows.map(r=>({b:r.s.n?r.s.np:null}))}]};
-      return `<section class="blk"><div class="hd"><h2>Income and costs, month by month${INFO('Xero profit and loss: revenue (trading income), gross profit (revenue less cost of sales) and net profit (gross profit plus other income less operating expenses)'+(GRP()?'; Group consolidated in A$.':'.'))}</h2><div class="rt">${cur}</div></div><div class="chc">${mLine(D,'b',{sub:cur,noTotal:true,label:'Revenue, gross profit and net profit by month',h:260,ref:gpm||null,refLab:gpm?'Profit goal '+FK(gpm)+' a month':''})}</div></section>`; })()
+      return `<section class="blk"><div class="hd"><h2>Income and costs, month by month${INFO('Xero profit and loss: revenue (trading income), gross profit (revenue less cost of sales) and net profit (gross profit plus other income less operating expenses)'+(GRP()?'; Group consolidated in A$.':'.'))}</h2><div class="rt">${cur}</div></div><div class="chc">${mLine(D,'b',{sub:cur,noTotal:true,label:'Revenue, gross profit and net profit by month',h:260,ref:gpm||null,refFrom:gpm?ms.findIndex(m=>m.key>=GOAL_FROM):0,refLab:gpm?'Profit goal '+FK(gpm)+' a month from '+kShort(GOAL_FROM):''})}</div></section>`; })()
     +(plSumm?`<section class="blk"><div class="hd"><h2>Summarised profit and loss, ${pn}${INFO('Xero profit and loss in summary, with each trading income account shown. The full detail is on the P&amp;L tab.')}</h2><div class="rt">${cur}</div></div>${plSumm}</section>`:'')
     +mixOvhSection(yk,ks,ykI)
     +(cash.some(c=>c.v!=null)?`<section class="blk"><div class="hd"><h2>Cash, ${qsel?pn+', month by month':'month by month'}</h2><div class="rt">${cur}${qsel?'':' · selected period highlighted'}</div></div>
