@@ -613,7 +613,7 @@ function mLine(D,m,o){
   const x=i=>L+(n>1?w*i/(n-1):w/2), y=v=>T+h*(mx-v)/(mx-mn);
   let g=`<svg class="mlc" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(o.label||'Departments month by month')}">`;
   for(let v=mn;v<=mx+1e-9;v+=st) g+=`<line x1="${L}" x2="${L+w}" y1="${y(v)}" y2="${y(v)}" class="${Math.abs(v)<1e-9?'zl':'gl'}"/><text x="${L-8}" y="${y(v)+4}" class="yl">${lmAx(v,m)}</text>`;
-  if(o.ref!=null) g+=`<line x1="${L}" x2="${L+w}" y1="${y(o.ref)}" y2="${y(o.ref)}" class="rf"/><text x="${L+4}" y="${y(o.ref)-5}" class="rfl">${esc(o.refLab||'')}</text>`;
+  if(o.ref!=null){ const rx=o.refFrom>0?x(Math.min(o.refFrom,n-1)):L; g+=`<line x1="${rx}" x2="${L+w}" y1="${y(o.ref)}" y2="${y(o.ref)}" class="rf"/><text x="${rx+4}" y="${y(o.ref)-5}" class="rfl">${esc(o.refLab||'')}</text>`; }
   ms.forEach((mo,i)=>{g+=`<text x="${x(i)}" y="${H-8}" class="xl">${mo.label.slice(0,3)}${part(mo.key)?'*':''}</text>`;});
   /* lines: solid between finished months, dashed into a month still in progress */
   S.forEach(s=>{
