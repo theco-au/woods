@@ -337,6 +337,42 @@
   .hd .rt .vtog+.vtog,.hd .rt .lnkb+.vtog{margin-left:8px}
   .kpis.k3{grid-template-columns:repeat(3,1fr)}@media(max-width:900px){.kpis.k3{grid-template-columns:repeat(2,1fr)}}@media(max-width:560px){.kpis.k3{grid-template-columns:1fr}}
   .three{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}@media(max-width:1000px){.three{grid-template-columns:1fr}}
+  /* notes (15 Oct 2026) */
+  .nblk{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--ink);border-radius:10px;padding:12px 16px;margin:12px 0 14px}
+  .nblk.big{border-left-color:#2a78d6;margin:0 0 22px;padding:16px 20px}.nblk.big .ntx{font-size:15px}
+  .nblk.carry{border-style:dashed;border-left-style:solid;border-left-color:#8a857a;opacity:.85}
+  .nhd{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+  .nlab{font:700 12px var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--mid)}
+  .ntx{font-size:14px;line-height:1.6;color:var(--body);white-space:normal}
+  .nbdg{font:700 10.5px var(--sans);letter-spacing:.04em;text-transform:uppercase;border-radius:5px;padding:2px 6px}
+  .nbdg.dr{background:#fbf0d6;color:#8a5a00}.nbdg.in{background:#e8e4f6;color:#4b3a8f}.nbdg.rc{background:#e6efe9;color:#2f6b4d}
+  .nedit,.nlink{margin-left:auto;background:none;border:none;font:600 12.5px var(--sans);color:var(--ink);text-decoration:underline;cursor:pointer;padding:0}
+  .nlink{margin-left:0}.nlink.del{color:var(--loss)}
+  .nadd{display:inline-block;margin:10px 0 12px;background:none;border:1px dashed #b9b2a4;border-radius:8px;padding:6px 12px;font:600 12.5px var(--sans);color:var(--mid);cursor:pointer}
+  .nadd:hover{color:var(--ink);border-color:var(--ink)}.nadd.big{margin:0 0 20px}
+  td.nc,th.nc{width:34px;text-align:center!important;padding-left:4px!important;padding-right:4px!important}
+  .nmk{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;border-radius:50%;background:var(--ink);color:#fff;font:700 11px var(--sans);cursor:default}
+  .nmk[role=button]{cursor:pointer}.nmk.dr{background:#c98a00}.nmk.carry{background:#fff;color:var(--mid);border:1px dashed #8a857a}
+  .nplus{width:22px;height:22px;border-radius:50%;border:1px solid transparent;background:none;color:#b9b2a4;font:700 15px/1 var(--sans);cursor:pointer;opacity:.0}
+  tr:hover .nplus,.nplus:focus{opacity:1;border-color:#d8d2c6;color:var(--ink)}
+  @media(hover:none){.nplus{opacity:.6}}
+  ol.nlist{margin:6px 0 0 20px;padding:0}ol.nlist li{padding:10px 0 12px 4px;border-bottom:1px solid var(--line2)}ol.nlist li::marker{font:700 13px var(--sans);color:var(--ink)}
+  ol.nlist .nhd b{color:var(--ink);font-size:14px}
+  .nmod{position:fixed;inset:0;background:rgba(20,18,16,.45);z-index:100;display:flex;align-items:center;justify-content:center;padding:16px}
+  .nmod[hidden]{display:none}
+  .nbox{background:var(--card);border-radius:14px;width:min(640px,100%);padding:22px 24px;box-shadow:0 20px 50px rgba(0,0,0,.25)}
+  .nbox h3{font-size:18px;color:var(--ink);margin-bottom:4px}.nsub{font-size:12.5px;color:var(--mid);margin-bottom:12px}
+  .ncar{font-size:13px;background:#f4f1ea;border-radius:8px;padding:8px 12px;margin-bottom:10px}
+  .nbox textarea{width:100%;font:14px/1.55 var(--sans);color:var(--ink);border:1px solid var(--line);border-radius:9px;padding:10px 12px;resize:vertical;min-height:140px}
+  .nbox textarea:focus{outline:2px solid var(--bench);outline-offset:1px}
+  .nopts{display:flex;align-items:center;gap:10px 18px;flex-wrap:wrap;margin:12px 0 4px;font-size:13px;color:var(--body)}
+  .nopts label{display:inline-flex;align-items:center;gap:6px;cursor:pointer}.nopts label[hidden]{display:none}
+  .nerr{min-height:18px;font-size:12.5px;color:var(--loss);margin:6px 0}
+  .nbtns{display:flex;align-items:center;gap:10px}
+  .nsave{background:var(--ink);color:#fff;border:none;border-radius:8px;padding:8px 18px;font:700 13px var(--sans);cursor:pointer}
+  .nsave:disabled,.nbtns button:disabled{opacity:.5;cursor:default}
+  body.nmodal{overflow:hidden}
+  #xpAll .nadd,#xpAll .nplus,#xpAll .nedit,body.xstatic .nadd,body.xstatic .nplus,body.xstatic .nedit{display:none!important}
   /* scorecard sparklines, ageing, movers, exports (8 Oct 2026) */
   .spk{display:block;width:100%;height:34px;margin-top:10px}
   .xbtn{font:600 12px var(--sans);color:#f2efe8;background:transparent;border:1px solid #5d5850;border-radius:7px;padding:5px 11px;cursor:pointer}
@@ -359,7 +395,7 @@
   @page{size:A4 landscape;margin:11mm}
   @media print{
     *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
-    .entbar,.perbar,#rtabs,.stabs,.rnav,.info,.xbtn,footer,.tip{display:none!important}
+    .entbar,.perbar,#rtabs,.stabs,.rnav,.info,.xbtn,footer,.tip,.nadd,.nplus,.nedit,.nmod{display:none!important}
     header.top{background:#fff;color:#000;padding:0}header.top h1{color:#000}.logo path{fill:#000}
     main{padding:12px 0}.kpis,.chc,.two,.three,tr,.kpi{break-inside:avoid}.blk{break-inside:auto;margin-bottom:22px}.hd,h3,.cht{break-after:avoid}body{background:#fff}
     .wrap{max-width:none;padding:0}
@@ -1213,7 +1249,7 @@ function deptPage(dn){
     +(d.fee?' Contribution is billings less commission accrued on the sales sheet, cost and a per-head share of non-payroll overhead from Xero, and the SEEK ads posted (job advertising, from the SEEK ad usage report). The 3-month multiple covers the last three closed months.':'');
   const r3T=(()=>{const r=a.mem.map(e=>Object.assign(roll3(e),{n:e.name})).filter(x=>x.c);const c3=r.reduce((s,x)=>s+x.c,0),b3=r.reduce((s,x)=>s+x.b,0);
     return {v:c3?X(b3/c3):'—',t:c3?CALC(lab+': last 3 closed months',(r[0]?r[0].ks.map(mShort).join(', '):''),[['Billings (GP)',F(b3)],['÷ Cost of employment',F(c3)],['= Billings per $1 of cost',X(b3/c3),'s']]):''};})();
-  return kp+`<section class="blk"><div class="hd"><h2>${lab}</h2><div class="rt">${pn}</div></div>
+  return (typeof noteBlock==='function'?noteBlock('dept',dn,'Note on '+d.label):'')+kp+`<section class="blk"><div class="hd"><h2>${lab}</h2><div class="rt">${pn}</div></div>
     ${d.fee?bars(rows,team):''}</section>
     ${d.fee?recruiterLineSection(dn):''}
     ${d.fee&&PER==='CUR'?trackSection([d]):''}
@@ -1772,7 +1808,7 @@ function plTable(cols){
   const sec=(f,lab,tot,exp)=>{
     const ns=lines?names(f):[]; if(!ns.length&&!cols.some(c=>Math.abs(get(c,f))>=0.5)) return '';
     const key='pl-'+f, shut=COLL.has(key);
-    return (ns.length?`<tr class="h tg${shut?' shut':''}" data-sec="${key}" title="Show or hide the accounts"><td colspan="${cols.length+1}">${lab}</td></tr>`:hdr(lab))+ns.map(l=>`<tr class="ln${shut?' hid':''}"><td>${esc(l)}</td>${cols.map(c=>cell(c,f,l,esc(l),{exp})).join('')}</tr>`).join('')
+    return (ns.length?`<tr class="h tg${shut?' shut':''}" data-sec="${key}" title="Show or hide the accounts"><td colspan="${cols.length+1}">${lab}</td></tr>`:hdr(lab))+ns.map(l=>`<tr class="ln${shut?' hid':''}" data-acct="${esc(l)}"><td>${esc(l)}</td>${cols.map(c=>cell(c,f,l,esc(l),{exp})).join('')}</tr>`).join('')
       +`<tr class="sub2"><td>${tot}</td>${cols.map(c=>cell(c,f,null,tot,{sec:true,exp})).join('')}</tr>`;};
   const calcGP=c=>CALC('Gross profit, '+esc(c.h.replace(' *','')),'',[['Trading income',F(c.s.rev)],['Less cost of sales',F(-c.s.cos)],['= Gross profit',F(c.s.gp),'s']]);
   const calcNP=c=>CALC('Net profit, '+esc(c.h.replace(' *','')),'',[['Gross profit',F(c.s.gp)],['Plus other income',F(c.s.oth)],['Less operating expenses',F(-c.s.opex)],['= Net profit',SG(c.s.np),'s']]);
@@ -1890,7 +1926,7 @@ function bsTable(cols){
   const hdr=t=>`<tr class="h"><td colspan="${cols.length+1}">${t}</td></tr>`;
   const sec=(s,lab)=>{const ns=names(s); if(!ns.length) return '';
     const key='bs-'+s, shut=COLL.has(key);
-    return `<tr class="h2 tg${shut?' shut':''}" data-sec="${key}" title="Show or hide the accounts"><td colspan="${cols.length+1}">${lab}</td></tr>`+ns.map(l=>`<tr class="ln${shut?' hid':''}"><td>${esc(l)}</td>${cols.map(c=>cell(c,s,l,esc(l))).join('')}</tr>`).join('')
+    return `<tr class="h2 tg${shut?' shut':''}" data-sec="${key}" title="Show or hide the accounts"><td colspan="${cols.length+1}">${lab}</td></tr>`+ns.map(l=>`<tr class="ln${shut?' hid':''}" data-acct="${esc(l)}"><td>${esc(l)}</td>${cols.map(c=>cell(c,s,l,esc(l))).join('')}</tr>`).join('')
       +`<tr class="sub2"><td>Total ${lab.toLowerCase()}</td>${cols.map(c=>cell(c,s,null,'Total '+lab.toLowerCase(),{sec:true})).join('')}</tr>`;};
   const C=(lab,rows)=>c=>CALC(lab+', '+nm(c),'',rows(c));
   if(BSD==='sum'){
@@ -1929,7 +1965,7 @@ function bsTable(cols){
     +hdr('Liabilities')+sec('cl','Current liabilities')+sec('ncl','Non-current liabilities')
     +`<tr class="tot"><td>Total liabilities</td>${cols.map(c=>cell(c,'liabs',null,'Total liabilities',{calc:C('Total liabilities',c=>[['Current liabilities',F(c.b.T.cl)],['Non-current liabilities',F(c.b.T.ncl)],['= Total liabilities',F(c.b.liabs),'s']])})).join('')}</tr>`
     +`<tr class="tot net"><td>Net assets</td>${cols.map(c=>cell(c,'net',null,'Net assets',{calc:C('Net assets',c=>[['Total assets',F(c.b.assets)],['Less total liabilities',F(-c.b.liabs)],['= Net assets',F(c.b.net),'s']])})).join('')}</tr>`
-    +hdr('Equity')+names('eq').map(l=>`<tr class="ln"><td>${esc(l)}</td>${cols.map(c=>cell(c,'eq',l,esc(l))).join('')}</tr>`).join('')
+    +hdr('Equity')+names('eq').map(l=>`<tr class="ln" data-acct="${esc(l)}"><td>${esc(l)}</td>${cols.map(c=>cell(c,'eq',l,esc(l))).join('')}</tr>`).join('')
     +`<tr class="tot"><td>Total equity</td>${cols.map(c=>cell(c,'eq',null,'Total equity',{sec:true})).join('')}</tr>`
     +`<tr class="pct"><td>Net assets less equity</td>${cols.map(c=>{const v=c.mv?null:c.b?c.b.net-c.b.eq:null;return v==null?'<td class="mut"></td>':`<td class="${Math.abs(v)<1?'mut':'neg'}">${F(Math.abs(v)<0.5?0:v)}</td>`;}).join('')}</tr>`;
   return `<div class="tbl"><table class="fin">\n<thead><tr><th></th>${cols.map(c=>`<th>${esc(c.h)}</th>`).join('')}</tr></thead><tbody>${body}</tbody></table></div>`;
@@ -2099,7 +2135,7 @@ function mixOvhSection(yk,ks,on){
       <div class="tbl"><table><thead><tr><th>Account</th><th>${esc(rPN())}</th><th>${esc(cm.h)}</th><th>Movement</th></tr></thead><tbody>
       ${rows.map((r,i)=>`<tr${i<3?' class="hl"':''}><td>${i<3?'<span class="rk">'+(i+1)+'</span>':''}${esc(r.l)}</td><td>${F(r.a)}</td><td>${F(r.b)}</td><td class="${r.d>0?'neg':'pos'}">${SG(r.d).replace(/<[^>]+>/g,'')}</td></tr>`).join('')}</tbody></table></div></section>`; }
   return `<section class="blk"><div class="hd"><h2>Fees and overheads, month by month${INFO('Left: fees from Xero by month, permanent recruitment and Search (temp is left out; see the P&amp;L tab). Right: non-payroll operating expenses by month, the six largest accounts for the year and the rest together.')}</h2><div class="rt">A$</div></div>
-    <div class="two"><div class="chc"><div class="cht">Fees by month</div>${mix}</div><div class="chc"><div class="cht">Overheads by month</div>${ovc}</div></div></section>`+mv;
+    <div class="two"><div class="chc"><div class="cht">Fees by month</div>${mix}</div><div class="chc"><div class="cht">Overheads by month</div>${ovc}</div></div>${noteBlock('sec','ovh','Note on fees and overheads')}</section>`+mv;
 }
 /* temp (labour hire): revenue and gross profit by month, for the P&L tab */
 function tempSectionWrap(h){ return h+tempSection(); }
@@ -2142,13 +2178,13 @@ function debtorsSection(end){
   const od=A.ar.c.map(c=>c.concat([c[2]+c[3]+c[4]+c[5]])).filter(c=>c[7]>0.5).sort((a,b)=>b[7]-a[7]).slice(0,10);
   return `<section class="blk"><div class="hd"><h2>Debtors ageing, ${esc(dLong(A.asAt))}${INFO('Xero sales invoices outstanding at the date, less payments, credit notes and prepayments allocated by then, aged by due date. The full lists of debtors and creditors are on the Debtors &amp; Creditors tab.')}</h2><div class="rt">${F(sumB(A.ar.b))} owed by ${A.ar.c.length} customer${A.ar.c.length===1?'':'s'}</div></div>
     <div class="chc">${ageBar(A.ar.b)}</div>
-    ${od.length?`<h3 class="h3s">Ten largest overdue balances</h3>${ageTable(od.map(c=>c.slice(0,7)),10)}`:''}</section>`;
+    ${od.length?`<h3 class="h3s">Ten largest overdue balances</h3>${ageTable(od.map(c=>c.slice(0,7)),10)}`:''}${noteBlock('sec','debtors','Note on debtors')}</section>`;
 }
 function aparPage(){
   const end=rKs()[rKs().length-1], A=agedFor(end);
   if(!A) return flag('Aged receivables and payables are not synced yet','They come from Xero sales invoices and bills through the nightly sync, once the Xero connection has the invoices permission (run xero_authorize in the Data Sync project and approve).','hi');
   const ar=sumB(A.ar.b), ap=sumB(A.ap.b);
-  return `<div class="kpis"><div class="kpi"><div class="lab">Debtors</div><div class="val">${F(ar)}</div><div class="sub">${A.ar.n} invoices · ${PCT(ar?(A.ar.b[2]+A.ar.b[3]+A.ar.b[4])/ar:0)} over 30 days</div></div>
+  return noteBlock('sec','apar','Note on debtors and creditors')+`<div class="kpis"><div class="kpi"><div class="lab">Debtors</div><div class="val">${F(ar)}</div><div class="sub">${A.ar.n} invoices · ${PCT(ar?(A.ar.b[2]+A.ar.b[3]+A.ar.b[4])/ar:0)} over 30 days</div></div>
       <div class="kpi"><div class="lab">Creditors</div><div class="val">${F(ap)}</div><div class="sub">${A.ap.n} bills · ${PCT(ap?(A.ap.b[2]+A.ap.b[3]+A.ap.b[4])/ap:0)} over 30 days</div></div>
       <div class="kpi"><div class="lab">Net</div><div class="val ${ar-ap<0?'neg':''}">${F(ar-ap)}</div><div class="sub">As at ${esc(dLong(A.asAt))}</div></div></div>
     <section class="blk"><div class="hd"><h2>Aged receivables${INFO('Xero sales invoices outstanding at the date, less payments, credit notes, prepayments and overpayments allocated by then, aged by due date. Foreign currency invoices at their own rate'+(GRP()?'; North America converted at the month-end rate.':'.'))}</h2><div class="rt">As at ${esc(dLong(A.asAt))}</div></div>
@@ -2158,12 +2194,12 @@ function aparPage(){
 }
 /* ---------- exports: the whole report for the period, as PDF (print) or a standalone HTML file ---------- */
 function fullReport(){
-  const sRT=RT, parts=[];
+  const sRT=RT, parts=[]; NOTEX=true;
   RTABS.forEach(t=>{ RT=t.id; let h='';
     try{ if(t.id==='sales'){ salesPaint(); h=document.getElementById('content').innerHTML; }
       else { TIPS.length=0; h=t.id==='pl'?plPage():t.id==='bs'?bsPage():t.id==='cf'?cfPage():t.id==='calc'?calcPage():t.id==='apar'?aparPage():dashPage(); } }catch(e){ console.error(e); h=''; }
     if(h) parts.push(`<section class="xp-page"><h1 class="xp-h">${esc(t.t)}</h1>${h}</section>`); });
-  RT=sRT;
+  RT=sRT; NOTEX=false;
   const e=ENT==='G'?'Woods Group':DATA.ents[ENT].name, logos=((document.querySelector('header.top .hd-row')||{}).outerHTML||'').replace(/Management report · live/,'Management report').replace(/ id="[^"]*"/g,'');
   const cover=`<section class="xp-cover">${logos}<div class="xp-ct"><div class="xp-k">Management report</div><div class="xp-t">${esc(e)}</div><div class="xp-p">${esc(rPN())}</div><div class="xp-d">Prepared by The Co. Accountants &amp; Business Advisors · ${esc(DATA.generated)}</div></div></section>`;
   const html=cover+parts.join('').replace(/ data-tip="\d+"/g,'').replace(/<nav class="(?:rnav|snav)"[^>]*>[\s\S]*?<\/nav>/g,'').replace(/<button[^>]*data-(skp|lm|plv|bsv|bsd|plg|gocons|goplc)[^>]*>[\s\S]*?<\/button>/g,'');
@@ -2180,6 +2216,130 @@ function exportHTML(){
   const doc=`<!doctype html><html lang="en-AU"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Woods Group Management Report</title>${fonts}<style>${css}<\/style></head><body class="xstatic"><main><div class="wrap">${r.html}</div></main></body></html>`;
   const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([doc],{type:'text/html'})); a.download=r.name+'.html'; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove();},1000);
 }
+/* ---------- notes (15 Oct 2026): monthly notes kept in the Report_Notes tab of The Co's data sheet ----------
+   Shown for a single month only (not quarters or the year to date). Note writers (ticked on the Viewers tab) add and
+   edit them on the page; drafts and internal notes are seen by writers and The Co only; exports carry published client notes. */
+let NOTES=[], NOTEW=false, NOTEI=false, NOTEX=false, NOTEME='';
+const nMonth=()=>/^\d{4}-\d{2}$/.test(PER)?PER:null;
+const notesOn=()=>MODE==='report'&&!!nMonth()&&!!DATA;
+const nEdit=()=>NOTEW&&!NOTEX;
+const nShown=n=>n.status!=='dismissed'&&(!NOTEX||(n.status==='published'&&n.vis!=='internal'));
+const nAll=(kind,ref)=>NOTES.filter(n=>n.ent===ENT&&n.month===nMonth()&&n.kind===kind&&(n.ref||'')===(ref||''));
+const nGet=(kind,ref)=>nAll(kind,ref).filter(nShown)[0]||null;
+const unesc=x=>{const t=document.createElement('textarea'); t.innerHTML=x; return t.value;};
+/* a recurring note from an earlier month that has not been carried into (or dismissed from) this month */
+function nCarry(kind,ref){ if(!nEdit()||nAll(kind,ref).length) return null;
+  return NOTES.filter(n=>n.ent===ENT&&n.kind===kind&&(n.ref||'')===(ref||'')&&n.rec&&n.status==='published'&&n.month<nMonth()).sort((a,b)=>b.month.localeCompare(a.month))[0]||null; }
+const nText=n=>esc(n.text).replace(/\n/g,'<br>');
+const nBadges=n=>(n.status==='draft'?'<span class="nbdg dr">Draft</span>':'')+(n.vis==='internal'?'<span class="nbdg in">Internal</span>':'')+(n.rec?'<span class="nbdg rc">Recurring</span>':'');
+const nAttr=(kind,ref)=>` data-nk="${kind}" data-nr="${esc(ref||'')}"`;
+function notesLoad(){
+  if(MODE!=='report'||typeof api!=='function'||!SESSION) return;
+  api({action:'notes',session:SESSION.t},1).then(r=>{ if(!r||!r.ok) return; NOTES=r.notes||[]; NOTEW=!!r.canWrite; NOTEI=!!r.internal; NOTEME=r.me||'';
+    const y=window.scrollY; paint(); window.scrollTo({top:y}); });
+}
+/* a block note: the month's commentary, or a note on a section or department */
+function noteBlock(kind,ref,label,o){
+  if(!notesOn()) return ''; o=o||{};
+  const n=nGet(kind,ref), c=n?null:nCarry(kind,ref);
+  if(n) return `<div class="nblk${o.big?' big':''}"><div class="nhd"><span class="nlab">${esc(label)}, ${esc(kLong(nMonth()))}</span>${nBadges(n)}${nEdit()?`<button type="button" class="nedit"${nAttr(kind,ref)}>Edit</button>`:''}</div><div class="ntx">${nText(n)}</div></div>`;
+  if(c) return `<div class="nblk carry"><div class="nhd"><span class="nlab">${esc(label)}: recurring note from ${esc(kShort(c.month))}</span><button type="button" class="nedit"${nAttr(kind,ref)}>Review</button></div><div class="ntx">${nText(c)}</div></div>`;
+  return nEdit()?`<button type="button" class="nadd${o.big?' big':''}"${nAttr(kind,ref)}>+ Add ${esc(label.charAt(0).toLowerCase()+label.slice(1))}</button>`:'';
+}
+/* adds a narrow note column to a P&L or balance sheet table: a numbered marker where an account has a note (hover to
+   read it), a + to add one; the notes are listed in the same order at the bottom of the page */
+function withNoteCol(html,kind,detail){
+  const list=[];
+  if(!notesOn()||GRP()||!detail) return {html,list};
+  const any=NOTES.some(n=>n.ent===ENT&&n.month===nMonth()&&n.kind===kind&&nShown(n));
+  if(!nEdit()&&!any) return {html,list};
+  html=html.replace(/<tr([^>]*)>([\s\S]*?)<\/tr>/g,(m,a,inner)=>{
+    if(/<th[\s>]/.test(inner)) return `<tr${a}>${inner}<th class="nc"></th></tr>`;
+    if(/colspan="\d+"/.test(inner)) return `<tr${a}>${inner.replace(/colspan="(\d+)"/,(x,k)=>'colspan="'+(+k+1)+'"')}</tr>`;
+    const r=(a.match(/data-acct="([^"]*)"/)||[])[1];
+    if(r==null) return `<tr${a}>${inner}<td class="nc"></td></tr>`;
+    const ref=unesc(r), n=nGet(kind,ref), c=n?null:nCarry(kind,ref);
+    let cell='';
+    if(n){ list.push({n,ref}); cell=`<span class="nmk${n.status==='draft'?' dr':''}"${nEdit()?` role="button" tabindex="0"`+nAttr(kind,ref):''}${TIP(`<div class="th">${esc(ref)}</div><div class="tx">${nText(n)}</div>`)}>${list.length}</span>`; }
+    else if(c) cell=`<span class="nmk carry" role="button" tabindex="0"${nAttr(kind,ref)}${TIP(`<div class="th">Recurring note from ${esc(kShort(c.month))}</div><div class="tx">${nText(c)}</div>`)}>↻</span>`;
+    else if(nEdit()) cell=`<button type="button" class="nplus"${nAttr(kind,ref)} aria-label="Add a note to ${r}" title="Add a note">+</button>`;
+    return `<tr${a}>${inner}<td class="nc">${cell}</td></tr>`;
+  });
+  return {html,list};
+}
+function noteList(title,kind,list){
+  if(!notesOn()||GRP()) return '';
+  const gen=noteBlock('sec',kind,'General note');
+  if(!list.length&&!gen) return '';
+  return `<section class="blk nsec"><div class="hd"><h2>${esc(title)}</h2><div class="rt">${esc(kLong(nMonth()))}</div></div>${gen}
+    ${list.length?`<ol class="nlist">${list.map(({n,ref})=>`<li><div class="nhd"><b>${esc(ref)}</b>${nBadges(n)}${nEdit()?`<button type="button" class="nedit"${nAttr(kind,ref)}>Edit</button>`:''}</div><div class="ntx">${nText(n)}</div></li>`).join('')}</ol>`
+      :(nEdit()?`<div class="mut" style="font-size:13px;margin-top:8px">Click + at the right of an account to add a note to it.</div>`:'')}</section>`;
+}
+/* the editor */
+const NLAB={month:'Commentary',sec:'Note',dept:'Department note'};
+let NED=null;
+function nModal(){
+  let m=document.getElementById('nModal'); if(m) return m;
+  m=document.createElement('div'); m.id='nModal'; m.className='nmod'; m.hidden=true;
+  m.innerHTML=`<div class="nbox" role="dialog" aria-modal="true" aria-labelledby="nTtl"><h3 id="nTtl"></h3><div class="nsub" id="nSub"></div>
+    <div class="ncar" id="nCar" hidden></div>
+    <textarea id="nTxt" rows="8" maxlength="4000" aria-label="Note"></textarea>
+    <div class="nopts"><div class="vtog" role="group" aria-label="Status"><button type="button" data-nst="draft">Draft</button><button type="button" data-nst="published">Published</button></div>
+      <label id="nIntL"><input type="checkbox" id="nInt"> Internal, The Co only</label><label><input type="checkbox" id="nRec"> Recurring, offer it again next month</label></div>
+    <div class="nerr" id="nErr"></div>
+    <div class="nbtns"><button type="button" id="nDel" class="nlink del">Delete</button><button type="button" id="nDis" class="nlink">Don't carry forward</button><span style="flex:1"></span><button type="button" id="nCan" class="btn2">Cancel</button><button type="button" id="nSave" class="nsave">Save</button></div></div>`;
+  document.body.appendChild(m);
+  m.addEventListener('click',ev=>{ if(ev.target===m) nClose(); const b=ev.target.closest('[data-nst]'); if(b){ NED.st=b.dataset.nst; nSt(); } });
+  m.addEventListener('keydown',ev=>{ if(ev.key==='Escape') nClose(); });
+  m.querySelector('#nCan').addEventListener('click',nClose);
+  m.querySelector('#nSave').addEventListener('click',()=>nSave(false));
+  m.querySelector('#nDis').addEventListener('click',()=>nSave(true));
+  m.querySelector('#nDel').addEventListener('click',nDelete);
+  return m;
+}
+function nSt(){ document.querySelectorAll('#nModal [data-nst]').forEach(b=>b.classList.toggle('on',b.dataset.nst===NED.st)); }
+function nTitle(kind,ref){ if(kind==='pl'||kind==='bs') return ref; if(kind==='dept'){ const d=typeof dep==='function'&&dep(ref); return (d?d.label:ref)+': department note'; }
+  if(kind==='sec') return ({cash:'Note on cash',depts:'Note on the departments',ovh:'Note on fees and overheads',debtors:'Note on debtors',apar:'Note on debtors and creditors',pl:'Profit and loss: general note',bs:'Balance sheet: general note'})[ref]||'Note';
+  return 'Commentary'; }
+function openNote(kind,ref){
+  if(!nEdit()||!nMonth()) return;
+  const m=nModal(), n=nAll(kind,ref).filter(x=>x.status!=='dismissed')[0]||null, c=n?null:nCarry(kind,ref);
+  NED={kind,ref,id:n?n.id:'',st:n?n.status:'published',del:false};
+  const ent=ENT==='G'?'Woods Group':DATA.ents[ENT].name;
+  m.querySelector('#nTtl').textContent=nTitle(kind,ref);
+  m.querySelector('#nSub').textContent=ent+' · '+kLong(nMonth())+(n?' · last saved by '+(n.by||'')+' '+(n.at||''):'');
+  const car=m.querySelector('#nCar'); car.hidden=!c; car.textContent=c?'Recurring note from '+kShort(c.month)+'. Save to carry it into '+kShort(nMonth())+', or choose not to carry it forward.':'';
+  m.querySelector('#nTxt').value=n?n.text:c?c.text:'';
+  m.querySelector('#nInt').checked=n?n.vis==='internal':c?c.vis==='internal':false;
+  m.querySelector('#nIntL').hidden=!NOTEI;
+  m.querySelector('#nRec').checked=n?!!n.rec:!!c;
+  m.querySelector('#nDel').hidden=!n; m.querySelector('#nDel').textContent='Delete';
+  m.querySelector('#nDis').hidden=!c;
+  nBusy(false,'');
+  nSt(); m.hidden=false; document.body.classList.add('nmodal');
+  setTimeout(()=>m.querySelector('#nTxt').focus(),30);
+}
+function nClose(){ const m=document.getElementById('nModal'); if(m) m.hidden=true; document.body.classList.remove('nmodal'); NED=null; }
+function nBusy(on,t){ const m=nModal(); m.querySelectorAll('button').forEach(b=>b.disabled=on); m.querySelector('#nErr').textContent=t||''; }
+function nDone(r){
+  if(r&&r.ok){ NOTES=r.notes||[]; nClose(); const y=window.scrollY; paint(); window.scrollTo({top:y}); return; }
+  nBusy(false,r&&r.error==='denied'?'You do not have permission to change this note.':r&&r.error==='empty'?'Write the note first.':r&&r.error==='busy'?'Busy: try again in a minute.':'The note could not be saved. Try again.');
+}
+function nSave(dismiss){
+  if(!NED) return; const m=nModal(), text=m.querySelector('#nTxt').value.trim();
+  if(!dismiss&&!text){ m.querySelector('#nErr').textContent='Write the note first.'; return; }
+  const note={id:NED.id,ent:ENT,month:nMonth(),kind:NED.kind,ref:NED.ref||'',text:dismiss?'':text,status:dismiss?'dismissed':NED.st,
+    vis:NOTEI&&m.querySelector('#nInt').checked?'internal':'client',rec:!dismiss&&m.querySelector('#nRec').checked};
+  nBusy(true,'Saving…'); api({action:'saveNote',session:SESSION.t,note},1).then(nDone);
+}
+function nDelete(){
+  if(!NED||!NED.id) return; const b=nModal().querySelector('#nDel');
+  if(!NED.del){ NED.del=true; b.textContent='Click again to delete'; return; }
+  nBusy(true,'Deleting…'); api({action:'deleteNote',session:SESSION.t,id:NED.id},1).then(nDone);
+}
+document.addEventListener('click',ev=>{ const t=ev.target.closest('[data-nk]'); if(!t||!document.getElementById('content').contains(t)) return; ev.preventDefault(); openNote(t.dataset.nk,t.dataset.nr||''); });
+document.addEventListener('keydown',ev=>{ if(ev.key!=='Enter'&&ev.key!==' ') return; const t=ev.target.closest&&ev.target.closest('span[data-nk]'); if(!t) return; ev.preventDefault(); openNote(t.dataset.nk,t.dataset.nr||''); });
+
 /* ---------- Calcs tab: how each number is worked out ---------- */
 const cnote=t=>`<p class="cnote">${t}</p>`;
 function calcPage(){
@@ -2243,8 +2403,9 @@ function plPage(){
   const miss=cols.filter(c=>c.s&&c.s.miss&&c.s.miss.length).length;
   const info='Xero profit and loss, standard layout, by account. '+(GRP()?(PLG==='cons'?'Consolidated in A$ (North America at the RBA monthly average AUD/USD rate). W&amp;Co Search fees that Recruitment pays Search ("Recruitment Cost - W&amp;Co. Search") are eliminated against the same amount of Search\'s Recruitment Fees; the client revenue stays in Recruitment. Profit is unchanged.':'Each entity in A$ (North America at the RBA monthly average AUD/USD rate). Not consolidated: switch to Consolidated to eliminate the fees between Recruitment and W&amp;Co Search.'):
     (rKs().length===1?'The month, the prior month, the movement and the year to date.':'Each month in the period and the total.'))+(rUS()?' North America reports in US$; its overheads come through Xero as "Other Income and Expense" and are shown as operating expenses.':'')+' * month not yet closed.';
+  const PLN=withNoteCol(plTable(cols),'pl',PLV==='det');
   return finFlags()+(miss&&!cols.some(c=>c.s&&c.s.n)?flag('No Xero profit and loss for this period yet','','hi'):'')
-    +`<section class="blk"><div class="hd"><h2>Profit and loss, ${pn}${INFO(info)}</h2><div class="rt">${GRP()?vtog('plg',PLG,[['side','Side by side'],['cons','Consolidated']]):(Object.keys(DATA.ents).length>1?`<button type="button" class="lnkb" data-goplc="1">Consolidated group P&amp;L \u2192</button>`:'')} ${vtog('plv',PLV,[['det','Detailed'],['sum','Summary']])}</div></div>${plTable(cols)}${GRP()&&PLG==='cons'?(()=>{const e=cols.filter(c=>c.s&&c.s.elim).map(c=>esc(c.h.replace(' *',''))+' '+F(c.s.elim)); return e.length?`<div class="tnote">Eliminated between Recruitment and W&amp;Co Search: ${e.join(' \u00b7 ')}</div>`:'';})():''}<div class="tnote">${GRP()?'A$':rUS()?'US$':'A$'} \u00b7 Xero synced ${esc((DATA.xero||{}).syncedAt||'')}</div></section>`+tempSection();
+    +`<section class="blk"><div class="hd"><h2>Profit and loss, ${pn}${INFO(info)}</h2><div class="rt">${GRP()?vtog('plg',PLG,[['side','Side by side'],['cons','Consolidated']]):(Object.keys(DATA.ents).length>1?`<button type="button" class="lnkb" data-goplc="1">Consolidated group P&amp;L \u2192</button>`:'')} ${vtog('plv',PLV,[['det','Detailed'],['sum','Summary']])}</div></div>${PLN.html}${GRP()&&PLG==='cons'?(()=>{const e=cols.filter(c=>c.s&&c.s.elim).map(c=>esc(c.h.replace(' *',''))+' '+F(c.s.elim)); return e.length?`<div class="tnote">Eliminated between Recruitment and W&amp;Co Search: ${e.join(' \u00b7 ')}</div>`:'';})():''}<div class="tnote">${GRP()?'A$':rUS()?'US$':'A$'} \u00b7 Xero synced ${esc((DATA.xero||{}).syncedAt||'')}</div></section>`+tempSection()+noteList('Notes to the profit and loss','pl',PLN.list);
 }
 function bsPage(){
   const {cols,end,cons}=bsCols(), pn=esc(rPN()), es=rEnts();
@@ -2270,7 +2431,8 @@ function bsPage(){
         <td${BD(esc(nm(p.b))+' books','Accounts with '+esc(nm(p.a)),p.items.filter(t=>t.e===p.b).map(t=>({l:t.l,v:/^(cl|ncl)$/.test(t.s)?t.v:-t.v})),{total:-p.ba,signed:true})}>${F(-p.ba)}</td>
         <td class="${Math.abs(p.diff)<1?'mut':'neg'}">${F(Math.abs(p.diff)<0.5?0:p.diff)}</td></tr>`).join('')}
       </tbody></table></div></section>`; }
-  return finFlags()+kp+`<section class="blk"><div class="hd"><h2>Balance sheet${GRP()&&BSV==='cons'?', consolidated':''}${INFO(info)}</h2><div class="rt">${tog}</div></div>${bsTable(cols)}<div class="tnote">${GRP()?'A$ \u00b7 ':''}${esc(cols[0].b&&cols[0].b.d?'As at '+dLong(cols[0].b.d):kEnd(end))}</div></section>`+pt;
+  const BSN=withNoteCol(bsTable(cols),'bs',BSD==='det');
+  return finFlags()+kp+`<section class="blk"><div class="hd"><h2>Balance sheet${GRP()&&BSV==='cons'?', consolidated':''}${INFO(info)}</h2><div class="rt">${tog}</div></div>${BSN.html}<div class="tnote">${GRP()?'A$ \u00b7 ':''}${esc(cols[0].b&&cols[0].b.d?'As at '+dLong(cols[0].b.d):kEnd(end))}</div></section>`+pt+noteList('Notes to the balance sheet','bs',BSN.list);
 }
 function cfCols(){
   const ks=rKs(), es=rEnts();
@@ -2351,7 +2513,7 @@ function dashPage(){
   const plSumm=(()=>{ const sv=PLV, sr=PLREV; PLV='sum'; PLREV=true; let t=''; try{ t=plTable(plCols()); }finally{ PLV=sv; PLREV=sr; } return t; })();
   const cfSumm=es.some(hasBS)?cfTable(cfCols()):'';
   const dE=GRP()?['R','S']:[ENT];
-  return finFlags()+kpis
+  return finFlags()+noteBlock('month','','Commentary',{big:true})+kpis
     +(()=>{ const ms=rUS()?U().months:DATA.months, pl=k=>GRP()?plConsSum([k]):plSum(ENT,[k]), rows=ms.map(m=>({m,s:pl(m.key)}));
       if(!rows.some(r=>r.s.n)) return '';
       const D={ms,series:[{key:'rev',name:'Revenue',colv:'#2a78d6',a:rows.map(r=>({b:r.s.n?r.s.rev:null}))},{key:'gp',name:'Gross profit',colv:'#1baf7a',a:rows.map(r=>({b:r.s.n?r.s.gp:null}))},{key:'np',name:'Net profit',colv:'#4a463e',a:rows.map(r=>({b:r.s.n?r.s.np:null}))}]};
@@ -2359,10 +2521,10 @@ function dashPage(){
     +(plSumm?`<section class="blk"><div class="hd"><h2>Summarised profit and loss, ${pn}${INFO('Xero profit and loss in summary, with each trading income account shown. The full detail is on the P&amp;L tab.')}</h2><div class="rt">${cur}</div></div>${plSumm}</section>`:'')
     +mixOvhSection(yk,ks,ykI)
     +(cash.some(c=>c.v!=null)?`<section class="blk"><div class="hd"><h2>Cash, ${qsel?pn+', month by month':'month by month'}</h2><div class="rt">${cur}${qsel?'':' · selected period highlighted'}</div></div>
-      <div class="two"><div class="chc"><div class="cht">Net cash movement</div>${mc}</div><div class="chc"><div class="cht">Cash at bank, month end</div>${lineChart(cash,{label:'Cash at bank by month end'})}</div></div></section>`:'')
+      <div class="two"><div class="chc"><div class="cht">Net cash movement</div>${mc}</div><div class="chc"><div class="cht">Cash at bank, month end</div>${lineChart(cash,{label:'Cash at bank by month end'})}</div></div>${noteBlock('sec','cash','Note on cash')}</section>`:'')
     +(cfSumm?`<section class="blk"><div class="hd"><h2>Summarised cash flow, ${pn}${INFO('From Xero\'s cash-basis P&amp;L and the change in the other balance sheet accounts, ending at cash at bank. The full detail is on the Cash Flow Summary tab.')}</h2><div class="rt">${cur}</div></div>${cfSumm}</section>`:'')
     +(rUS()?'':deptLineSection(dE,GRP()?' Recruitment and W&amp;Co Search departments together, in A$.':''))
-    +(!rUS()?`<section class="blk"><div class="hd"><h2>Departments against cost, ${pn}${INFO('From the Sales tab: each fee department\'s billings against its people\'s fully loaded cost, with the break-even and target marks.')}</h2><div class="rt">Sorted by billings</div></div>${deptBars(dE)}</section>`+seekSection(dE)+deptShareSection(dE):'')
+    +(!rUS()?`<section class="blk"><div class="hd"><h2>Departments against cost, ${pn}${INFO('From the Sales tab: each fee department\'s billings against its people\'s fully loaded cost, with the break-even and target marks.')}</h2><div class="rt">Sorted by billings</div></div>${deptBars(dE)}${noteBlock('sec','depts','Note on the departments')}</section>`+seekSection(dE)+deptShareSection(dE):'')
     +(!GRP()&&!rUS()?`<section class="blk"><div class="hd"><h2>Department scorecard${INFO('From the Sales tab: each fee department\'s billings against its people\'s fully loaded cost.')}</h2><div class="rt">${pn}</div></div>${scorecard()}</section>`:'')
     +debtorsSection(end);
 }
@@ -2474,6 +2636,7 @@ function got(d){
   DATA=d; ls.set(DKEY,{at:Date.now(),e:SESSION&&SESSION.e,d:d}); ss.set(DKEY,null);
   if(MODE==='report'&&typeof trimReport==='function') trimReport(d);
   document.body.classList.remove('locked'); showWho(); setEnts(); paint();
+  if(typeof notesLoad==='function') notesLoad();
   const btn=$('refresh'); btn.disabled=false; btn.textContent='Refresh data';
 }
 function load(force,quiet){
