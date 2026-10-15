@@ -1249,7 +1249,7 @@ function deptPage(dn){
     +(d.fee?' Contribution is billings less commission accrued on the sales sheet, cost and a per-head share of non-payroll overhead from Xero, and the SEEK ads posted (job advertising, from the SEEK ad usage report). The 3-month multiple covers the last three closed months.':'');
   const r3T=(()=>{const r=a.mem.map(e=>Object.assign(roll3(e),{n:e.name})).filter(x=>x.c);const c3=r.reduce((s,x)=>s+x.c,0),b3=r.reduce((s,x)=>s+x.b,0);
     return {v:c3?X(b3/c3):'—',t:c3?CALC(lab+': last 3 closed months',(r[0]?r[0].ks.map(mShort).join(', '):''),[['Billings (GP)',F(b3)],['÷ Cost of employment',F(c3)],['= Billings per $1 of cost',X(b3/c3),'s']]):''};})();
-  return (typeof noteBlock==='function'?noteBlock('dept',dn,'Note on '+d.label):'')+kp+`<section class="blk"><div class="hd"><h2>${lab}</h2><div class="rt">${pn}</div></div>
+  return (typeof noteBlock==='function'?noteBlock('dept',dn,'Note: '+d.label):'')+kp+`<section class="blk"><div class="hd"><h2>${lab}</h2><div class="rt">${pn}</div></div>
     ${d.fee?bars(rows,team):''}</section>
     ${d.fee?recruiterLineSection(dn):''}
     ${d.fee&&PER==='CUR'?trackSection([d]):''}
@@ -1696,7 +1696,7 @@ function salesPaint(){
    ===================================================================== */
 let PLREV=false; let RT='dash', PERSET=false, PLV='det', BSV='side', PLG='side', BSD='det'; const COLL=new Set();
 const vtog=(k,cur,opts)=>`<div class="vtog" role="group">${opts.map(([v,t])=>`<button type="button" data-${k}="${v}" class="${v===cur?'on':''}">${t}</button>`).join('')}</div>`;
-const RTABS=[{id:'dash',t:'Dashboard'},{id:'pl',t:'P&L'},{id:'bs',t:'Balance Sheet'},{id:'cf',t:'Cash Flow Summary'},{id:'calc',t:'Calcs'},{id:'sales',t:'Sales'},{id:'apar',t:'Debtors & Creditors'}];
+const RTABS=[{id:'dash',t:'Dashboard'},{id:'pl',t:'P&L'},{id:'bs',t:'Balance Sheet'},{id:'cf',t:'Cash Flow Summary'},{id:'sales',t:'Sales'},{id:'apar',t:'Debtors & Creditors'},{id:'calc',t:'Calcs'}];
 const MNL=['January','February','March','April','May','June','July','August','September','October','November','December'];
 const kLong=k=>MNL[+k.slice(5,7)-1]+' '+k.slice(0,4);
 const kShort=k=>MNL[+k.slice(5,7)-1].slice(0,3)+' '+k.slice(2,4);
@@ -2137,7 +2137,7 @@ function mixOvhSection(yk,ks,on){
       <div class="tbl"><table><thead><tr><th>Account</th><th>${esc(rPN())}</th><th>${esc(cm.h)}</th><th>Movement</th></tr></thead><tbody>
       ${rows.map((r,i)=>`<tr${i<3?' class="hl"':''}><td>${i<3?'<span class="rk">'+(i+1)+'</span>':''}${esc(r.l)}</td><td>${F(r.a)}</td><td>${F(r.b)}</td><td class="${r.d>0?'neg':'pos'}">${SG(r.d).replace(/<[^>]+>/g,'')}</td></tr>`).join('')}</tbody></table></div></section>`; }
   return `<section class="blk"><div class="hd"><h2>Fees and overheads, month by month${INFO('Left: fees from Xero by month, permanent recruitment and Search (temp is left out; see the P&amp;L tab). Right: non-payroll operating expenses by month, the six largest accounts for the year and the rest together.')}</h2><div class="rt">A$</div></div>
-    <div class="two"><div class="chc"><div class="cht">Fees by month</div>${mix}</div><div class="chc"><div class="cht">Overheads by month</div>${ovc}</div></div>${noteBlock('sec','ovh','Note on fees and overheads')}</section>`+mv;
+    <div class="two"><div class="chc"><div class="cht">Fees by month</div>${mix}</div><div class="chc"><div class="cht">Overheads by month</div>${ovc}</div></div>${noteBlock('sec','ovh','Note: Fees and overheads')}</section>`+mv;
 }
 /* temp (labour hire): revenue and gross profit by month, for the P&L tab */
 function tempSectionWrap(h){ return h+tempSection(); }
@@ -2180,13 +2180,13 @@ function debtorsSection(end){
   const od=A.ar.c.map(c=>c.concat([c[2]+c[3]+c[4]+c[5]])).filter(c=>c[7]>0.5).sort((a,b)=>b[7]-a[7]).slice(0,10);
   return `<section class="blk"><div class="hd"><h2>Debtors ageing, ${esc(dLong(A.asAt))}${INFO('Xero sales invoices outstanding at the date, less payments, credit notes and prepayments allocated by then, aged by due date. The full lists of debtors and creditors are on the Debtors &amp; Creditors tab.')}</h2><div class="rt">${F(sumB(A.ar.b))} owed by ${A.ar.c.length} customer${A.ar.c.length===1?'':'s'}</div></div>
     <div class="chc">${ageBar(A.ar.b)}</div>
-    ${od.length?`<h3 class="h3s">Ten largest overdue balances</h3>${ageTable(od.map(c=>c.slice(0,7)),10)}`:''}${noteBlock('sec','debtors','Note on debtors')}</section>`;
+    ${od.length?`<h3 class="h3s">Ten largest overdue balances</h3>${ageTable(od.map(c=>c.slice(0,7)),10)}`:''}${noteBlock('sec','debtors','Note: Debtors ageing')}</section>`;
 }
 function aparPage(){
   const end=rKs()[rKs().length-1], A=agedFor(end);
   if(!A) return flag('Aged receivables and payables are not synced yet','They come from Xero sales invoices and bills through the nightly sync, once the Xero connection has the invoices permission (run xero_authorize in the Data Sync project and approve).','hi');
   const ar=sumB(A.ar.b), ap=sumB(A.ap.b);
-  return noteBlock('sec','apar','Note on debtors and creditors')+`<div class="kpis"><div class="kpi"><div class="lab">Debtors</div><div class="val">${F(ar)}</div><div class="sub">${A.ar.n} invoices · ${PCT(ar?(A.ar.b[2]+A.ar.b[3]+A.ar.b[4])/ar:0)} over 30 days</div></div>
+  return noteBlock('sec','apar','Note: Debtors and creditors')+`<div class="kpis"><div class="kpi"><div class="lab">Debtors</div><div class="val">${F(ar)}</div><div class="sub">${A.ar.n} invoices · ${PCT(ar?(A.ar.b[2]+A.ar.b[3]+A.ar.b[4])/ar:0)} over 30 days</div></div>
       <div class="kpi"><div class="lab">Creditors</div><div class="val">${F(ap)}</div><div class="sub">${A.ap.n} bills · ${PCT(ap?(A.ap.b[2]+A.ap.b[3]+A.ap.b[4])/ap:0)} over 30 days</div></div>
       <div class="kpi"><div class="lab">Net</div><div class="val ${ar-ap<0?'neg':''}">${F(ar-ap)}</div><div class="sub">As at ${esc(dLong(A.asAt))}</div></div></div>
     <section class="blk"><div class="hd"><h2>Aged receivables${INFO('Xero sales invoices outstanding at the date, less payments, credit notes, prepayments and overpayments allocated by then, aged by due date. Foreign currency invoices at their own rate'+(GRP()?'; North America converted at the month-end rate.':'.'))}</h2><div class="rt">As at ${esc(dLong(A.asAt))}</div></div>
@@ -2198,8 +2198,8 @@ function aparPage(){
 function fullReport(){
   const sRT=RT, parts=[]; NOTEX=true;
   RTABS.forEach(t=>{ RT=t.id; let h='';
-    try{ if(t.id==='sales'){ salesPaint(); h=document.getElementById('content').innerHTML; }
-      else { TIPS.length=0; h=t.id==='pl'?plPage():t.id==='bs'?bsPage():t.id==='cf'?cfPage():t.id==='calc'?calcPage():t.id==='apar'?aparPage():dashPage(); } }catch(e){ console.error(e); h=''; }
+    try{ if(t.id==='sales'){ salesPaint(); addSecNotes(document.getElementById('content')); h=document.getElementById('content').innerHTML; }
+      else { TIPS.length=0; h=t.id==='pl'?plPage():t.id==='bs'?bsPage():t.id==='cf'?cfPage():t.id==='calc'?calcPage():t.id==='apar'?aparPage():dashPage(); h=secNotesStr(h); } }catch(e){ console.error(e); h=''; }
     if(h) parts.push(`<section class="xp-page"><h1 class="xp-h">${esc(t.t)}</h1>${h}</section>`); });
   RT=sRT; NOTEX=false;
   const e=ENT==='G'?'Woods Group':DATA.ents[ENT].name, logos=((document.querySelector('header.top .hd-row')||{}).outerHTML||'').replace(/Management report · live/,'Management report').replace(/ id="[^"]*"/g,'');
@@ -2277,6 +2277,23 @@ function noteList(title,kind,list){
     ${list.length?`<ol class="nlist">${list.map(({n,ref})=>`<li><div class="nhd"><b>${esc(ref)}</b>${nBadges(n)}${nEdit()?`<button type="button" class="nedit"${nAttr(kind,ref)}>Edit</button>`:''}</div><div class="ntx">${nText(n)}</div></li>`).join('')}</ol>`
       :(nEdit()?`<div class="mut" style="font-size:13px;margin-top:8px">Click + at the right of an account to add a note to it.</div>`:'')}</section>`;
 }
+/* a note at the bottom of every section (single month only); key = tab + section heading, so it follows the section */
+const NSECT={};
+function secKey(sec){
+  const h=sec.querySelector('.hd h2'); if(!h) return null;
+  const t=((h.childNodes[0]&&h.childNodes[0].textContent)||'').split(',')[0].trim(); if(!t) return null;
+  const tab=RT==='sales'?'sales-'+(typeof TAB!=='undefined'?TAB:'sum'):RT;
+  return {k:tab+':'+t.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,''),t};
+}
+function addSecNotes(root){
+  if(!notesOn()||!root) return;
+  root.querySelectorAll('section.blk').forEach(sec=>{
+    if(sec.classList.contains('nsec')||sec.querySelector('.nblk,.nadd,[data-acct]')) return;
+    const x=secKey(sec); if(!x) return; NSECT[x.k]=x.t;
+    const h=noteBlock('sec',x.k,'Note: '+x.t); if(h) sec.insertAdjacentHTML('beforeend',h);
+  });
+}
+function secNotesStr(html){ if(!notesOn()) return html; const t=document.createElement('template'); t.innerHTML=html; addSecNotes(t.content); return t.innerHTML; }
 /* the editor */
 const NLAB={month:'Commentary',sec:'Note',dept:'Department note'};
 let NED=null;
@@ -2300,8 +2317,8 @@ function nModal(){
   return m;
 }
 function nSt(){ document.querySelectorAll('#nModal [data-nst]').forEach(b=>b.classList.toggle('on',b.dataset.nst===NED.st)); }
-function nTitle(kind,ref){ if(kind==='pl'||kind==='bs') return ref; if(kind==='dept'){ const d=typeof dep==='function'&&dep(ref); return (d?d.label:ref)+': department note'; }
-  if(kind==='sec') return ({cash:'Note on cash',depts:'Note on the departments',ovh:'Note on fees and overheads',debtors:'Note on debtors',apar:'Note on debtors and creditors',pl:'Profit and loss: general note',bs:'Balance sheet: general note'})[ref]||'Note';
+function nTitle(kind,ref){ if(kind==='sec'&&NSECT[ref]) return 'Note: '+NSECT[ref]; if(kind==='pl'||kind==='bs') return ref; if(kind==='dept'){ const d=typeof dep==='function'&&dep(ref); return (d?d.label:ref)+': department note'; }
+  if(kind==='sec') return ({cash:'Note: Cash',depts:'Note: Departments against cost',ovh:'Note: Fees and overheads',debtors:'Note: Debtors ageing',apar:'Note: Debtors and creditors',pl:'Profit and loss: general note',bs:'Balance sheet: general note'})[ref]||'Note';
   return 'Commentary'; }
 function openNote(kind,ref){
   if(!nEdit()||!nMonth()) return;
@@ -2524,10 +2541,10 @@ function dashPage(){
     +(plSumm?`<section class="blk"><div class="hd"><h2>Summarised profit and loss, ${pn}${INFO('Xero profit and loss in summary, with each trading income account shown. The full detail is on the P&amp;L tab.')}</h2><div class="rt">${cur}</div></div>${plSumm}</section>`:'')
     +mixOvhSection(yk,ks,ykI)
     +(cash.some(c=>c.v!=null)?`<section class="blk"><div class="hd"><h2>Cash, ${qsel?pn+', month by month':'month by month'}</h2><div class="rt">${cur}${qsel?'':' · selected period highlighted'}</div></div>
-      <div class="two"><div class="chc"><div class="cht">Net cash movement</div>${mc}</div><div class="chc"><div class="cht">Cash at bank, month end</div>${lineChart(cash,{label:'Cash at bank by month end'})}</div></div>${noteBlock('sec','cash','Note on cash')}</section>`:'')
+      <div class="two"><div class="chc"><div class="cht">Net cash movement</div>${mc}</div><div class="chc"><div class="cht">Cash at bank, month end</div>${lineChart(cash,{label:'Cash at bank by month end'})}</div></div>${noteBlock('sec','cash','Note: Cash')}</section>`:'')
     +(cfSumm?`<section class="blk"><div class="hd"><h2>Summarised cash flow, ${pn}${INFO('From Xero\'s cash-basis P&amp;L and the change in the other balance sheet accounts, ending at cash at bank. The full detail is on the Cash Flow Summary tab.')}</h2><div class="rt">${cur}</div></div>${cfSumm}</section>`:'')
     +(rUS()?'':deptLineSection(dE,GRP()?' Recruitment and W&amp;Co Search departments together, in A$.':''))
-    +(!rUS()?`<section class="blk"><div class="hd"><h2>Departments against cost, ${pn}${INFO('From the Sales tab: each fee department\'s billings against its people\'s fully loaded cost, with the break-even and target marks.')}</h2><div class="rt">Sorted by billings</div></div>${deptBars(dE)}${noteBlock('sec','depts','Note on the departments')}</section>`+seekSection(dE)+deptShareSection(dE):'')
+    +(!rUS()?`<section class="blk"><div class="hd"><h2>Departments against cost, ${pn}${INFO('From the Sales tab: each fee department\'s billings against its people\'s fully loaded cost, with the break-even and target marks.')}</h2><div class="rt">Sorted by billings</div></div>${deptBars(dE)}${noteBlock('sec','depts','Note: Departments against cost')}</section>`+seekSection(dE)+deptShareSection(dE):'')
     +(!GRP()&&!rUS()?`<section class="blk"><div class="hd"><h2>Department scorecard${INFO('From the Sales tab: each fee department\'s billings against its people\'s fully loaded cost.')}</h2><div class="rt">${pn}</div></div>${scorecard()}</section>`:'')
     +debtorsSection(end);
 }
@@ -2554,7 +2571,7 @@ function paint(){
   if(!DATA) return;
   if(!PERSET){ PER=defPer(); PERSET=true; }
   document.body.classList.toggle('ent-S',ENT==='S');
-  if(RT==='sales'){ salesPaint(); rTabs(); document.getElementById('content').insertAdjacentHTML('beforeend',rNav()); return; }
+  if(RT==='sales'){ salesPaint(); addSecNotes(document.getElementById('content')); bindTips(); rTabs(); document.getElementById('content').insertAdjacentHTML('beforeend',rNav()); return; }
   TIPS.length=0;
   document.getElementById('tabs').innerHTML='';
   rSeg();
@@ -2570,7 +2587,7 @@ function paint(){
   let h='';
   try{ h=RT==='pl'?plPage():RT==='bs'?bsPage():RT==='cf'?cfPage():RT==='calc'?calcPage():RT==='apar'?aparPage():dashPage(); }
   catch(err){ console.error(err); h=`<div class="err">This page could not be drawn from the data loaded.</div>`; }
-  document.getElementById('content').innerHTML=h+rNav();
+  document.getElementById('content').innerHTML=secNotesStr(h)+rNav();
   bindTips();
 }
 function goRT(id){ if(!RTABS.some(t=>t.id===id)) return; RT=id; paint(); window.scrollTo({top:0}); }
