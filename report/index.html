@@ -38,7 +38,7 @@
     border-radius:8px;padding:8px 14px;cursor:pointer}
   .rbtn:hover{background:#fff}
   .rbtn[disabled]{opacity:.55;cursor:wait}
-  .asat{font-size:12px;color:#8f8a80}
+  .asat{font-size:12px;color:#8f8a80;cursor:help}
   .me{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;color:#ddd8cd;padding-left:4px}
   .me[hidden]{display:none}
   .me img{width:24px;height:24px;border-radius:50%;display:block}
@@ -471,6 +471,21 @@
 <script>
 (()=>{'use strict';
 let DATA=null, ENT='R', PER='CUR', TAB='sum';
+/* "Live at": the oldest of the Xero and FoundU pulls in this build (the sales sheets are read when the build runs);
+   hover for each source. While a resync runs, SYNCMSG shows its progress instead. */
+let SYNCMSG='', SYNCFAIL='';
+function fmtAt(ms){ return new Intl.DateTimeFormat('en-AU',{timeZone:'Australia/Melbourne',day:'numeric',month:'short',hour:'numeric',minute:'2-digit'}).format(new Date(ms)).replace(',','').replace(/\s?([ap])\.?m\.?$/i,' $1m'); }
+function showLive(){
+  const el=document.getElementById('asat'); if(!el) return;
+  if(SYNCMSG){ el.textContent=SYNCMSG; el.title=''; return; }
+  if(!DATA){ el.textContent=''; return; }
+  const s=DATA.sync||{}, src=[], t=[s.xeroAt,s.founduAt].filter(Boolean);
+  src.push('Xero synced '+(s.xeroAt?fmtAt(s.xeroAt):(DATA.xero&&DATA.xero.syncedAt)||'(unknown)'));
+  src.push('FoundU payroll synced '+(s.founduAt?fmtAt(s.founduAt):DATA.payrollSyncedAt||'(unknown)'));
+  src.push('Sales sheets read '+(s.salesAt?fmtAt(s.salesAt):DATA.generated));
+  el.textContent=(SYNCFAIL?SYNCFAIL+' · ':'')+'Live at '+(t.length?fmtAt(Math.min.apply(null,t)):((DATA.xero&&DATA.xero.syncedAt)||DATA.generated));
+  el.title=src.join('\n');
+}
 let XON=false;   // Xero figures live on the report's own tabs, not inside Sales
 /* phones: the header scrolls away except its period and tab bars */
 {const hd=document.querySelector('header.top'), stick=()=>{const pb=hd.querySelector('.perbar'); hd.style.top=(window.innerWidth<=640&&pb)?(-(pb.offsetTop-6))+'px':'';};
@@ -1504,7 +1519,7 @@ function paintUSA(){
   document.getElementById('mBasis').textContent='US dollars · calendar year '+(u?u.year:'');
   document.getElementById('mLede').innerHTML=`<span class="lchip">Break-even <b>${uBE().toFixed(2)}×</b></span>${uTG()?`<span class="lchip">Target <b>${uTG().toFixed(2)}×</b></span>`:'<span class="lchip">No profit goal set</span>'}`
     +INFO('Permanent fees for each recruiter against their fully loaded payroll cost, from the North America billing sheet, Gusto and the LLC\'s Xero file. Break-even is cost × '+uBE().toFixed(2)+(uTG()?'; the profit target is cost × '+uTG().toFixed(2)+'.':'; no profit goal is set yet.'),'North America');
-  document.getElementById('asat').textContent='Live at '+DATA.generated+(DATA.cached?' (cached)':'');
+  showLive();
   if(!u||!u.ok){ document.getElementById('seg').innerHTML=''; document.getElementById('tabs').innerHTML='';
     document.getElementById('content').innerHTML=`<div class="err">North America figures are not available.${u&&u.checks&&u.checks[0]?' '+esc(u.checks[0].t)+'.':''}</div>`; bindTips(); return; }
   perFix(u.months,u.current);
@@ -1650,7 +1665,7 @@ function paintGroup(){
   document.getElementById('mBasis').textContent='A$'+(hasUS()?' · North America at RBA monthly average AUD/USD':'');
   document.getElementById('mLede').innerHTML='<span class="lchip">All entities in <b>A$</b></span><span class="lchip">Each against its own multiples</span>'
     +INFO('Billings against fully loaded cost for every entity in Australian dollars, each measured against its own multiples, so effort can be compared across the group.'+(hasUS()?' North America is converted at the RBA monthly average AUD/USD rate.':'')+' A month counts as closed from the 15th of the following month.','Woods Group');
-  document.getElementById('asat').textContent='Live at '+DATA.generated+(DATA.cached?' (cached)':'');
+  showLive();
   perFix(DATA.months,DATA.current.key);
   document.getElementById('seg').innerHTML=segHTML(DATA.months,DATA.current.key);
   TAB='sum';
@@ -1675,7 +1690,7 @@ function salesPaint(){
     +INFO((goal()?`Billings for each person and department against fully loaded employment cost. Break-even is cost × ${mm.be.toFixed(2)}; the profit target is cost × ${mm.tg.toFixed(2)}.`
       :`Billings against fully loaded employment cost. No profit goal is set for ${esc(e.short)}, so break-even at cost × ${mm.be.toFixed(2)} is the only marker.`)
       +' Billings (GP) come from the Woods &amp; Co Financial Performance sheet, read only. Cost is FoundU base pay, leave and package allowances plus super, payroll tax and WorkCover; closed months are normalised from weekly pays to a calendar month and the current month uses each person\'s pay rate to today. Commission, bonus and termination payments are not in cost. Multiples are '+esc(DATA.mult.BASIS)+', permanent recruitment only.',esc(e.name));
-  document.getElementById('asat').textContent='Live at '+DATA.generated+(DATA.cached?' (cached)':'');
+  showLive();
   // period buttons
   document.getElementById('seg').innerHTML=segHTML(DATA.months,DATA.current.key);
   // tabs
@@ -2122,22 +2137,34 @@ function mixOvhSection(yk,ks,on){
   const mixSer=ENT==='S'?[['Search fees','#008300']]:[['Permanent fees','#2a78d6'],['Search fees','#008300']];
   const mix=sBars(M.map(x=>{const p=rv(x.s,l=>!isSr(l)&&!isTp(l)), sr=rv(x.s,isSr), i=yk.indexOf(x.k);
     return {l:kShort(x.k).slice(0,3),on:on[i],vs:ENT==='S'?[p+sr]:[p,sr],tip:CALC('Fees, '+kLong(x.k),'Temp revenue left out',ENT==='S'?[['Search fees',F(p+sr)]]:[['Permanent fees',F(p)],['Search fees',F(sr)],['= Fees',F(p+sr),'s']])};}),mixSer,{label:'Fees by month'});
-  /* overheads: non-payroll operating expenses, the six largest accounts for the year and the rest */
-  const ov=s=>{const o={}; Object.keys(s.L.opex).filter(l=>!isPayX(l)).forEach(l=>{o[l]=s.L.opex[l];}); return o;};
-  const yr={}; M.forEach(x=>{const o=ov(x.s); Object.keys(o).forEach(l=>{yr[l]=(yr[l]||0)+o[l];});});
-  const top=Object.keys(yr).sort((a,b)=>yr[b]-yr[a]).slice(0,6), cols=['#2a78d6','#eb6834','#1baf7a','#eda100','#e87ba4','#7b5cc4','#b8b2a6'];
-  const oser=top.map((l,i)=>[l,cols[i]]).concat([['Other','#b8b2a6']]);
-  const ovc=sBars(M.map(x=>{const o=ov(x.s), rest=Object.keys(o).filter(l=>!top.includes(l)).reduce((t,l)=>t+o[l],0), i=yk.indexOf(x.k);
-    return {l:kShort(x.k).slice(0,3),on:on[i],vs:top.map(l=>o[l]||0).concat([rest]),tip:BD('Overheads, '+kLong(x.k),'Non-payroll operating expenses',Object.keys(o).map(l=>({l,v:o[l]})),{total:Object.keys(o).reduce((t,l)=>t+o[l],0),max:12})};}),oser,{label:'Overheads by month'});
+  /* operating expenses by month, payroll included, grouped: each account belongs to the first group whose test it passes */
+  const OPG=[['Payroll',l=>isPayX(l)&&!/^benefits?\s*-/i.test(l)],
+    ['Travel and motor vehicle',l=>/travel|motor vehicle|parking|toll|fuel|accommodation|airfare|flight|uber|taxi/i.test(l)],
+    ['Occupancy and office',l=>/rent|cleaning|light|power|heating|electric|repairs|maintenance|office|printing|stationery|postage|furniture/i.test(l)],
+    ['Technology',l=>/software|subscription|telephone|internet|mobile|website|hosting|\bit\b|computer/i.test(l)],
+    ['Marketing and business development',l=>/advertis|marketing|sponsor|networking|client events|client gifts|content|seo|promotion|recruitment costs|internal recruitment/i.test(l)],
+    ['Staff and entertainment',l=>/entertainment|staff|benefit|food|meals|training|amenities/i.test(l)],
+    ['Professional fees',l=>/accounting|legal|consult|filing|audit|professional|asic/i.test(l)],
+    ['Insurance',l=>/insurance/i.test(l)],
+    ['Finance and other',()=>true]];
+  const grpOf=l=>OPG.find(g=>g[1](l))[0];
+  const ov=s=>{const o={}; Object.keys(s.L.opex).forEach(l=>{const g=grpOf(l); o[g]=(o[g]||0)+s.L.opex[l];}); return o;};
+  const ovNP=s=>{const o={}; Object.keys(s.L.opex).filter(l=>!isPayX(l)).forEach(l=>{o[l]=s.L.opex[l];}); return o;};
+  const yr={}; M.forEach(x=>{const o=ov(x.s); Object.keys(o).forEach(g=>{yr[g]=(yr[g]||0)+o[g];});});
+  const gcol={'Payroll':'#4a463f','Travel and motor vehicle':'#2a78d6','Occupancy and office':'#eb6834','Technology':'#1baf7a','Marketing and business development':'#eda100','Staff and entertainment':'#e87ba4','Professional fees':'#7b5cc4','Insurance':'#3fb6c9','Finance and other':'#b8b2a6'};
+  const gl=OPG.map(g=>g[0]).filter(g=>Math.abs(yr[g]||0)>=1);
+  const oser=gl.map(g=>[g,gcol[g]]);
+  const ovc=sBars(M.map(x=>{const o=ov(x.s), i=yk.indexOf(x.k), tot=gl.reduce((t,g)=>t+(o[g]||0),0);
+    return {l:kShort(x.k).slice(0,3),on:on[i],vs:gl.map(g=>Math.max(0,o[g]||0)),tip:BD('Operating expenses, '+kLong(x.k),'Grouped, payroll included',gl.map(g=>({l:g,v:o[g]||0})).filter(r=>Math.abs(r.v)>=1),{total:tot,max:12})};}),oser,{label:'Operating expenses by month, grouped'});
   /* largest movers: the selected period against the comparison period */
   const cm=rCmp(); let mv='';
-  if(cm){ const a=ov(GRP()?plConsSum(ks):plSum(ENT,ks)), b=ov(GRP()?plConsSum(cm.ks):plSum(ENT,cm.ks));
+  if(cm){ const a=ovNP(GRP()?plConsSum(ks):plSum(ENT,ks)), b=ovNP(GRP()?plConsSum(cm.ks):plSum(ENT,cm.ks));
     const rows=[...new Set(Object.keys(a).concat(Object.keys(b)))].map(l=>({l,a:a[l]||0,b:b[l]||0})).map(r=>Object.assign(r,{d:r.a-r.b})).filter(r=>Math.abs(r.d)>=1).sort((p,q)=>Math.abs(q.d)-Math.abs(p.d)).slice(0,8);
     if(rows.length) mv=`<section class="blk"><div class="hd"><h2>Largest overhead movements${INFO('Against '+esc(cm.long||cm.h)+'. '+'Non-payroll operating expense accounts with the largest change on the comparison period. The three largest are marked.')}</h2><div class="rt">${GRP()?'A$':'A$'}</div></div>
       <div class="tbl"><table><thead><tr><th>Account</th><th>${esc(rPN())}</th><th>${esc(cm.h)}</th><th>Movement</th></tr></thead><tbody>
       ${rows.map((r,i)=>`<tr${i<3?' class="hl"':''}><td>${i<3?'<span class="rk">'+(i+1)+'</span>':''}${esc(r.l)}</td><td>${F(r.a)}</td><td>${F(r.b)}</td><td class="${r.d>0?'neg':'pos'}">${SG(r.d).replace(/<[^>]+>/g,'')}</td></tr>`).join('')}</tbody></table></div></section>`; }
-  return `<section class="blk"><div class="hd"><h2>Fees and overheads, month by month${INFO('Left: fees from Xero by month, permanent recruitment and Search (temp is left out; see the P&amp;L tab). Right: non-payroll operating expenses by month, the six largest accounts for the year and the rest together.')}</h2><div class="rt">A$</div></div>
-    <div class="two"><div class="chc"><div class="cht">Fees by month</div>${mix}</div><div class="chc"><div class="cht">Overheads by month</div>${ovc}</div></div>${noteBlock('sec','ovh','Note: Fees and overheads')}</section>`+mv;
+  return `<section class="blk"><div class="hd"><h2>Fees and overheads, month by month${INFO('Left: fees from Xero by month, permanent recruitment and Search (temp is left out; see the P&amp;L tab). Right: all operating expenses by month, payroll included, grouped (payroll: wages, super, payroll tax, WorkCover and leave; travel and motor vehicle; occupancy and office; technology; marketing and business development; staff and entertainment; professional fees; insurance; finance and other). Hover a month for the groups.')}</h2><div class="rt">A$</div></div>
+    <div class="two"><div class="chc"><div class="cht">Fees by month</div>${mix}</div><div class="chc"><div class="cht">Operating expenses by month, grouped</div>${ovc}</div></div>${noteBlock('sec','ovh','Note: Fees and overheads')}</section>`+mv;
 }
 /* temp (labour hire): revenue and gross profit by month, for the P&L tab */
 function tempSectionWrap(h){ return h+tempSection(); }
@@ -2582,7 +2609,7 @@ function paint(){
   document.getElementById('mBasis').textContent=GRP()?'A$ · North America converted at RBA rates':rUS()?'US dollars · calendar year':'A$ · calendar year, finished months';
   document.getElementById('mLede').innerHTML=`<span class="lchip">${esc(rPN())}</span><button type="button" class="xbtn" data-xp="pdf">Download PDF</button><button type="button" class="xbtn" data-xp="html">Download HTML</button>`
     +INFO('Profit and loss, balance sheet and bank summary come from Xero, synced nightly, before month-end review. Sales figures come from the sales sheets, FoundU and Gusto (read only). '+(GRP()?'The Group view shows each entity side by side in A$ and is not consolidated.':''),esc(e.name));
-  document.getElementById('asat').textContent='Live at '+DATA.generated+(DATA.cached?' (cached)':'');
+  showLive();
   rTabs();
   let h='';
   try{ h=RT==='pl'?plPage():RT==='bs'?bsPage():RT==='cf'?cfPage():RT==='calc'?calcPage():RT==='apar'?aparPage():dashPage(); }
@@ -2657,7 +2684,41 @@ function got(d){
   if(MODE==='report'&&typeof trimReport==='function') trimReport(d);
   document.body.classList.remove('locked'); showWho(); setEnts(); paint();
   if(typeof notesLoad==='function') notesLoad();
-  const btn=$('refresh'); btn.disabled=false; btn.textContent='Refresh data';
+  if(!SYNCT){ const btn=$('refresh'); btn.disabled=false; btn.textContent='Refresh data'; }
+}
+/* Refresh: asks the Data Sync project to pull Xero and FoundU now (it checks every minute), shows progress,
+   then rebuilds once the sync has finished. A page opened mid-sync picks the progress up from the data reply. */
+let SYNCT=null, SYNCSEEN=0;
+function syncSeen(s){
+  if(!s||SYNCT) return;
+  if(s.state==='requested'||s.state==='running'){ syncWatch(s); return; }
+  if(s.finishedAt&&DATA&&DATA.builtAt&&s.finishedAt>DATA.builtAt&&SYNCSEEN!==s.finishedAt){ SYNCSEEN=s.finishedAt; load(true,true); }
+}
+function resync(){
+  if(!SESSION||SYNCT) return;
+  const btn=$('refresh'); btn.disabled=true; btn.textContent='Starting sync…';
+  api({action:'resync',session:SESSION.t}).then(r=>{
+    if(!r.ok){ btn.disabled=false; btn.textContent='Refresh data';
+      if(r.error==='denied'){ lock('Your access has ended or your sign-in is no longer valid. Sign in again, or contact The Co.'); return; }
+      $('asat').textContent=r.error==='busy'?'Too many refreshes: try again in a minute':'Could not start a sync: try again shortly'; return; }
+    const s=r.sync;
+    if(!s||!s.state||s.state==='off'||r.busy){ if(r.busy){ SYNCFAIL='Sync limit reached for this hour'; } load(true); return; }
+    syncWatch(s);
+  });
+}
+function syncWatch(s){
+  const btn=$('refresh'); btn.disabled=true; btn.textContent='Syncing…'; SYNCFAIL='';
+  const t0=Date.now();
+  const tick=st=>{
+    if(st.state==='done'||st.state==='failed'||st.state==='idle'||Date.now()-t0>25*60000){
+      SYNCT=null; SYNCMSG='';
+      if(st.state!=='done') SYNCFAIL='Last sync did not finish';
+      SYNCSEEN=st.finishedAt||SYNCSEEN; load(true); return; }
+    SYNCMSG=st.state==='running'?'Syncing Xero and FoundU since '+fmtAt(st.startedAt||Date.now()).replace(/^\d+ \w+ /,'')+' (5 to 8 min)…':'Sync requested, starting within a minute…';
+    showLive();
+    SYNCT=setTimeout(()=>api({action:'syncStatus',session:SESSION.t},1).then(r=>{ tick(r.ok?(r.sync&&r.sync.state?r.sync:{state:'done'}):st); }),20000);
+  };
+  tick(s);
 }
 function load(force,quiet){
   if(!SESSION||Date.now()>SESSION.x-60000){ lock(SESSION?'Your 30-day sign-in has ended. Sign in again.':''); return; }
@@ -2667,7 +2728,7 @@ function load(force,quiet){
     document.getElementById('content').innerHTML=`<div class="err">${esc(err&&err.message||'The dashboard could not load.')}</div>`+(DATA?'':'');
     if(DATA) paint();};
   api({action:'data',session:SESSION.t,force:!!force}).then(r=>{
-    if(r.ok){ got(r.data); return; }
+    if(r.ok){ got(r.data); syncSeen(r.sync); return; }
     btn.disabled=false; btn.textContent='Refresh data';
     if(r.error==='denied'){ lock('Your access has ended or your sign-in is no longer valid. Sign in again, or contact The Co.'); return; }
     if(!DATA){ $('content').innerHTML=`<div class="err">${r.error==='busy'?'The dashboard is busy. Try again in a minute.':'The dashboard is unavailable right now. Try again shortly.'}</div>`; return; }
@@ -2707,7 +2768,7 @@ document.getElementById('tabs').addEventListener('click',ev=>{const b=ev.target.
 document.getElementById('seg').addEventListener('click',ev=>{const b=ev.target.closest('button');if(!b)return;PER=b.dataset.p;paint();});
 document.getElementById('content').addEventListener('click',ev=>{const sk=ev.target.closest('[data-skp]');if(sk){SKP=!SKP;const y=window.scrollY;paint();window.scrollTo({top:y});return;}const b=ev.target.closest('[data-lm]');if(!b)return;LM=b.dataset.lm;const y=window.scrollY;paint();window.scrollTo({top:y});});
 document.getElementById('entsel').addEventListener('change',ev=>{ENT=ev.target.value;TAB='sum';PER=defPer();paint();window.scrollTo({top:0});});
-document.getElementById('refresh').addEventListener('click',()=>load(true));
+document.getElementById('refresh').addEventListener('click',()=>typeof resync==='function'?resync():load(true));
 {const xo=document.getElementById('xon'); xo.checked=XON;
  xo.addEventListener('change',()=>{XON=xo.checked; try{localStorage.setItem('woodsXero',XON?'on':'off');}catch(e){} if(DATA) paint();});}
 start();
