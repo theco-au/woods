@@ -2714,7 +2714,7 @@ function syncWatch(s){
       SYNCT=null; SYNCMSG='';
       if(st.state!=='done') SYNCFAIL='Last sync did not finish';
       SYNCSEEN=st.finishedAt||SYNCSEEN; load(true); return; }
-    SYNCMSG=st.state==='running'?'Syncing Xero and FoundU since '+fmtAt(st.startedAt||Date.now()).replace(/^\d+ \w+ /,'')+' (5 to 8 min)…':'Sync requested, starting within a minute…';
+    SYNCMSG=st.state==='running'?'Syncing Xero and FoundU since '+fmtAt(st.startedAt||Date.now()).replace(/^\d+ \w+ /,'')+' (about 10 min)…':'Sync requested, starting within a minute…';
     showLive();
     SYNCT=setTimeout(()=>api({action:'syncStatus',session:SESSION.t},1).then(r=>{ tick(r.ok?(r.sync&&r.sync.state?r.sync:{state:'done'}):st); }),20000);
   };
