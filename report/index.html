@@ -383,28 +383,43 @@
   tr.hl td{background:#fbf6ea}
   .rk{display:inline-flex;width:18px;height:18px;border-radius:50%;background:var(--ink);color:#fff;font:700 11px var(--sans);align-items:center;justify-content:center;margin-right:8px;vertical-align:1px}
   #xpAll{display:none}
-  .xp-cover{background:var(--black);color:#f2efe8;border-radius:14px;padding:34px 36px 40px;margin-bottom:28px}
-  .xp-cover .hd-row{margin-bottom:60px}.xp-cover .hd-meta{color:#bdb7ab}
-  .xp-k{font:700 12px var(--sans);letter-spacing:.12em;text-transform:uppercase;color:#bdb7ab;margin-bottom:10px}
-  .xp-t{font-size:40px;font-weight:800;letter-spacing:-.03em;color:#fff;line-height:1.05}
-  .xp-p{font-size:22px;font-weight:600;color:#f2efe8;margin:8px 0 26px}.xp-d{font-size:13px;color:#bdb7ab}
-  .xp-h{font-size:26px;font-weight:800;letter-spacing:-.02em;color:var(--ink);margin:6px 0 16px;padding-bottom:10px;border-bottom:2px solid var(--ink)}
+  /* exports (28 Oct 2026): white, printer-friendly cover and pages */
+  .xp-cover{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:30px 34px;margin-bottom:28px;display:flex;flex-direction:column;min-height:560px}
+  .xp-brand{display:flex;align-items:center;justify-content:space-between;gap:24px;padding-bottom:22px;border-bottom:1.5px solid var(--ink)}
+  .xp-tlogo{height:26px;width:auto;display:block;fill:var(--ink)}
+  .xp-elogo{height:44px;width:auto;display:block;fill:var(--ink)}.xp-elogo.s{height:17px}
+  .xp-ct{margin:auto 0}
+  .xp-k{font:700 11.5px var(--sans);letter-spacing:.2em;text-transform:uppercase;color:var(--body);margin-bottom:14px}
+  .xp-t{font-size:44px;font-weight:800;letter-spacing:-.03em;color:var(--ink);line-height:1.05}
+  .xp-bar{width:76px;height:5px;background:var(--ink);margin:20px 0 18px}
+  .xp-p{font-size:24px;font-weight:500;color:var(--body)}
+  .xp-foot{border-top:1px solid var(--line);padding-top:14px;font-size:12.5px;color:var(--body)}.xp-b{font-size:11.5px;color:var(--mid);margin-top:4px}
+  .xp-h{font-size:24px;font-weight:800;letter-spacing:-.02em;color:var(--ink);margin:4px 0 16px;padding-bottom:9px;border-bottom:1.5px solid var(--ink)}
   .xp-page{margin-bottom:40px}
   body.xstatic .info,body.xstatic .xbtn,body.xstatic .rnav,#xpAll .info,#xpAll .rnav,#xpAll .xbtn{display:none!important}
   body.xstatic main{padding-top:28px}
-  @page{size:A4 landscape;margin:11mm}
+  @page{size:A4 portrait;margin:13mm 12mm 15mm}
   @media print{
     *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
-    .entbar,.perbar,#rtabs,.stabs,.rnav,.info,.xbtn,footer,.tip,.nadd,.nplus,.nedit,.nmod{display:none!important}
+    .entbar,.perbar,#rtabs,.stabs,.rnav,.info,.xbtn,footer,.tip,.nadd,.nplus,.nedit,.nmod,.vtog,.lnkb{display:none!important}
     header.top{background:#fff;color:#000;padding:0}header.top h1{color:#000}.logo path{fill:#000}
-    main{padding:12px 0}.kpis,.chc,.two,.three,tr,.kpi{break-inside:avoid}.blk{break-inside:auto;margin-bottom:22px}.hd,h3,.cht{break-after:avoid}body{background:#fff}
+    main{padding:12px 0}.kpis,.chc,.two,.three,tr,.kpi,.flag,.nblk,.row,.hbr{break-inside:avoid}.blk{break-inside:auto;margin-bottom:22px}.hd,h3,.cht,.xp-h{break-after:avoid}
+    body,body.xstatic{background:#fff}
     .wrap{max-width:none;padding:0}
     body.xprint>*:not(#xpAll){display:none!important}
-    body.xprint #xpAll{display:block}
+    body.xprint #xpAll{display:block;zoom:.74}
     .xp-page{break-before:page;margin:0}
-    .xp-cover{min-height:170mm;margin:0;display:flex;flex-direction:column;justify-content:space-between}
-    .xp-cover .logo path{fill:#f2efe8}
+    .xp-cover{border:none;border-radius:0;padding:0;margin:0;height:262mm;min-height:0}
+    #xpAll .xp-cover{zoom:1.35;height:262mm}
     .two .chc,.chc,.kpi{box-shadow:none}
+    /* the page is narrower than the screen layouts assume: keep the wide layouts */
+    .two{grid-template-columns:1fr 1fr!important}.kpis.k3{grid-template-columns:repeat(3,1fr)!important}.three{grid-template-columns:repeat(3,1fr)!important}
+    .row{grid-template-columns:190px 1fr 108px 74px!important;gap:16px!important}.track{grid-column:auto!important;order:0!important}.row .amt,.row .who{order:0!important;grid-column:auto!important}.mx{order:0!important;text-align:right!important}
+    .hbr{grid-template-columns:150px 1fr 96px!important}.lnd-n{grid-template-columns:repeat(4,1fr)!important}
+    .tbl{overflow:visible!important;border-radius:8px}
+    .tbl td:first-child,.tbl th:first-child,.tbl thead th{position:static!important}
+    thead{display:table-header-group}
+    .snav{display:none!important}
   }
 </style>
 </head>
@@ -861,7 +876,7 @@ function npBridge(en){
     ${miss.length?flag('Xero not synced for '+miss.map(mShort).join(', '),'Those months are left out of the Xero side.','hi'):''}
     <div class="tbl"><table><thead><tr><th>Item</th><th>Amount</th></tr></thead><tbody>
     ${rows.map(([l,v,t])=>`<tr><td>${l}</td><td class="${v<0?'neg':''}"${t||''}>${F(v)}</td></tr>`).join('')}
-    <tr class="tot"><td>Xero net profit</td><td class="${x.np<0?'neg':''}">${F(x.np)}</td></tr>
+    <tr class="tot"><td>Xero net profit${(ks.some(k=>X[k]&&X[k].below))?' (before income tax and dividends)':''}</td><td class="${x.np<0?'neg':''}">${F(x.np)}</td></tr>
     <tr class="sub"><td>Remaining variance</td><td>${F(Math.abs(resid)<0.5?0:resid)}</td></tr>
     </tbody></table></div></section>`;
 }
@@ -1191,17 +1206,20 @@ function xeroSection(){
   const use=ks.filter(k=>X[k]&&(onlyCur||!isOpen(k))), miss=ks.filter(k=>!X[k]);
   const lab=k=>DATA.months.find(m=>m.key===k).short;
   const S=f=>use.reduce((s,k)=>s+(X[k][f]||0),0), V={rev:S('rev'),cos:S('cos'),gp:S('gp'),oth:S('oth'),opex:S('opex'),np:S('np'),fees:S('fees')};
+  /* income tax expense and dividends paid sit below net profit (Data API from 28 Oct 2026: x.below) */
+  const B=f=>use.reduce((s,k)=>s+((X[k].below||{})[f]||0),0); V.tax=B('tax'); V.div=B('div'); V.npa=V.np-V.tax-V.div;
   const bill=billFor(use), sub=use.map(lab).join(', ');
   const fee=deptsOf(ENT).filter(d=>d.fee);
-  const tipFor=f=>f==='gp'?xGP('Gross profit',sub,V):f==='np'?xNP('Net profit',sub,V)
+  const tipFor=f=>f==='tax'||f==='div'?'':f==='npa'?CALC('Profit after income tax and dividends',sub,[['Net profit',SG(V.np)],['Less income tax expense',F(-V.tax)],['Less dividends paid',F(-V.div)],['= Profit after income tax and dividends',SG(V.npa),'s']]):f==='gp'?xGP('Gross profit',sub,V):f==='np'?xNP('Net profit',sub,V)
     :f==='fees'?(use.length>1?BD('Permanent fees (Recruitment Fees)',sub+' · by month',use.map(k=>({l:lab(k),v:X[k].fees||0})),{keepOrder:true,total:V.fees})
       :CALC('Permanent fees (Recruitment Fees)',sub,[['Recruitment Fees account',F(V.fees)],['Sales sheet billings',F(bill)],['Difference',SG(V.fees-bill)]]))
     :xTip(X,use,f,f==='cos'||f==='opex'?-1:1,{rev:'Revenue',cos:'Cost of sales',oth:'Other income',opex:'Operating expenses'}[f],sub,lab);
-  const L=[['Revenue','rev',1,''],['of which permanent fees (Recruitment Fees)','fees',1,'sub'],['Cost of sales','cos',-1,''],['Gross profit','gp',1,''],['Other income','oth',1,''],['Operating expenses','opex',-1,''],['Net profit','np',1,'tot']];
+  const L=[['Revenue','rev',1,''],['of which permanent fees (Recruitment Fees)','fees',1,'sub'],['Cost of sales','cos',-1,''],['Gross profit','gp',1,''],['Other income','oth',1,''],['Operating expenses','opex',-1,''],['Net profit','np',1,'tot']]
+    .concat(Math.abs(V.tax)+Math.abs(V.div)>=0.5?[['Less income tax expense','tax',1,''],['Less dividends paid','div',1,''],['Profit after income tax and dividends','npa',1,'tot']]:[]);
   const ms=DATA.months.filter(m=>X[m.key]);
   const closed=ms.filter(m=>!isOpen(m.key)).map(m=>m.key);
   const hdr=onlyCur?esc(perName())+' (not closed)':(use.length?use.map(lab).join(', ').replace(/, ([^,]*)$/,' and $1'):esc(perName()));
-  const info=`Straight from Xero for ${esc(DATA.ents[ENT].name)}, before month-end review, so the monthly management report remains the reported result. A month counts as closed from the 15th of the following month, when it is snapshotted. Until then it is left out of quarter and year totals and out of the multiples, because payroll, accruals and month-end journals may not be posted. Sales sheet billings tie to the permanent fees account; the difference is invoicing timing and placements not in the sheet.${miss.length?' No Xero data for '+miss.map(lab).join(', ')+'.':''}`;
+  const info=`Straight from Xero for ${esc(DATA.ents[ENT].name)}, before month-end review, so the monthly management report remains the reported result. A month counts as closed from the 15th of the following month, when it is snapshotted. Until then it is left out of quarter and year totals and out of the multiples, because payroll, accruals and month-end journals may not be posted. Net profit is before income tax expense and dividends paid, which are shown below it. Sales sheet billings tie to the permanent fees account; the difference is invoicing timing and placements not in the sheet.${miss.length?' No Xero data for '+miss.map(lab).join(', ')+'.':''}`;
   const cyt=(f,sg)=>BD({rev:'Revenue',fees:'Permanent fees',gp:'Gross profit',opex:'Operating expenses',np:'Net profit'}[f]+', closed months','By month',closed.map(k=>({l:lab(k),v:(X[k][f]||0)*sg})),{keepOrder:true,keepZero:true,signed:f==='np',total:closed.reduce((s,k)=>s+(X[k][f]||0)*sg,0)});
   return `<section class="blk"><div class="hd"><h2>Xero profit and loss${INFO(info)}</h2><div class="rt">Unreviewed ledger figures · synced ${esc(XD.syncedAt||'')}</div></div>
     ${onlyCur?flag(esc(perName())+' is not closed','Expect missing wages, super and payroll tax, and reversing accruals, until month-end. Do not read the net profit below as a result.','hi'):''}
@@ -1293,10 +1311,10 @@ function deriveTable(ent){
   if(!rows.length) return '';
   const feeTeam=mk=>{const sE=ENT,sP=PER; ENT=ent; PER=mk; const its=deptsOf(ent).filter(d=>d.fee).map(d=>({l:d.label,v:deptAgg(d.name).c})); ENT=sE; PER=sP; return its;};
   const dcosLines=mk=>xLines(X,[mk],'cos',1).filter(x=>ent==='S'||!/^temporary|w&co\.? ?search/i.test(x.l));
-  const opexLines=mk=>xLines(X,[mk],'opex',1).filter(x=>!/interest/i.test(x.l));
+  const opexLines=mk=>xLines(X,[mk],'opex',1).filter(x=>!/interest/i.test(x.l)&&!/^dividends?\b|^income tax expense/i.test(x.l));
   const r1=(lab,x,cls,mk)=>{const cm=x.fees?(x.fees-x.dcos)/x.fees:0, s=esc(lab);
     const tD=mk?(X[mk]&&X[mk].lines?BD('Direct costs, '+s,'Cost of sales excluding temporary lines'+(ent==='S'?'':' and the Search recharge'),dcosLines(mk),{total:x.dcos}):''):BD('Direct costs','By month',rows.map(r=>({l:monthLab(r.m),v:r.dcos})),{keepOrder:true,total:x.dcos});
-    const tO=mk?(X[mk]&&X[mk].lines?BD('Cost base, '+s,'Operating expenses excluding interest · by account',opexLines(mk),{total:x.opex,max:18}):''):BD('Cost base','By month',rows.map(r=>({l:monthLab(r.m),v:r.opex})),{keepOrder:true,total:x.opex});
+    const tO=mk?(X[mk]&&X[mk].lines?BD('Cost base, '+s,'Operating expenses excluding interest, income tax and dividends · by account',opexLines(mk),{total:x.opex,max:18}):''):BD('Cost base','By month',rows.map(r=>({l:monthLab(r.m),v:r.opex})),{keepOrder:true,total:x.opex});
     const tP=mk?(()=>{const its=feeTeam(mk), sm=its.reduce((s0,i)=>s0+i.v,0); if(Math.abs(sm-x.pay)>1) its.push({l:'Derivation basis difference',v:x.pay-sm}); return BD('Fee-team cost, '+s,'By department',its,{total:x.pay});})()
       :BD('Fee-team cost','By month',rows.map(r=>({l:monthLab(r.m),v:r.pay})),{keepOrder:true,total:x.pay});
     const tF=mk?'':BD('Permanent fees','By month',rows.map(r=>({l:monthLab(r.m),v:r.fees})),{keepOrder:true,total:x.fees});
@@ -1749,13 +1767,25 @@ const rAvg=(e,k,a)=>a&&e==='U'?(fxUSD(k)?1/fxUSD(k):0):1;
 const rEndR=(e,k,a)=>a&&e==='U'?(fxEnd(k)?1/fxEnd(k):0):1;
 
 /* ---------- P&L ---------- */
-const PLF=['rev','cos','gp','oth','opex','np','fees'];
+const PLF=['rev','cos','gp','oth','opex','np','fees','div','tax','npa'];
+/* Dividends paid and income tax expense sit below the net profit line (changed 28 Oct 2026). The Data API takes them out of operating
+   expenses and net profit and keeps them in x.below; nx() does the same for a build that has not yet been redeployed.
+   div, tax and npa (profit after income tax and dividends, which ties to Xero's reported net profit) feed the three rows under Net margin. */
+const BELOW_RE=/^dividends?\b|^income tax expense/i;
 /* North America reports its overheads under "Other Income and Expense": show them as operating expenses */
-function nx(x){ if(!x) return null; x=Object.assign({},x);
+function nx(x,keepBelow){ if(!x) return null; x=Object.assign({},x);
   if(!x.opex&&x.oth<0){x.opex=-x.oth;x.oth=0; if(x.lines&&x.lines.oth) x.lines=Object.assign({},x.lines,{opex:(x.lines.opex||[]).concat(x.lines.oth.map(([l,a])=>[l,-a])),oth:[]});}
+  if(!keepBelow&&!x.below&&x.lines&&(x.lines.opex||[]).some(([l])=>BELOW_RE.test(l))){
+    const b={div:0,tax:0,lines:[]}, keep=[];
+    x.lines.opex.forEach(([l,a])=>{ if(BELOW_RE.test(l)){ if(/^dividend/i.test(l)) b.div+=a; else b.tax+=a; b.lines.push([l,a]); } else keep.push([l,a]); });
+    x.lines=Object.assign({},x.lines,{opex:keep}); x.opex-=b.div+b.tax; x.np+=b.div+b.tax; x.below=b; }
+  const bl=(!keepBelow&&x.below)||null; x.div=bl?bl.div:0; x.tax=bl?bl.tax:0; x.npa=x.np-x.div-x.tax;
   return x; }
-function plOf(e,k){ const src=e==='U'?((DATA.usa||{}).xero||{}):((DATA.xero||{})[e]||{}), pr=((DATA.xero||{}).prior||{})[e]||{}; return nx(src[k]||pr[k]||null); }
-function plZero(){return {rev:0,cos:0,gp:0,oth:0,opex:0,np:0,fees:0,L:{rev:{},cos:{},oth:{},opex:{}},miss:[],noLines:false,n:0};}
+/* the two accounts put back into operating expenses and net profit: the cash flow starts from the cash basis P&L, which still carries them */
+function plRaw(x){ if(!x||!x.below) return x; const b=x.below, t=b.div+b.tax; x=Object.assign({},x,{opex:x.opex+t,np:x.np-t,div:0,tax:0,npa:x.np-t});
+  if(x.lines) x.lines=Object.assign({},x.lines,{opex:(x.lines.opex||[]).concat(b.lines)}); return x; }
+function plOf(e,k,raw){ const src=e==='U'?((DATA.usa||{}).xero||{}):((DATA.xero||{})[e]||{}), pr=((DATA.xero||{}).prior||{})[e]||{}; const x=nx(src[k]||pr[k]||null); return raw?plRaw(x):x; }
+function plZero(){return {rev:0,cos:0,gp:0,oth:0,opex:0,np:0,fees:0,div:0,tax:0,npa:0,L:{rev:{},cos:{},oth:{},opex:{}},miss:[],noLines:false,n:0};}
 function plAdd(o,x,r){ PLF.forEach(f=>o[f]+=(x[f]||0)*r);
   if(x.L) Object.keys(o.L).forEach(f=>Object.keys(x.L[f]).forEach(l=>{o.L[f][l]=(o.L[f][l]||0)+x.L[f][l]*r;}));
   else if(x.lines) Object.keys(o.L).forEach(f=>(x.lines[f]||[]).forEach(([l,a])=>{o.L[f][l]=(o.L[f][l]||0)+a*r;}));
@@ -1826,7 +1856,8 @@ function plTable(cols){
     return (ns.length?`<tr class="h tg${shut?' shut':''}" data-sec="${key}" title="Show or hide the accounts"><td colspan="${cols.length+1}">${lab}</td></tr>`:hdr(lab))+ns.map(l=>`<tr class="ln${shut?' hid':''}" data-acct="${esc(l)}"><td>${esc(l)}</td>${cols.map(c=>cell(c,f,l,esc(l),{exp})).join('')}</tr>`).join('')
       +`<tr class="sub2"><td>${tot}</td>${cols.map(c=>cell(c,f,null,tot,{sec:true,exp})).join('')}</tr>`;};
   const calcGP=c=>CALC('Gross profit, '+esc(c.h.replace(' *','')),'',[['Trading income',F(c.s.rev)],['Less cost of sales',F(-c.s.cos)],['= Gross profit',F(c.s.gp),'s']]);
-  const calcNP=c=>CALC('Net profit, '+esc(c.h.replace(' *','')),'',[['Gross profit',F(c.s.gp)],['Plus other income',F(c.s.oth)],['Less operating expenses',F(-c.s.opex)],['= Net profit',SG(c.s.np),'s']]);
+  const calcNP=c=>CALC('Net profit, '+esc(c.h.replace(' *','')),'Before income tax expense and dividends paid',[['Gross profit',F(c.s.gp)],['Plus other income',F(c.s.oth)],['Less operating expenses',F(-c.s.opex)],['= Net profit',SG(c.s.np),'s']]);
+  const calcNPA=c=>CALC('Profit after income tax and dividends, '+esc(c.h.replace(' *','')),'Ties to net profit as reported by Xero',[['Net profit',SG(c.s.np)],['Less income tax expense',F(-c.s.tax)],['Less dividends paid',F(-c.s.div)],['= Profit after income tax and dividends',SG(c.s.npa),'s']]);
   if(PLV==='sum'){
     /* summarised: section totals, with operating expenses split into payroll and everything else */
     const fn=(c,f)=>c.mv?fn(cols[c.mv[0]],f)-fn(cols[c.mv[1]],f):f(c.s);
@@ -1846,7 +1877,8 @@ function plTable(cols){
       +(lines?R('Less wages, super and payroll costs',pay,{exp:true,acct:s=>Object.keys(s.L.opex).filter(isPayX).map(l=>({l,v:s.L.opex[l]})),info:'Operating expense accounts for wages, super, payroll tax, WorkCover, leave and other employment costs.'})
         +R('Less other operating expenses',s=>s.opex-pay(s),{exp:true,acct:s=>Object.keys(s.L.opex).filter(l=>!isPayX(l)).map(l=>({l,v:s.L.opex[l]}))}):'')
       +R('Total operating expenses',s=>s.opex,{cls:'sub2',exp:true,acct:A('opex')})
-      +R('Net profit',s=>s.np,{cls:'tot'})+`<tr class="pct"><td>Net margin</td>${cols.map(c=>pctCell(c,'np')).join('')}</tr>`;
+      +R('Net profit',s=>s.np,{cls:'tot'})+`<tr class="pct"><td>Net margin</td>${cols.map(c=>pctCell(c,'np')).join('')}</tr>`
+      +R('Less income tax expense',s=>s.tax,{exp:true})+R('Less dividends paid',s=>s.div,{exp:true})+R('Profit after income tax and dividends',s=>s.npa,{cls:'tot'});
     return `<div class="tbl"><table class="fin">${head}<tbody>${body2}</tbody></table></div>`;
   }
   const body=sec('rev','Trading income','Total trading income')+sec('cos','Less cost of sales','Total cost of sales',true)
@@ -1854,7 +1886,10 @@ function plTable(cols){
     +`<tr class="pct"><td>Gross margin</td>${cols.map(c=>pctCell(c,'gp')).join('')}</tr>`
     +sec('oth','Plus other income','Total other income')+sec('opex','Less operating expenses','Total operating expenses',true)
     +`<tr class="tot"><td>Net profit</td>${cols.map(c=>cell(c,'np',null,'Net profit',{calc:calcNP})).join('')}</tr>`
-    +`<tr class="pct"><td>Net margin</td>${cols.map(c=>pctCell(c,'np')).join('')}</tr>`;
+    +`<tr class="pct"><td>Net margin</td>${cols.map(c=>pctCell(c,'np')).join('')}</tr>`
+    +`<tr><td>Less income tax expense</td>${cols.map(c=>cell(c,'tax',null,'Income tax expense',{exp:true})).join('')}</tr>`
+    +`<tr><td>Less dividends paid</td>${cols.map(c=>cell(c,'div',null,'Dividends paid',{exp:true})).join('')}</tr>`
+    +`<tr class="tot"><td>Profit after income tax and dividends</td>${cols.map(c=>cell(c,'npa',null,'Profit after income tax and dividends',{calc:calcNPA})).join('')}</tr>`;
   return `<div class="tbl"><table class="fin">${head}<tbody>${body}</tbody></table></div>`;
 }
 
@@ -1993,7 +2028,7 @@ const isTaxL=l=>/gst|payg|withholding|super|wage|payroll|salar|income tax|tax pa
 const isEarn=l=>/current year earnings|retained earnings|retained profits|accumulated (profits|losses)/i.test(l);
 const isPayX=l=>/wage|salar|super|payroll|workcover|leave|long service|holiday|bonus|commission paid|employer tax|social security|medicare|health insurance|benefit/i.test(l);
 const CFGRP=[['tax','Payroll, super, PAYG and GST paid'],['timing','Unpaid bills, accruals and debtor timing'],['inv','Fixed and non-current assets'],['dep','Depreciation and other non-cash journals'],['fin','Loans and related entity balances'],['eq','Equity: capital, drawings and dividends'],['bso','Other balance sheet accounts']];
-function cplOf(e,k){ return nx((((DATA.cpl||{})[e])||{})[k]||null); }
+function cplOf(e,k){ return nx((((DATA.cpl||{})[e])||{})[k]||null,true); }
 function cfMonth(e,k,a){
   const o=bsAt(e,kPrev(k)), c=bsAt(e,k), p=cplOf(e,k); if(!o||!c) return null;
   const r=rAvg(e,k,a), d=(s,l)=>(c.L[s][l]||0)-(o.L[s][l]||0);
@@ -2005,7 +2040,7 @@ function cfMonth(e,k,a){
     [['rev',p.rev,1],['oth',p.oth,1],['cos',p.cos,-1],['opex',p.opex,-1]].forEach(([f,t,sg])=>{const s=Object.values(it[f]).reduce((x,v)=>x+v,0)/(r||1), df=t*sg-s; if(Math.abs(df)>=0.5) add(f,'Not itemised',df);}); }
   /* accrual P&L less cash-basis P&L, account by account: expenses posted by journal (payroll, depreciation) or not yet paid,
      and income invoiced but not yet received. With the balance sheet movements below, this turns the cash-basis P&L into the change in cash. */
-  const ap=plOf(e,k);
+  const ap=plOf(e,k,true);   /* raw: the cash basis P&L still carries dividends and income tax, so "Other differences" stays nil */
   if(ap&&ap.lines&&(!p||p.lines)){
     ['cos','opex'].forEach(f=>{const A=lm(ap,f), C=lm(p,f); new Set(Object.keys(A).concat(Object.keys(C))).forEach(l=>{const j=(A[l]||0)-(C[l]||0); if(Math.abs(j)<0.005) return;
       add(isDep(l)?'dep':isPayX(l)?'tax':'timing',l+(isDep(l)?' (expense)':isPayX(l)?' (expensed by journal)':' (expensed, not paid)'),-j);});});
@@ -2221,28 +2256,49 @@ function aparPage(){
     <section class="blk"><div class="hd"><h2>Aged payables${INFO('Xero bills outstanding at the date, less payments and credits allocated by then, aged by due date.')}</h2><div class="rt">As at ${esc(dLong(A.asAt))}</div></div>
       <div class="chc" style="margin-bottom:14px">${ageBar(A.ap.b)}</div>${ageTable(A.ap.c)}</section>`;
 }
-/* ---------- exports: the whole report for the period, as PDF (print) or a standalone HTML file ---------- */
-function fullReport(){
-  const sRT=RT, parts=[]; NOTEX=true;
-  RTABS.forEach(t=>{ RT=t.id; let h='';
+/* ---------- exports: the whole report for the period, as PDF (print) or a standalone HTML file ----------
+   28 Oct 2026: printer-friendly layout. A4 portrait, white cover (The Co. and the entity's own logo: the W&Co Search wordmark for Search,
+   Woods & Co. otherwise), each tab from a new page under its title, and a footer on every page after the cover with the entity and
+   period on the left and the tab and page x of y on the right (CSS page margin boxes, one named page per tab). Calcs is left out of
+   the PDF and kept in the HTML. File name: "<entity> - <period> Management Report" (a quarter or the year as e.g. Jul-Sep 2026). */
+const xpEnt=()=>ENT==='G'?'Woods Group':DATA.ents[ENT].name;
+function xpPeriodFile(){ const ks=rKs(), m=k=>MNL[+k.slice(5,7)-1]; if(ks.length===1&&!isQ(PER)) return kLong(ks[0]);
+  const a=ks[0], b=ks[ks.length-1]; return m(a).slice(0,3)+'-'+m(b).slice(0,3)+' '+b.slice(0,4); }
+const xpName=()=>(xpEnt()+' - '+xpPeriodFile()+' Management Report').replace(/[\/\\:*?"<>|]+/g,'');
+const cssStr=s=>'"'+String(s).replace(/\\/g,'\\\\').replace(/"/g,'\\"').replace(/\n/g,' ')+'"';
+function xpLogo(sel,cls){ const el=document.querySelector(sel); if(!el) return '';
+  return el.outerHTML.replace(/^<svg class="[^"]*"/,'<svg class="'+cls+'"').replace(/ id="[^"]*"/g,''); }
+function fullReport(withCalc){
+  const sRT=RT, parts=[], tabs=RTABS.filter(t=>withCalc||t.id!=='calc'); NOTEX=true;
+  tabs.forEach(t=>{ RT=t.id; let h='';
     try{ if(t.id==='sales'){ salesPaint(); addSecNotes(document.getElementById('content')); h=document.getElementById('content').innerHTML; }
       else { TIPS.length=0; h=t.id==='pl'?plPage():t.id==='bs'?bsPage():t.id==='cf'?cfPage():t.id==='calc'?calcPage():t.id==='apar'?aparPage():dashPage(); h=secNotesStr(h); } }catch(e){ console.error(e); h=''; }
-    if(h) parts.push(`<section class="xp-page"><h1 class="xp-h">${esc(t.t)}</h1>${h}</section>`); });
+    if(h) parts.push(`<section class="xp-page" style="page:xp-${t.id}"><h1 class="xp-h">${esc(t.t)}</h1>${h}</section>`); });
   RT=sRT; NOTEX=false;
-  const e=ENT==='G'?'Woods Group':DATA.ents[ENT].name, logos=((document.querySelector('header.top .hd-row')||{}).outerHTML||'').replace(/Management report · live/,'Management report').replace(/ id="[^"]*"/g,'');
-  const cover=`<section class="xp-cover">${logos}<div class="xp-ct"><div class="xp-k">Management report</div><div class="xp-t">${esc(e)}</div><div class="xp-p">${esc(rPN())}</div><div class="xp-d">Prepared by The Co. Accountants &amp; Business Advisors · ${esc(DATA.generated)}</div></div></section>`;
+  const e=xpEnt(), pn=rPN(), us=ENT==='U';
+  const brand=xpLogo('header.top svg.logo','xp-tlogo')+(ENT==='S'?xpLogo('header.top .slogo','xp-elogo s'):xpLogo('header.top .wlogo','xp-elogo'));
+  const basis=us?(U().mult&&U().mult.BE?'Break-even '+uBE().toFixed(2)+'× derived from the LLC\'s Xero file and payroll':''):(DATA.mult&&DATA.mult.BASIS?'Multiples '+DATA.mult.BASIS:'');
+  const cover=`<section class="xp-cover" style="page:xp-cover"><div class="xp-brand">${brand}</div>
+    <div class="xp-ct"><div class="xp-k">Management report</div><div class="xp-t">${esc(e)}</div><div class="xp-bar"></div><div class="xp-p">${esc(pn)}</div></div>
+    <div class="xp-foot"><div>Prepared by The Co. Accountants &amp; Business Advisors · ${esc(DATA.generated)}</div>${basis?`<div class="xp-b">${esc(basis)}</div>`:''}</div></section>`;
   const html=cover+parts.join('').replace(/ data-tip="\d+"/g,'').replace(/<nav class="(?:rnav|snav)"[^>]*>[\s\S]*?<\/nav>/g,'').replace(/<button[^>]*data-(skp|lm|plv|bsv|bsd|plg|gocons|goplc)[^>]*>[\s\S]*?<\/button>/g,'');
-  paint(); return {html,name:('Woods Group Management Report '+e+' '+rPN()).replace(/[^\w ]+/g,'').replace(/\s+/g,'_')};
+  /* page footers: generic page, then one named page per tab; the cover has none */
+  const box="font-family:'Aptos','Segoe UI',system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:7.5pt;color:#575349;vertical-align:top;padding-top:3mm";
+  const css=`@page{size:A4 portrait;margin:13mm 12mm 15mm;@bottom-left{content:${cssStr(e+' | '+pn)};${box}}@bottom-right{content:"Page " counter(page) " of " counter(pages);${box};text-align:right}}
+@page xp-cover{@bottom-left{content:none}@bottom-right{content:none}}
+`+tabs.map(t=>`@page xp-${t.id}{@bottom-right{content:${cssStr(t.t+' | Page ')} counter(page) " of " counter(pages)}}`).join('\n');
+  paint(); return {html,css,name:xpName()};
 }
 function exportPDF(){
-  const r=fullReport(); let box=document.getElementById('xpAll'); if(!box){ box=document.createElement('div'); box.id='xpAll'; document.body.appendChild(box); }
-  box.innerHTML=r.html; document.body.classList.add('xprint'); const t=document.title; document.title=r.name;
-  const done=()=>{document.body.classList.remove('xprint'); box.innerHTML=''; document.title=t; window.removeEventListener('afterprint',done);};
+  const r=fullReport(false); let box=document.getElementById('xpAll'); if(!box){ box=document.createElement('div'); box.id='xpAll'; document.body.appendChild(box); }
+  box.innerHTML=r.html; let st=document.getElementById('xpPage'); if(!st){ st=document.createElement('style'); st.id='xpPage'; document.head.appendChild(st); } st.textContent=r.css;
+  document.body.classList.add('xprint'); const t=document.title; document.title=r.name;
+  const done=()=>{document.body.classList.remove('xprint'); box.innerHTML=''; st.textContent=''; document.title=t; window.removeEventListener('afterprint',done);};
   window.addEventListener('afterprint',done); setTimeout(()=>window.print(),150);
 }
 function exportHTML(){
-  const r=fullReport(), css=[...document.querySelectorAll('style')].map(x=>x.textContent).join('\n'), fonts=[...document.querySelectorAll('link[rel="stylesheet"],link[rel="preconnect"]')].map(x=>x.outerHTML).join('');
-  const doc=`<!doctype html><html lang="en-AU"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Woods Group Management Report</title>${fonts}<style>${css}<\/style></head><body class="xstatic"><main><div class="wrap">${r.html}</div></main></body></html>`;
+  const r=fullReport(true), css=[...document.querySelectorAll('style')].filter(x=>x.id!=='xpPage').map(x=>x.textContent).join('\n'), fonts=[...document.querySelectorAll('link[rel="stylesheet"],link[rel="preconnect"]')].map(x=>x.outerHTML).join('');
+  const doc=`<!doctype html><html lang="en-AU"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Woods Group Management Report</title>${fonts}<style>${css}\n${r.css}<\/style></head><body class="xstatic${ENT==='S'?' ent-S':''}"><main><div class="wrap">${r.html}</div></main></body></html>`;
   const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([doc],{type:'text/html'})); a.download=r.name+'.html'; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove();},1000);
 }
 /* ---------- notes (15 Oct 2026): monthly notes kept in the Report_Notes tab of The Co's data sheet ----------
@@ -2415,7 +2471,7 @@ function calcPage(){
     h+=npBridge(en).replace('Contribution to net profit',nm+': net profit bridge');
     /* break-even and target ratios */
     h+=`<section class="blk"><div class="hd"><h2>${nm}: break-even and target ratios</h2><div class="rt">${esc(DATA.mult.BASIS||'')}</div></div>
-      ${cnote('Break-even ratio = cost base ÷ margin ÷ fee-team cost: the billings each $1 of fee-team cost must bring in for the entity to break even. Target ratio = (cost base + monthly profit goal) ÷ margin ÷ fee-team cost. Cost base is Xero operating expenses excluding interest (it includes every wage, so non-fee staff are covered). Margin is the contribution margin above. Fee-team cost is the fee departments\' cost of employment. Months together are summed before dividing. Adopted: break-even '+mm.be.toFixed(2)+'×'+(g?', target '+mm.tg.toFixed(2)+'×':'; no profit goal is set, so target equals break-even')+'.')}
+      ${cnote('Break-even ratio = cost base ÷ margin ÷ fee-team cost: the billings each $1 of fee-team cost must bring in for the entity to break even. Target ratio = (cost base + monthly profit goal) ÷ margin ÷ fee-team cost. Cost base is Xero operating expenses excluding interest, income tax expense and dividends paid (it includes every wage, so non-fee staff are covered). Margin is the contribution margin above. Fee-team cost is the fee departments\' cost of employment. Months together are summed before dividing. Adopted: break-even '+mm.be.toFixed(2)+'×'+(g?', target '+mm.tg.toFixed(2)+'×':'; no profit goal is set, so target equals break-even')+'.')}
       ${deriveTable(en)}</section>`;
     /* break-even and target dollars */
     h+=`<section class="blk"><div class="hd"><h2>${nm}: break-even and target dollars</h2><div class="rt">${pn}</div></div>
@@ -2451,7 +2507,7 @@ function plPage(){
     (rKs().length===1?'The month, the prior month, the movement and the year to date.':'Each month in the period and the total.'))+(rUS()?' North America reports in US$; its overheads come through Xero as "Other Income and Expense" and are shown as operating expenses.':'')+' * month not yet closed.';
   const PLN=withNoteCol(plTable(cols),'pl',PLV==='det');
   return finFlags()+(miss&&!cols.some(c=>c.s&&c.s.n)?flag('No Xero profit and loss for this period yet','','hi'):'')
-    +`<section class="blk"><div class="hd"><h2>Profit and loss, ${pn}${INFO(info)}</h2><div class="rt">${GRP()?vtog('plg',PLG,[['side','Side by side'],['cons','Consolidated']]):(Object.keys(DATA.ents).length>1?`<button type="button" class="lnkb" data-goplc="1">Consolidated group P&amp;L \u2192</button>`:'')} ${vtog('plv',PLV,[['det','Detailed'],['sum','Summary']])}</div></div>${PLN.html}${GRP()&&PLG==='cons'?(()=>{const e=cols.filter(c=>c.s&&c.s.elim).map(c=>esc(c.h.replace(' *',''))+' '+F(c.s.elim)); return e.length?`<div class="tnote">Eliminated between Recruitment and W&amp;Co Search: ${e.join(' \u00b7 ')}</div>`:'';})():''}<div class="tnote">${GRP()?'A$':rUS()?'US$':'A$'} \u00b7 Xero synced ${esc((DATA.xero||{}).syncedAt||'')}</div></section>`+tempSection()+noteList('Notes to the profit and loss','pl',PLN.list);
+    +`<section class="blk"><div class="hd"><h2>Profit and loss, ${pn}${INFO(info)}</h2><div class="rt">${GRP()?vtog('plg',PLG,[['side','Side by side'],['cons','Consolidated']]):(Object.keys(DATA.ents).length>1?`<button type="button" class="lnkb" data-goplc="1">Consolidated group P&amp;L \u2192</button>`:'')} ${vtog('plv',PLV,[['det','Detailed'],['sum','Summary']])}</div></div>${PLN.html}${GRP()&&PLG==='cons'?(()=>{const e=cols.filter(c=>c.s&&c.s.elim).map(c=>esc(c.h.replace(' *',''))+' '+F(c.s.elim)); return e.length?`<div class="tnote">Eliminated between Recruitment and W&amp;Co Search: ${e.join(' \u00b7 ')}</div>`:'';})():''}<div class="tnote">${GRP()?'A$':rUS()?'US$':'A$'} \u00b7 Net profit is before income tax expense and dividends paid, which are shown below it \u00b7 Xero synced ${esc((DATA.xero||{}).syncedAt||'')}</div></section>`+tempSection()+noteList('Notes to the profit and loss','pl',PLN.list);
 }
 function bsPage(){
   const {cols,end,cons}=bsCols(), pn=esc(rPN()), es=rEnts();
