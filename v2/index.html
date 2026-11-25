@@ -8,7 +8,6 @@
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%276%27 fill=%27%23131210%27/%3E%3Ctext x=%2716%27 y=%2722%27 font-family=%27Arial%27 font-weight=%27700%27 font-size=%2716%27 fill=%27%23fff%27 text-anchor=%27middle%27%3EW%3C/text%3E%3C/svg%3E">
 <title>Woods Group Dashboard</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap">
 <style>
   :root{
     --ink:#16150f; --body:#575349; --mid:#7a7e82; --faint:#a8a297;
@@ -537,6 +536,173 @@
   .hd-row>.logo{height:20px;margin-top:10px;opacity:.9}
   @media(min-width:701px){.wlogo{height:46px}}
   header.top h1{font-size:clamp(24px,3.2vw,34px)}
+
+  /* ===== v2 layout: role workspaces pack (26 Nov 2026) ===== */
+  :root{--pine:#18392d;--green:#19553b;--leaf:#4e8a67;--ink:#20352a;--body:#3f5446;--mid:#52675a;--faint:#8a9a8f;--muted:#52675a;
+    --canvas:#f4f7f4;--paper:#f4f7f4;--line:#dce4dd;--line2:#e6ece6;--soft:#e8f1e9;--warm:#f6e7dc;--card:#fff;
+    --gain:#2c6642;--gain-bg:#e1f0e5;--loss:#93462f;--loss-bg:#f5e9dd;--bench:#715913;--bench-bg:#f4edcf;--brand:#19553b;--deep:#19553b;--mint:#e8f1e9;
+    --sans:"Segoe UI",-apple-system,system-ui,Arial,sans-serif;--mono:"Segoe UI",-apple-system,system-ui,Arial,sans-serif;--rail:204px}
+  body.ws{background:var(--canvas);color:var(--ink);font:14px/1.48 var(--sans);letter-spacing:0}
+  body.ws .entbar,body.ws header.top,body.ws main,body.ws footer{margin-left:var(--rail)}
+  /* rail */
+  .rail{position:fixed;inset:0 auto 0 0;width:var(--rail);background:var(--pine);color:#e6efe8;display:flex;flex-direction:column;z-index:40;overflow:auto}
+  .rbrand{padding:26px 23px 20px}.rbrand svg{width:92px;height:45px!important;display:block;fill:#fff!important}
+  .rtitle{margin:14px 22px 8px;color:#bed3c4;letter-spacing:.13em;text-transform:uppercase;font-size:10px;font-weight:700}
+  .rsep{height:1px;background:#2e4d3f;margin:12px 22px}
+  .rail nav{display:grid;gap:3px;padding:0 11px}
+  .rail nav a{display:flex;align-items:center;gap:10px;min-height:37px;padding:7px 11px;border-radius:5px;color:#e3ece5;text-decoration:none;font-size:13.5px}
+  .rail nav a:hover{background:#2b4c3d}
+  .rail nav a.active{background:#315741;color:#fff;box-shadow:inset 3px 0 #a6d1a5;font-weight:650}
+  .rail nav svg,.menubtn svg{display:block;width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex:none}
+  .rbottom{margin-top:auto;border-top:1px solid #355143;padding:16px 22px;color:#bed4c3;font-size:11px;display:flex;align-items:center;gap:9px}
+  .rbottom svg{width:55px!important;height:12px!important;margin:0!important;opacity:1!important}.rbottom svg path{fill:#e1ece3!important}
+  #navback{display:none}
+  /* toolbar */
+  body.ws .entbar{background:#fff;border-bottom:1px solid var(--line);padding:0;min-height:65px;display:flex;align-items:center}
+  body.ws .entbar .wrap{max-width:none;width:100%;padding:10px clamp(18px,2.5vw,44px);gap:18px}
+  .tunit{display:grid;gap:1px}.tlabel{font-size:10.5px;color:var(--muted);font-weight:550}
+  body.ws .entbar select,.tsel{font:650 13.5px var(--sans);color:var(--ink);background:#fff url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M2 4.5L6 8.5L10 4.5' stroke='%2320352a' stroke-width='1.6' fill='none' stroke-linecap='round'/></svg>") no-repeat right 4px center;
+    border:0;border-radius:4px;padding:2px 22px 2px 0;appearance:none;min-height:24px;max-width:280px}
+  .tsel[disabled]{opacity:1;background-image:none;cursor:default}
+  body.ws .entbar .tunit:first-of-type{border-right:1px solid var(--line);padding-right:20px}
+  .perctl{display:flex;align-items:center;gap:14px}
+  .seg3{display:inline-flex;border:1px solid var(--line);border-radius:6px;padding:2px;background:#f6f8f5}
+  .seg3 button{border:0;background:none;font:600 12px var(--sans);color:var(--mid);padding:5px 11px;border-radius:4px;cursor:pointer}
+  .seg3 button.on{background:#fff;color:var(--ink);box-shadow:0 0 0 1px var(--line)}
+  body.ws .asat{color:var(--muted);font-size:12px;display:inline-flex;align-items:center;gap:7px}
+  body.ws .asat::before{content:"";width:7px;height:7px;border-radius:50%;background:#6f9f73;flex:none}
+  body.ws .rbtn{background:#fff;color:var(--green);border:1px solid #becec2;border-radius:5px;padding:6px 12px;font:630 12px var(--sans)}
+  body.ws .rbtn:hover{background:var(--soft)}
+  body.ws .me{color:var(--muted);font-size:12px}.me .ini{background:var(--green)!important}
+  .menubtn{display:none;border:1px solid var(--line);background:#fff;border-radius:6px;padding:7px;color:var(--ink)}
+  /* page intro (the old header) */
+  body.ws header.top{background:transparent;border:0;padding:24px 0 0;color:var(--ink)}
+  body.ws header.top .wrap,body.ws main .wrap,body.ws footer .wrap{max-width:1570px;padding-left:clamp(18px,2.5vw,44px);padding-right:clamp(18px,2.5vw,44px)}
+  body.ws header.top .hd-row,body.ws .perbar,body.ws #tabs,body.ws #rtabs,body.ws #vsw,body.ws .rnav,body.ws .snav,body.ws .xtog{display:none!important}
+  .eyebrow{font-size:10px;text-transform:uppercase;letter-spacing:.12em;font-weight:680;color:var(--muted);margin-bottom:5px}
+  body.ws header.top h1{font:650 clamp(29px,2.8vw,41px)/1.13 var(--sans);letter-spacing:-.047em;color:var(--ink);margin:0}
+  .psub{margin:6px 0 0;color:var(--muted);font-size:13px;max-width:900px}
+  body.ws header.top .lede{margin:12px 0 18px;color:var(--muted);font-size:12.5px;gap:8px}
+  body.ws .lchip{background:#fff!important;border:1px solid var(--line)!important;color:var(--muted)!important;border-radius:12px!important;font-size:11.5px}
+  body.ws .lchip b{color:var(--ink)!important}
+  body.ws .xbtn{background:var(--green);color:#fff;border:1px solid var(--green);border-radius:5px;font:630 12px var(--sans);padding:6px 11px}
+  body.ws .xbtn+.xbtn{background:#fff;color:var(--green);border-color:#becec2}
+  body.ws header.top .info{color:var(--faint)}
+  body.ws main{padding:4px 0 40px}
+  /* KPIs */
+  body.ws .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:11px;margin:0 0 14px}
+  body.ws .kpis.k4{grid-template-columns:repeat(4,minmax(0,1fr))}
+  body.ws .kpi{background:#fff;border:1px solid var(--line);border-radius:8px!important;padding:12px 15px 13px;min-height:98px}
+  body.ws .kpi .lab{font-size:12px;font-weight:600;color:var(--ink);margin-bottom:2px}
+  body.ws .kpi .val{font:660 clamp(22px,2.2vw,32px)/1.24 var(--sans);letter-spacing:-.045em;color:var(--ink);margin:4px 0}
+  body.ws .kpi .sub{font-size:11.5px;color:var(--muted);margin-top:0}
+  body.ws .kpis>.kpi:first-child,body.ws .kpi.lead{background:var(--green);border-color:var(--green);color:#fff}
+  body.ws .kpis>.kpi:first-child .lab,body.ws .kpis>.kpi:first-child .val,body.ws .kpi.lead .lab,body.ws .kpi.lead .val{color:#fff}
+  body.ws .kpis>.kpi:first-child .sub,body.ws .kpi.lead .sub{color:#deebdf}
+  body.ws .kpis>.kpi:first-child .info{color:#cfe2d3}
+  body.ws .kpis>.kpi:first-child .chip{background:rgba(255,255,255,.16);color:#fff}
+  body.ws .kpi.neg .val{color:var(--loss)}
+  body.ws .kpi .val.neg,body.ws .neg{color:var(--loss)}
+  /* panels: every section is a white card */
+  body.ws .blk{background:#fff;border:1px solid var(--line);border-radius:9px;padding:17px 19px;margin:0 0 14px;min-width:0}
+  body.ws .blk>.hd{border:0;padding:0;margin:0 0 14px;align-items:flex-start}
+  body.ws .blk>.hd h2{font:650 19px/1.25 var(--sans);letter-spacing:-.035em;color:var(--ink)}
+  body.ws .blk>.hd .rt{font-size:12px;color:var(--muted)}
+  .psub2{margin:4px 0 0;color:var(--muted);font-size:12px;line-height:1.45}
+  body.ws .blk .tbl,body.ws .blk .chc,body.ws .blk .beb{border:0;border-radius:0;padding:0;background:transparent}
+  body.ws .blk .beb .lg{background:transparent;padding:0 0 12px;border-bottom:1px solid var(--line2)}
+  body.ws .blk .row{padding:12px 0}
+  body.ws .g2{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:14px;margin-bottom:14px}
+  body.ws .g2>.blk{margin:0}
+  /* tables */
+  body.ws table{font-size:12.5px;background:transparent}
+  body.ws th,body.ws td{padding:9px 8px}
+  body.ws th:first-child,body.ws td:first-child{padding-left:0}body.ws th:last-child,body.ws td:last-child{padding-right:0}
+  body.ws thead th{background:transparent!important;color:var(--muted);font-size:10.5px;font-weight:650;border-bottom:1px solid var(--line)}
+  body.ws tbody td{border-bottom:1px solid var(--line2);color:var(--ink);font-family:var(--sans)}
+  body.ws tbody td:first-child{color:var(--ink);font-weight:500}
+  body.ws tr.tot td,body.ws .tbl tr.tot td:first-child{background:transparent!important;border-top:1px solid var(--line);font-weight:700}
+  body.ws .tbl tbody td:first-child{background:transparent}
+  body.ws table.fin tr.h td{background:transparent!important;color:var(--muted)}
+  body.ws table.fin tr.net td{background:var(--soft)}
+  @media(min-width:901px){body.ws .tbl thead th{top:0}}
+  /* pills, flags, notes */
+  body.ws .st{border-radius:12px;font-size:10.5px;font-weight:630;padding:3px 8px}
+  body.ws .st.ok{background:#e1f0e5;color:#2c6642}body.ws .st.mid{background:#f4edcf;color:#715913}body.ws .st.bad{background:#f5e9dd;color:#824429}
+  body.ws .flag,body.ws .enote,body.ws .cnote,body.ws .nblk{background:#fff;border:1px solid var(--line);border-radius:9px!important}
+  body.ws .flag{border-left:3px solid var(--leaf)}
+  body.ws .enote{padding:14px 16px;font-size:13px;color:var(--muted)}
+  .tlink{color:var(--green);font-weight:650;font-size:12px;text-underline-offset:3px;white-space:nowrap}
+  td .tlink{font-size:inherit;font-weight:600}
+  .fnote{border-top:1px solid var(--line);margin-top:13px;padding-top:10px;color:var(--muted);font-size:11.5px}
+  /* chart rows (division performance, quarter attainment) */
+  .mtog{display:inline-flex;flex-wrap:wrap;gap:4px;margin:-4px 0 12px}
+  .mtog button{border:1px solid var(--line);background:#fff;border-radius:5px;font:600 11.5px var(--sans);color:var(--mid);padding:4px 9px;cursor:pointer}
+  .mtog button.on{background:var(--soft);border-color:#b9cfbf;color:var(--green)}
+  .clist{display:grid;gap:9px}
+  .crow{display:grid;grid-template-columns:minmax(110px,1.05fr) minmax(64px,1.65fr) minmax(70px,.55fr);gap:10px;align-items:center;min-height:27px;text-decoration:none;color:var(--ink);font-size:12.5px}
+  a.crow:hover .cname{text-decoration:underline;color:var(--green)}
+  .crow b{justify-self:end;font-weight:650}
+  .ctrack{display:block;height:10px;background:#edf1ec;border-radius:3px;overflow:hidden}
+  .cbar{display:block;height:100%;background:var(--leaf);border-radius:3px;min-width:1px}.cbar.neg{background:#b27659}.cbar.ok{background:#2c7442}
+  .wp{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-size:12.5px}.wp strong{font-size:19px;letter-spacing:-.03em}
+  .wp.small{font-size:11.5px;color:var(--muted)}
+  .ptrack{position:relative;height:9px;background:#edf1ec;border-radius:3px;margin:7px 0 8px}
+  .ptrack span{position:absolute;left:0;top:0;bottom:0;background:var(--leaf);border-radius:3px}
+  .ptrack i{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--ink);margin-left:-1px}
+  .agenda{display:grid}
+  .arow{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:11px 0;border-top:1px solid var(--line2)}
+  .arow:first-child{border-top:0;padding-top:0}
+  .arow b{display:block;font-size:13.5px;font-weight:650;color:var(--ink)}.arow span:not(.st){display:block;font-size:12px;color:var(--muted)}
+  .rcards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+  .rcard{background:#f6f8f5;border:1px solid var(--line);border-radius:5px;padding:10px;display:grid;gap:3px;text-decoration:none;color:var(--ink);font-size:12.5px}
+  .rcard:hover{border-color:#8ea996}.rcard b{font-weight:630}.rcard small{color:var(--muted);font-size:11.5px}
+  .starts{display:grid;gap:10px}
+  .srow{display:flex;gap:12px;align-items:center}
+  .srow>div:last-child b{display:block;font-size:15px}.srow>div:last-child span{font-size:12px;color:var(--muted)}
+  .sdate{width:46px;text-align:center;border:1px solid var(--line);border-radius:5px;padding:4px 0;background:#f6f8f5;line-height:1.15}
+  .sdate small{display:block;font-size:9.5px;color:var(--muted);text-transform:uppercase}.sdate b{font-size:13px;text-transform:uppercase}
+  /* filters and toggles inside pages */
+  body.ws .pfil button{border-radius:5px;padding:5px 10px;font-size:12px}
+  body.ws .pfil button.on{background:var(--green);border-color:var(--green)}
+  body.ws .vtog{background:#f6f8f5;border:1px solid var(--line);border-radius:6px}
+  body.ws .vtog button{border-radius:4px}body.ws .vtog button.on{background:#fff;color:var(--ink);box-shadow:0 0 0 1px var(--line)}
+  body.ws .more{margin:0 0 20px}
+  body.ws .rbtn[data-more]{background:#fff}
+  body.ws .glo div{border-radius:9px}
+  body.ws .glo b{color:var(--ink)}
+  body.ws footer{background:transparent;border-top:1px solid var(--line);margin-top:10px;padding:18px 0 26px}
+  body.ws footer .logo{height:16px}
+  body.ws .gate{margin-left:0}
+  body.locked .rail{display:none}
+  body.locked.ws .entbar,body.locked.ws footer{margin-left:0}
+  /* print and PDF: no rail */
+  @media print{.rail,#navback,.menubtn{display:none!important}body.ws .entbar,body.ws header.top,body.ws main,body.ws footer{margin-left:0!important}body.ws .blk{border:0;padding:0}}
+  /* tablet and phone: the rail slides in */
+  @media(max-width:1100px){body.ws .g2{grid-template-columns:1fr}.rcards{grid-template-columns:repeat(2,minmax(0,1fr))}body.ws .kpis.k4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media(max-width:900px){
+    :root{--rail:0px}
+    .rail{width:236px;transform:translateX(-100%);transition:transform .18s}
+    body.navopen .rail{transform:none}
+    body.navopen #navback{display:block;position:fixed;inset:0;background:rgba(19,44,32,.42);border:0;z-index:39}
+    .menubtn{display:inline-flex}
+    body.ws .entbar .wrap{gap:10px 12px}
+    body.ws .entbar .tunit:first-of-type{border-right:0;padding-right:0}
+    .perctl{width:100%;order:5;justify-content:space-between}
+  }
+  @media(max-width:560px){body.ws .kpis.k4{grid-template-columns:1fr 1fr}body.ws .kpi .val{font-size:21px}.crow{grid-template-columns:minmax(90px,1fr) minmax(40px,1fr) auto}.arow{flex-direction:column;align-items:flex-start}}
+  body.ws .entbar label.tunit{text-transform:none;letter-spacing:0;font-size:inherit;color:inherit;font-weight:inherit;display:grid}
+  @media(min-width:1101px){body.ws .entbar .wrap{flex-wrap:nowrap}body.ws .entbar .wrap>*{flex-shrink:0}body.ws .entbar .sp{flex:1 1 auto;min-width:0}}
+  body.ws #who{white-space:nowrap}
+  body.ws .kpis{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+  body.ws .asat{max-width:230px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block}
+  body.ws .asat::before{display:inline-block;margin-right:7px;vertical-align:1px}
+  @media(max-width:1500px){body.ws #whoName{display:none}}
+  .rwho{margin-top:auto;padding:12px 22px;border-top:1px solid #355143}
+  .rwho #who{display:flex!important;align-items:center;gap:8px;color:#e3ece5;font-size:12px}
+  .rwho #who[hidden]{display:none!important}
+  .rwho #whoName{display:inline!important;color:#e3ece5}.rwho #signout{color:#bed3c4;margin-left:auto}
+  .rwho + .rbottom{margin-top:0}
 </style>
 </head>
 <body>
@@ -3073,7 +3239,7 @@ function divPage(){
   const dcTip=r=>CALC(esc(r.d?r.d.label:'Total')+': direct costs',pn,[['Fully loaded salaries',F(r.ppl)],['Commission (accrued)',F(r.cm)],['SEEK ads posted',F(r.ad)],['= Direct costs',F(r.dc),'s']]);
   const npTip=r=>CALC(esc(r.d?r.d.label:'Total')+': net profit',pn,[['GP (billings)',F(r.gp)],['Less direct costs',F(-r.dc)],['= Operating profit',F(r.op)],['Less overhead allocation',F(-r.oh)],['= Net profit',F(r.np),'s'],['ROGP (NP ÷ GP)',PC(r.gp?r.np/r.gp:null)]]);
   const ohTip=r=>CALC(esc(r.d.label)+': overhead allocation',pn,[['Fully loaded salaries',F(r.ppl)],['Share of fee-team salaries',PC(T.ppl?r.ppl/T.ppl:null)],['= Overhead allocated',F(r.oh),'s']],'Overhead is shared in proportion to fully loaded salary, month by month.');
-  const row=r=>`<tr><td><i class="sw" style="background:var(--d${DCOL[r.d.name]||7})"></i>${esc(r.d.label)}${r.est?'*':''}</td><td>${F(r.gp)}</td><td${dcTip(r)}>${F(r.dc)}</td><td>${F(r.op)}</td><td${ohTip(r)}>${F(r.oh)}</td>
+  const row=r=>`<tr><td><i class="sw" style="background:var(--d${DCOL[r.d.name]||7})"></i><a href="#" class="tlink" data-page="dept:${esc(r.d.name)}">${esc(r.d.label)}</a>${r.est?'*':''}</td><td>${F(r.gp)}</td><td${dcTip(r)}>${F(r.dc)}</td><td>${F(r.op)}</td><td${ohTip(r)}>${F(r.oh)}</td>
     <td class="${r.np<0?'neg':''}"${npTip(r)}>${F(r.np)}</td><td>${BL(r.bud)}</td><td>${r.bud==null?'<span class="mut">–</span>':SG(r.np-r.bud)}</td>
     <td class="pill"><span class="st ${stc(r.np,r.bud,r.g2s)}">${PC(r.rogp)}</span></td><td>${r.g2s==null?'–':X(r.g2s)}</td></tr>`;
   const P=poolRec(ENT,ks), resid=P.pool-T.oh-P.unb;
@@ -3221,6 +3387,309 @@ document.addEventListener('click',ev=>{
   if(b.dataset.pd!=null) PDEPT=b.dataset.pd; if(b.dataset.ps) PSORT=b.dataset.ps; if(b.dataset.pm) PMODE=b.dataset.pm;
   const y=window.scrollY; paint(); window.scrollTo({top:y});
 });
+
+/* =====================================================================
+   v2 layout (role workspaces pack, 26 Nov 2026): left rail per role, white toolbar with entity and period,
+   page intro, KPI row with a lead card, white panels. The rail replaces the tab bars and the Live / Month-end
+   switch: each rail item opens a live page or a month-end page. Data, roles and access rules are unchanged.
+   ===================================================================== */
+let PAGE='home', NAVOPEN=false;
+const RAIL_ROLE={owner:'Business owner',theco:'The Co',ops:'Operations',search:'Search lead',lead:'Team leader',consultant:'Consultant',full:'Full access',summary:'Summary access'};
+const ICON={
+  home:'<path d="M3 3h6v6H3zM11 3h6v6h-6zM3 11h6v6H3zM11 11h6v6h-6z"/>',
+  trend:'<path d="M3 15l4.5-5 3.5 3L17 6"/><path d="M13 6h4v4"/>',
+  div:'<path d="M4 5h12M4 10h8M4 15h10"/>',
+  ppl:'<circle cx="8" cy="7" r="3"/><path d="M2.5 17c.8-3 3-4.5 5.5-4.5s4.7 1.5 5.5 4.5"/><path d="M13.5 4.3a3 3 0 010 5.4M15.5 12.7c1 .7 1.7 2 2 3.3"/>',
+  fwd:'<rect x="3" y="4" width="14" height="13" rx="2"/><path d="M3 8h14M7 2.5v3M13 2.5v3"/>',
+  pace:'<path d="M3.5 14a6.5 6.5 0 1113 0"/><path d="M10 14l3.5-4"/>',
+  comm:'<path d="M3 15l4-4 3 3 7-7"/><path d="M13 7h4v4"/>',
+  seek:'<path d="M3 8v4l9 4V4L3 8z"/><path d="M12 7a3 3 0 010 6"/>',
+  fin:'<rect x="4" y="3" width="12" height="14" rx="1.5"/><path d="M7 7h6M7 10h6M7 13h4"/>',
+  bs:'<path d="M10 3v14M4 7h12M5 7l-2 5h4l-2-5zM15 7l-2 5h4l-2-5z"/>',
+  cf:'<path d="M4 7h10l-3-3M16 13H6l3 3"/>',
+  apar:'<path d="M4 4h12v12H4z"/><path d="M4 9h12M9 9v7"/>',
+  cmp:'<rect x="3" y="9" width="3" height="8"/><rect x="8.5" y="5" width="3" height="12"/><rect x="14" y="11" width="3" height="6"/>',
+  rep:'<path d="M5 3h7l3 3v11H5z"/><path d="M12 3v3h3M8 10h4M8 13h4"/>',
+  book:'<path d="M3 4.5C5 3.5 8 3.5 10 5c2-1.5 5-1.5 7-.5V16c-2-1-5-1-7 .5-2-1.5-5-1.5-7-.5z"/><path d="M10 5v11.5"/>',
+  chk:'<path d="M10 2.5l6 2.5v4.5c0 4-2.6 6.6-6 8-3.4-1.4-6-4-6-8V5z"/><path d="M7 10l2 2 4-4"/>',
+  calc:'<rect x="4" y="2.5" width="12" height="15" rx="1.5"/><path d="M7 6h6M7 10h1M10 10h1M13 10h0M7 13.5h1M10 13.5h1"/>',
+  team:'<circle cx="10" cy="6.5" r="3"/><path d="M4 17c.9-3.4 3.3-5 6-5s5.1 1.6 6 5"/>',
+  all:'<path d="M3 16V9M8 16V5M13 16v-8M18 16V3"/>',
+  place:'<path d="M10 17s-5-4.6-5-8.5a5 5 0 0110 0C15 12.4 10 17 10 17z"/><circle cx="10" cy="8.5" r="1.8"/>'
+};
+const ico=k=>`<svg viewBox="0 0 20 20" aria-hidden="true">${ICON[k]||ICON.home}</svg>`;
+const internal=()=>['theco','full','owner','ops'].includes(ROLE())&&!!(DATA.ents.R&&DATA.ents.S);
+
+/* the pages each person can open, by entity and role */
+function railPages(){
+  if(NARROW()){
+    const own=ROLE()==='lead'?MYD().filter(n=>deptsOf(ENT).some(d=>d.name===n)):[];
+    const work=[{id:'home',t:own.length?'Team overview':'Overview',i:'home',tab:'home'}]
+      .concat(own.map(n=>({id:'dept:'+n,t:own.length>1?dep(n).label:'Team detail',i:'team',tab:n})))
+      .concat(own.length?[{id:'tppl',t:'Team people',i:'ppl',tab:'tppl'}]:[])
+      .concat([{id:'all',t:'All teams',i:'all',tab:'all'},{id:'fwd',t:'Forward starts',i:'fwd',tab:'fwd'}]);
+    return [{h:(RAIL_ROLE[ROLE()]||'')+' workspace',items:work},{h:'',items:[{id:'glo',t:'Definitions',i:'book',tab:'glo'}]}];
+  }
+  const fin=[{id:'rep:dash',t:'Month-end report',i:'rep',rep:'dash'},{id:'rep:pl',t:'Profit and loss',i:'fin',rep:'pl'},{id:'rep:bs',t:'Balance sheet',i:'bs',rep:'bs'},
+    {id:'rep:cf',t:'Cash flow',i:'cf',rep:'cf'},{id:'rep:apar',t:'Debtors & creditors',i:'apar',rep:'apar'}]
+    .concat(Object.keys(DATA.ents).length>1?[{id:'cmp',t:'Entity comparison',i:'cmp',ent:'G'}]:[]);
+  const other=[{id:'glo',t:'Definitions',i:'book',tab:'glo'}]
+    .concat(internal()?[{id:'chk',t:'Data checks',i:'chk',tab:'chk'},{id:'rep:calc',t:'Calculations',i:'calc',rep:'calc'}]:[]);
+  if(ENT==='G') return [{h:'Group',items:[{id:'home',t:'Group overview',i:'home',tab:'sum'}]},{h:'Finance',items:fin.filter(x=>x.id!=='cmp')},{h:'',items:other.filter(x=>x.id!=='chk')}];
+  if(ENT==='U') return [{h:'North America',items:[{id:'home',t:'Overview',i:'home',tab:'sum'},{id:'upl',t:'Placements',i:'place',tab:'upl'},{id:'uchk',t:'Checks',i:'chk',tab:'uchk'}]},{h:'Finance',items:fin},{h:'',items:[{id:'glo',t:'Definitions',i:'book',tab:'glo',ent:'R'}]}];
+  return [{h:'Performance',items:[{id:'home',t:'Overview',i:'home',tab:'home'},{id:'trend',t:'Trading trends',i:'trend',tab:'trend'},{id:'div',t:'Divisions',i:'div',tab:'div'},
+      {id:'ppl',t:'People',i:'ppl',tab:'ppl'},{id:'fwd',t:'Forward starts',i:'fwd',tab:'fwd'},{id:'pace',t:'Pace & targets',i:'pace',tab:'pace'},
+      {id:'comm',t:'Commission',i:'comm',tab:'comm'},{id:'seek',t:'SEEK advertising',i:'seek',tab:'seek'}]},
+    {h:'Finance',items:fin},{h:'',items:other}];
+}
+function pageDef(id){
+  if(/^dept:/.test(id)){ const n=id.slice(5), d=dep(n); return {id,t:d?d.label:n,tab:n,parent:NARROW()?id:'div',dept:true}; }
+  for(const g of railPages()) for(const it of g.items) if(it.id===id) return it;
+  return null;
+}
+function goPage(id,ent){
+  if(ent&&ent!==ENT){ ENT=ent; setEnts(); }
+  if(!pageDef(id)){ id='home'; }
+  PAGE=id; const p=pageDef(id);
+  if(p.ent&&p.ent!==ENT){ ENT=p.ent; setEnts(); PAGE=p.ent==='G'?'home':PAGE; }
+  NAVOPEN=false; paint(); window.scrollTo({top:0});
+}
+function useViewFor(p){
+  const v=p&&p.rep?'rep':'live';
+  if(NARROW()||v===VIEW) return;
+  VIEW=v; useView(); PERSET=true;
+  if(v==='rep'&&typeof notesLoad==='function'&&!window.__notesLoaded){ window.__notesLoaded=true; setTimeout(notesLoad,0); }
+}
+
+/* ---------- paint: rail page -> live or month-end renderer ---------- */
+function paint(){
+  if(!DATA) return;
+  shellOnce();
+  let p=pageDef(PAGE); if(!p){ PAGE='home'; p=pageDef('home'); }
+  useViewFor(p);
+  PERSET=true;
+  if(p.rep){
+    if(PER==='CUR') PER=defPer();
+    RT=p.rep; reportPaint();
+  } else {
+    if(VIEW==='live'&&!PER) PER='CUR';
+    TAB=p.tab; salesPaint();
+  }
+  intro(p); railRender(); perRender();
+}
+
+/* one-off: build the rail, move the entity picker into the toolbar, add the period control and intro lines */
+function shellOnce(){
+  if(document.getElementById('rail')) return;
+  document.body.classList.add('ws');
+  const rail=document.createElement('aside'); rail.id='rail'; rail.className='rail'; rail.setAttribute('aria-label','Workspace navigation');
+  const wl=document.querySelector('.wlogo'), tl=document.querySelector('header.top .logo');
+  rail.innerHTML=`<div class="rbrand">${wl?wl.outerHTML:'<b>WOODS &amp; CO</b>'}</div><div id="railNav"></div><div class="rbottom"><span>Prepared by</span>${tl?tl.outerHTML:'<b>THE CO.</b>'}</div>`;
+  document.body.insertBefore(rail,document.body.firstChild);
+  const who=document.getElementById('who'); if(who){ const box=document.createElement('div'); box.className='rwho'; box.appendChild(who); rail.insertBefore(box,rail.querySelector('.rbottom')); }
+  const bd=document.createElement('button'); bd.id='navback'; bd.type='button'; bd.setAttribute('aria-label','Close navigation'); document.body.appendChild(bd);
+  const eb=document.querySelector('.entbar .wrap');
+  if(eb){
+    const mb=document.createElement('button'); mb.type='button'; mb.id='menuBtn'; mb.className='menubtn'; mb.setAttribute('aria-label','Open navigation'); mb.innerHTML='<svg viewBox="0 0 20 20"><path d="M3 5h14M3 10h14M3 15h14"/></svg>';
+    eb.insertBefore(mb,eb.firstChild);
+    const pc=document.createElement('div'); pc.id='perCtl'; pc.className='perctl';
+    const sel=document.getElementById('entsel'); const lab=eb.querySelector('label[for=entsel]');
+    const wrapE=document.createElement('div'); wrapE.className='tunit'; wrapE.innerHTML='<span class="tlabel">Entity</span>';
+    eb.insertBefore(wrapE,sel); wrapE.appendChild(sel); if(lab) lab.remove();
+    wrapE.insertAdjacentElement('afterend',pc);
+  }
+  const h1=document.getElementById('mTitle');
+  if(h1){ const ey=document.createElement('div'); ey.id='mEye'; ey.className='eyebrow'; h1.parentNode.insertBefore(ey,h1);
+    const sb=document.createElement('p'); sb.id='mSub'; sb.className='psub'; h1.insertAdjacentElement('afterend',sb); }
+  document.addEventListener('click',ev=>{
+    const a=ev.target.closest('[data-page]'); if(a){ ev.preventDefault(); goPage(a.dataset.page,a.dataset.ent||null); return; }
+    if(ev.target.closest('#menuBtn')){ NAVOPEN=!NAVOPEN; document.body.classList.toggle('navopen',NAVOPEN); return; }
+    if(ev.target.closest('#navback')){ NAVOPEN=false; document.body.classList.remove('navopen'); return; }
+    const pm=ev.target.closest('[data-pmode]'); if(pm){ setPerMode(pm.dataset.pmode); return; }
+    const dm=ev.target.closest('[data-dmeas]'); if(dm){ DMEAS=dm.dataset.dmeas; const y=window.scrollY; paint(); window.scrollTo({top:y}); }
+  });
+  document.addEventListener('change',ev=>{
+    if(ev.target.id==='perSel'){ PER=ev.target.value; PERSET=true; paint(); }
+  });
+  // the entity picker keeps the page if the new entity has it
+  const es=document.getElementById('entsel');
+  if(es) es.addEventListener('change',()=>{ setTimeout(()=>{ if(!pageDef(PAGE)) PAGE='home'; paint(); },0); },true);
+}
+function railRender(){
+  const nav=document.getElementById('railNav'); if(!nav) return;
+  const cur=pageDef(PAGE), act=cur&&cur.parent?cur.parent:PAGE;
+  nav.innerHTML=railPages().map(g=>`${g.h?`<div class="rtitle">${esc(g.h)}</div>`:'<div class="rsep"></div>'}<nav>${g.items.map(it=>
+    `<a href="#" data-page="${esc(it.id)}"${it.ent?` data-ent="${it.ent}"`:''} class="${it.id===act&&(!it.ent||it.ent===ENT)?'active':''}">${ico(it.i)}<span>${esc(it.t)}</span></a>`).join('')}</nav>`).join('');
+  document.body.classList.toggle('navopen',NAVOPEN);
+}
+function intro(p){
+  const ey=document.getElementById('mEye'), t=document.getElementById('mTitle'), s=document.getElementById('mSub');
+  const ent=ENT==='G'?'Woods Group':(DATA.ents[ENT]||{}).short||'';
+  const T={home:NARROW()?(MYD().length&&ROLE()==='lead'?'Team overview':'Overview'):ENT==='G'?'Group overview':ENT==='U'?'North America overview':ROLE()==='owner'?'Owner overview':'Performance overview',
+    trend:'Trading trends',div:'Divisions',ppl:'People',fwd:'Forward starts',pace:'Pace and targets',comm:'Commission',seek:'SEEK advertising',
+    glo:'Definitions',chk:'Data checks',upl:'Placements',uchk:'Checks',tppl:'Team people',all:'All teams',cmp:'Entity comparison',
+    'rep:dash':'Month-end report','rep:pl':'Profit and loss','rep:bs':'Balance sheet','rep:cf':'Cash flow summary','rep:apar':'Debtors and creditors','rep:calc':'How the numbers are calculated'};
+  const pn=p.rep?rPN():(ENT==='U'?uPerName():perName());
+  const S={home:ENT==='U'?'Permanent fees against payroll cost by recruiter, in US dollars, with GP to salary and ROGP.':NARROW()?'Where the team stands this month, who needs a hand and what is booked to start.':ENT==='G'?'Every entity side by side in A$, each against its own multiples.':'Trading for the period, the pressure points by division and the last closed month across the entities.',
+    trend:'Billings, GP to salary and contribution by department, month by month.',div:'GP to net profit and ROGP by division, with the overhead pool behind it.',
+    ppl:'Each person\'s GP, salary, overhead share, net profit and ROGP.',fwd:'Placements already on the sales sheet for the months ahead.',
+    pace:'Whether each team is on track for the month, and the quarter so far.',comm:'Quarterly targets, attainment and commission from the sales sheet.',
+    seek:'SEEK ad spend by department and person, against billings.',glo:'How each measure is worked out.',chk:'Data issues to clear before month-end.',
+    tppl:'Your team: GP, salary, GP to salary and net profit by person.',all:'Every team\'s and person\'s billings, without pay or cost.',
+    'rep:dash':'Finished months only: P&L, balance sheet, cash and commentary.'};
+  if(ey) ey.textContent=(RAIL_ROLE[ROLE()]||'')+(ent?' · '+ent:'');
+  if(t) t.textContent=p.dept?p.t:(T[p.id]||p.t||'');
+  if(s) s.textContent=(p.dept?'Department detail. ':((S[p.id]?S[p.id]+' ':'')))+pn+'.';
+  document.title=(t?t.textContent+' · ':'')+'Woods Group Dashboard';
+}
+
+/* ---------- period: Month / Quarter / YTD plus "period ending" ---------- */
+function perMonthsList(){
+  const us=ENT==='U', live=VIEW==='live';
+  const ms=us?(U()||{}).months||[]:DATA.months, cur=live?(us?U().current:DATA.current.key):null;
+  return {ms,cur};
+}
+function perRender(){
+  const el=document.getElementById('perCtl'); if(!el) return;
+  if(ENT==='G'&&VIEW==='live'){ el.innerHTML=''; return; }
+  const {ms,cur}=perMonthsList(); if(!ms.length){ el.innerHTML=''; return; }
+  const mode=PER==='YTD'?'ytd':isQ(PER)?'q':'m';
+  const opts=mode==='q'?qBtns(ms).map(o=>({v:o.p,t:o.t+' · '+o.ti})).reverse()
+    :mode==='ytd'?[{v:'YTD',t:ms[0].label.split(' ')[0]+' to '+ms[ms.length-1].label+(ms[ms.length-1].key===cur?' (to date)':'')}]
+    :ms.slice().reverse().map(m=>({v:m.key===cur?'CUR':m.key,t:m.label+(m.key===cur?' (to date)':'')}));
+  const val=mode==='m'&&cur&&PER===cur?'CUR':PER;
+  el.innerHTML=`<label class="tunit"><span class="tlabel">${mode==='m'?'Month':mode==='q'?'Quarter':'Financial year'}</span><select id="perSel" class="tsel"${mode==='ytd'?' disabled':''}>${opts.map(o=>`<option value="${esc(o.v)}"${o.v===val?' selected':''}>${esc(o.t)}</option>`).join('')}</select></label>
+    <div class="seg3" role="group" aria-label="Period type">${[['m','Month'],['q','Quarter'],['ytd','YTD']].map(([k,t])=>`<button type="button" data-pmode="${k}" class="${k===mode?'on':''}">${t}</button>`).join('')}</div>`;
+}
+function setPerMode(m){
+  const {ms,cur}=perMonthsList(); if(!ms.length) return;
+  const last=ms[ms.length-1];
+  if(m==='ytd') PER='YTD';
+  else if(m==='q'){ const qs=qBtns(ms); PER=qs.length?qs[qs.length-1].p:'YTD'; }
+  else PER=cur&&last.key===cur?'CUR':last.key;
+  PERSET=true; paint();
+}
+
+/* ---------- live pages ---------- */
+let DMEAS='gap';
+function v2Tabs(tabs){
+  const ids=['home','trend','div','ppl','fwd','pace','comm','seek','glo','all','tppl'];
+  if(NARROW()){
+    const own=ROLE()==='lead'?MYD().filter(n=>deptsOf(ENT).some(d=>d.name===n)):[];
+    tabs.splice(0,tabs.length,...['home'].concat(own,['tppl','all','fwd','glo']).map(id=>({id,t:id,s:''})));
+    return;
+  }
+  ids.forEach(id=>{ if(!tabs.some(x=>x.id===id)) tabs.push({id,t:id,s:''}); });
+}
+function v2Page(){
+  const fee=deptsOf(ENT).filter(d=>d.fee);
+  switch(TAB){
+    case 'home': return NARROW()?leadHome():ownerHome();
+    case 'trend': return deptLineSection([ENT])+monthTable();
+    case 'div': return divPage();
+    case 'ppl': return pplPage();
+    case 'fwd': return NARROW()?(fwdSection(fee)||'<div class="enote">Nothing is on the sales sheet for the coming months yet.</div>'):(fwdSection(fee)+fwdNote(fee)||'<div class="enote">Nothing is on the sales sheet for the coming months yet.</div>');
+    case 'pace': return (landSection(fee)+trackSection(fee))||`<div class="enote">Pace is shown for the month in progress. Choose the current month in the period control.</div>`;
+    case 'comm': return quarterSection()||'<div class="enote">No quarterly targets or commission on the sales sheet for this period.</div>';
+    case 'seek': return seekSection([ENT])||'<div class="enote">No SEEK advertising loaded for this entity.</div>';
+    case 'glo': return gloPage();
+    case 'all': return allSales();
+    case 'tppl': { const own=MYD().filter(n=>deptsOf(ENT).some(d=>d.name===n)); if(!own.length) return ''; const s=PDEPT; PDEPT=own.includes(PDEPT)?PDEPT:own[0]; const h=pplPage().replace(/<div class="pfil"><span class="lb">Department<\/span>[\s\S]*?<\/div>\n/,''); PDEPT=s; return h; }
+  }
+  return '';
+}
+const kpi=(lab,val,det,cls,tip)=>`<div class="kpi ${cls||''}"${tip||''}><div class="lab">${lab}</div><div class="val">${val}</div>${det?`<div class="sub">${det}</div>`:''}</div>`;
+const panel=(title,sub,body,right)=>`<section class="blk pnl"><div class="hd"><div><h2>${title}</h2>${sub?`<p class="psub2">${sub}</p>`:''}</div>${right?`<div class="rt">${right}</div>`:''}</div>${body}</section>`;
+const plink=(id,t)=>`<a href="#" class="tlink" data-page="${id}">${t} <span aria-hidden="true">›</span></a>`;
+
+/* month in progress: billed, target to date, run-rate landing (the projected month-end section's own method) */
+function monthPace(fee){
+  const c=DATA.current, k=c.key, ks=DATA.months.map(m=>m.key), i=ks.indexOf(k), prev=ks.slice(Math.max(0,i-3),i);
+  const bill=kk=>fee.reduce((s,d)=>s+deptBill(d,[kk]),0);
+  const pb=prev.map(kk=>({b:bill(kk),d:bDays(kk,1,dimK(kk))})), pB=pb.reduce((s,x)=>s+x.b,0), pD=pb.reduce((s,x)=>s+x.d,0), rate=pD?pB/pD:0;
+  const done=bDays(k,1,c.day), all=bDays(k,1,c.days), rem=all-done, now=bill(k), proj=now+rate*rem;
+  const mm=M(), g=goal(), cost=DATA.emps.filter(e=>fee.some(d=>d.name===e.dept)).reduce((s,e)=>s+monthCost(e,k),0), full=cost*(g?mm.tg:mm.be), mtd=all?full*done/all:0;
+  return {now,proj,full,mtd,gap:now-mtd,pgap:proj-full,rem,done,all,g,word:g?'target':'break-even'};
+}
+function ownerHome(){
+  const fee=deptsOf(ENT).filter(d=>d.fee), ks=perMonths(), pn=esc(perName()), live=MODE==='live'&&PER==='CUR', es=DATA.ents[ENT].short;
+  const rows=divRows(ENT), T=rows.reduce((t,r)=>{['gp','ppl','np','oh'].forEach(f=>t[f]+=r[f]); return t;},{gp:0,ppl:0,np:0,oh:0});
+  const fk=(DATA.fwd||[])[0], fv=fk?fee.reduce((s,d)=>s+(((DATA.fwdBill||{})[d.name]||{})[fk.key]||0),0):0;
+  let k1, cards;
+  if(live){
+    const P=monthPace(fee), dm=DATA.months.find(m=>m.key===DATA.current.key);
+    cards=kpi('Billings to date',F(P.now),'Billings (GP) · '+esc(es),'lead')
+      +kpi('Gap to '+P.word+' to date',F(P.gap),'Against '+F(P.mtd)+' through '+DATA.current.day+' '+dm.label.split(' ')[0].slice(0,3),P.gap<0?'neg':'pos')
+      +kpi('Projected month-end',F(P.proj),'Run rate · '+P.rem+' business day'+(P.rem===1?'':'s')+' left')
+      +kpi('Booked '+(fk?fk.label.split(' ')[0]:'next month'),F(fv),'Forward starts on the sales sheet');
+    k1=P;
+  } else {
+    const a=entAgg();
+    cards=kpi('Billings (GP)',F(T.gp),pn,'lead')+kpi('Gap to '+word(),F(a.gap),'Against '+F(a.tgt),a.gap<0?'neg':'pos')+kpi('Net profit',F(T.np),'After overhead allocation',T.np<0?'neg':'')+kpi('ROGP',PC(T.gp?T.np/T.gp:null),'Net profit ÷ GP');
+  }
+  // division performance, by measure
+  const M_={gap:{t:'Gap to '+word(),v:r=>r.a.gap,f:F},b:{t:'Billings',v:r=>r.gp,f:F},g2s:{t:'GP to salary',v:r=>r.g2s||0,f:X},np:{t:'Net profit',v:r=>r.np,f:F}}, me=M_[DMEAS]||M_.gap;
+  const dr=rows.slice().sort((x,y)=>DMEAS==='gap'||DMEAS==='np'?me.v(x)-me.v(y):me.v(y)-me.v(x));
+  const mx=Math.max(1e-9,...dr.map(r=>Math.abs(me.v(r))));
+  const neg=dr.filter(r=>me.v(r)<0), negT=neg.reduce((s,r)=>s+me.v(r),0), worst=neg[0];
+  const divBody=`<div class="mtog" role="group" aria-label="Measure">${Object.keys(M_).map(k=>`<button type="button" data-dmeas="${k}" class="${k===DMEAS?'on':''}">${M_[k].t}</button>`).join('')}</div>
+    <div class="clist">${dr.map(r=>{const v=me.v(r);return `<a href="#" class="crow" data-page="dept:${esc(r.d.name)}"><span class="cname">${esc(r.d.label)}</span><span class="ctrack"><span class="cbar ${v<0?'neg':''}" style="width:${(Math.abs(v)/mx*100).toFixed(1)}%"></span></span><b class="${v<0?'neg':''}">${me.f(v)}</b></a>`;}).join('')}</div>
+    ${(DMEAS==='gap'||DMEAS==='np')&&worst&&negT?`<p class="fnote">${esc(worst.d.label)} accounts for ${PC(me.v(worst)/negT).replace('.0%','%')} of the ${DMEAS==='gap'?'shortfall':'losses'} across the divisions behind.</p>`:''}`;
+  const outlook=live?(()=>{const P=k1, w=v=>Math.max(0,Math.min(100,P.full?v/P.full*100:0)).toFixed(1)+'%';
+      return panel('Month-end outlook','Billings (GP) · '+esc(es)+' · A$',`<div class="wp"><span>Billed to date</span><strong>${F(P.now)}</strong></div><div class="ptrack"><span style="width:${w(P.now)}"></span><i style="left:${w(P.mtd)}"></i></div><div class="wp small"><span>${P.word==='target'?'Target':'Break-even'} to date ${F(P.mtd)}</span><span>${P.mtd?PC(P.now/P.mtd).replace('.0%','%'):'–'} covered</span></div>
+        <div class="wp" style="margin-top:16px"><span>Projected month-end</span><strong>${F(P.proj)}</strong></div><div class="ptrack"><span style="width:${w(P.proj)}"></span><i style="left:100%"></i></div><div class="wp small"><span>Full-month ${P.word} ${F(P.full)}</span><span>${P.full?PC(P.proj/P.full).replace('.0%','%'):'–'} covered</span></div>
+        <p class="fnote">Projected ${P.pgap>=0?'surplus':'shortfall'} <b class="${P.pgap<0?'neg':'pos'}">${F(P.pgap)}</b> at the recent run rate. ${plink('pace','Review pace')}</p>`);})()
+    :panel('Period result','GP to net profit · '+pn,`<div class="tbl"><table class="v2"><tbody><tr><td>GP (billings)</td><td>${F(T.gp)}</td></tr><tr><td>Fully loaded salaries</td><td>${F(-T.ppl)}</td></tr><tr><td>Overhead and other direct costs</td><td>${F(T.np-T.gp+T.ppl)}</td></tr><tr class="tot"><td>Net profit</td><td>${F(T.np)}</td></tr></tbody></table></div><p class="fnote">${plink('div','Open divisions')}</p>`);
+  // closed results by entity (Xero), last finished month
+  const fin=Object.keys(DATA.ents).map(e=>{const ms=e==='U'?((DATA.usa||{}).months||[]):DATA.months, cur=e==='U'?(DATA.usa||{}).current:DATA.current.key;
+      const k=ms.map(m=>m.key).filter(x=>x<cur&&plOf(e,x)).pop(); if(!k) return null; const x=plOf(e,k), b=bsAt(e,k);
+      return {e,k,x,bank:b?b.T.bank:null,f:e==='U'?FU:F};}).filter(Boolean);
+  const lk=fin.length?fin.map(r=>r.k).sort().pop():null;
+  const closed=fin.length?panel('Closed results by entity',(lk?esc(kLong(lk)):'')+' management accounts, from Xero. Each entity in its own currency.',
+    `<div class="tbl"><table class="v2"><thead><tr><th>Entity</th><th>Month</th><th>Trading income</th><th>Gross profit</th><th>Net result</th><th>Closing bank</th></tr></thead><tbody>
+    ${fin.map(r=>`<tr><td><a href="#" class="tlink" data-page="rep:pl" data-ent="${r.e}">${esc(DATA.ents[r.e].short)}</a></td><td class="mut">${esc(kShort(r.k))}</td><td>${r.f(r.x.rev)}</td><td>${r.f(r.x.gp)}</td><td class="${r.x.np<0?'neg':''}">${r.f(r.x.np)}</td><td>${r.bank==null?'–':`<a href="#" class="tlink" data-page="rep:cf" data-ent="${r.e}">${r.f(r.bank)}</a>`}</td></tr>`).join('')}
+    </tbody></table></div><p class="fnote">Select an entity for its P&amp;L, or a bank balance for its cash flow.</p>`,Object.keys(DATA.ents).length>1?`<a href="#" class="tlink" data-page="home" data-ent="G">Group view ›</a>`:''):'';
+  // what needs a decision
+  const ag=[];
+  if(worst) ag.push({t:'Review the largest division '+(DMEAS==='np'?'loss':'shortfall'),d:esc(worst.d.label)+' is '+F(Math.abs(me.v(worst)))+' behind '+(DMEAS==='np'?'break-even':word())+' for '+pn+'.',a:`dept:${worst.d.name}`,l:'Open division'});
+  const lossE=fin.filter(r=>r.x.np<0); if(lossE.length) ag.push({t:'Review '+esc(DATA.ents[lossE[0].e].short)+' cash and result',d:esc(kLong(lossE[0].k))+' closed with a net result of '+lossE[0].f(lossE[0].x.np)+(lossE[0].bank!=null?' and a bank balance of '+lossE[0].f(lossE[0].bank):'')+'.',a:'rep:cf',ent:lossE[0].e,l:'Open cash flow'});
+  if(fk&&fv) ag.push({t:'Check '+fk.label.split(' ')[0]+' start coverage',d:F(fv)+' is booked on the sales sheet to start in '+esc(fk.label)+'.',a:'fwd',l:'Open forward starts'});
+  const lowP=pplRows(ENT,'').filter(r=>!r.line&&r.c&&r.g2s!=null&&r.g2s<M().be).length; if(lowP) ag.push({t:lowP+' fee earner'+(lowP===1?' is':'s are')+' below break-even',d:'GP to salary under '+M().be.toFixed(2)+'× for '+pn+'.',a:'ppl',l:'Open people'});
+  const agenda=ag.length?panel('Needs a decision','The questions the numbers raise this period. Each opens the report behind it.',`<div class="agenda">${ag.map(x=>`<div class="arow"><div><b>${x.t}</b><span>${x.d}</span></div><a href="#" class="tlink" data-page="${x.a}"${x.ent?` data-ent="${x.ent}"`:''}>${x.l} ›</a></div>`).join('')}</div>`):'';
+  const reps=[['trend','Trading trends','Monthly history and run rate'],['comm','Commission','Quarterly targets and outcomes'],['ppl','People','GP, salary and ROGP by person'],['rep:dash','Month-end report','Finished months, P&L, balance sheet, cash']];
+  return `<div class="kpis k4">${cards}</div>
+    <div class="g2">${panel('Division performance',esc(es)+' · '+pn+' · A$',divBody)}${outlook}</div>
+    ${closed}${agenda}
+    ${panel('Supporting reports','',`<div class="rcards">${reps.map(([id,t,s])=>`<a href="#" class="rcard" data-page="${id}"><b>${t} ↗</b><small>${s}</small></a>`).join('')}</div>`)}`;
+}
+
+/* team leader home: own team in full, nothing about other teams' pay */
+function leadHome(){
+  const own=MYD().filter(n=>deptsOf(ENT).some(d=>d.name===n)).map(dep);
+  if(!own.length) return allSales();
+  const pn=esc(perName()), live=MODE==='live'&&PER==='CUR', fk=(DATA.fwd||[])[0], fv=fk?own.reduce((s,d)=>s+(((DATA.fwdBill||{})[d.name]||{})[fk.key]||0),0):0;
+  const A=own.map(d=>deptAgg(d.name)), b=A.reduce((s,a)=>s+a.b,0), c=A.reduce((s,a)=>s+a.c,0), tg=A.reduce((s,a)=>s+a.tgt,0);
+  const P=live?monthPace(own):null;
+  const cards=kpi('Team billings',F(b),pn,'lead')+(P?kpi('Gap to '+P.word+' to date',F(P.gap),'Against '+F(P.mtd)+' so far',P.gap<0?'neg':'pos')+kpi('Projected month-end',F(P.proj),'Full-month '+P.word+' '+F(P.full))
+      :kpi('Gap to '+word(),F(b-tg),'Against '+F(tg),b-tg<0?'neg':'pos')+kpi('GP to salary',c?X(b/c):'–','Break-even '+M().be.toFixed(2)+'×'))
+    +kpi('Booked '+(fk?fk.label.split(' ')[0]:'next month'),F(fv),'Forward starts');
+  const mem=[].concat(...A.map(a=>a.mem)).filter(e=>!e.billOnly&&e.a.c>0&&!isSup(e));
+  const behind=mem.filter(e=>e.a.gap<0).sort((x,y)=>x.a.gap-y.a.gap);
+  const att=behind.length?`<div class="agenda">${behind.slice(0,6).map(e=>`<div class="arow"><div><b>${esc(e.name)}</b><span>${F(e.a.b)} billed against ${F(e.a.tgt)} ${word()} · GP to salary ${X(e.a.mult)}</span></div><span class="st ${e.a.b>=e.a.bev?'mid':'bad'}">${F(e.a.gap)}</span></div>`).join('')}</div>`
+    :'<div class="enote">Everyone on the team is at or above '+word()+' for this period.</div>';
+  const ms=DATA.months, last=perMonths().slice(-1)[0], lm=ms.find(m=>m.key===last)||ms[ms.length-1], qm=ms.filter(m=>m.q===lm.q).map(m=>m.key);
+  const q=mem.map(e=>({e,qb:qm.reduce((s,k)=>s+(e.bill[k]||0),0),t:((e.qtr||{})[lm.q]||{}).target||0})).filter(x=>x.t).sort((x,y)=>y.qb/y.t-x.qb/x.t);
+  const qBody=q.length?`<div class="clist">${q.map(x=>`<div class="crow"><span class="cname">${esc(x.e.name)}</span><span class="ctrack"><span class="cbar ${x.qb<x.t?'':'ok'}" style="width:${Math.min(100,x.qb/x.t*100).toFixed(1)}%"></span></span><b>${PC(x.qb/x.t).replace('.0%','%')}</b></div>`).join('')}</div><p class="fnote">${esc(lm.fq||lm.q)}: GP to date against each person's quarter target.</p>`
+    :'<div class="enote">No quarter targets on the sales sheet for this team.</div>';
+  const pr=pplRows(ENT,own[0].name).filter(r=>!r.line).sort((x,y)=>y.b-x.b);
+  const wl=`<div class="tbl"><table class="v2"><thead><tr><th>Consultant</th><th>GP</th><th>GP to salary</th><th>NP</th></tr></thead><tbody>${pr.map(r=>`<tr><td><b style="color:var(--ink)">${esc(r.name)}</b></td><td>${F(r.b)}</td><td class="pill">${r.g2s==null?'–':`<span class="st ${mvc(r.g2s)}">${X(r.g2s)}</span>`}</td><td class="${r.np<0?'neg':''}">${F(r.np)}</td></tr>`).join('')}</tbody></table></div>`;
+  const fm=[DATA.current.key].concat((DATA.fwd||[]).map(m=>m.key)), ml=k=>k===DATA.current.key?monthLab(k):(((DATA.fwd||[]).find(m=>m.key===k)||{}).label||k);
+  const st=`<div class="starts">${fm.map(k=>{const v=own.reduce((s,d)=>s+(k===DATA.current.key?deptBill(d,[k]):(((DATA.fwdBill||{})[d.name]||{})[k]||0)),0); const p=ml(k).split(' ');
+    return `<div class="srow"><div class="sdate"><small>${esc(p[1]||'')}</small><b>${esc((p[0]||'').slice(0,3))}</b></div><div><b>${F(v)}</b><span>${k===DATA.current.key?'Billed so far this month':'Starts already on the sales sheet'}</span></div></div>`;}).join('')}</div>`;
+  return `<div class="kpis k4">${cards}</div>
+    <div class="g2">${panel('Needs attention','Fee earners behind '+word()+', '+pn+'.',att,plink('tppl','Team people'))}${panel('Quarter to date','Against each person\'s target.',qBody)}</div>
+    <div class="g2">${panel('Team workload',pn,wl,plink('dept:'+own[0].name,'Team detail'))}${panel('Upcoming starts','This month and the months ahead.',st,plink('fwd','Forward starts'))}</div>`;
+}
 
 start();
 })();
