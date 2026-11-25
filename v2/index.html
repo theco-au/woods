@@ -3126,6 +3126,7 @@ const fyFrom=()=>{const y=(DATA&&DATA.months)||[]; return y.length?MNL[+y[0].key
 /* every load: keep the live copy (with the month in progress) and the month-end copy (finished months only) */
 function trimReport(d){
   if(!d||!d.current) return;
+  if(/^FY20\d\d$/.test(d.fy||'')) d.fy='FY'+d.fy.slice(4);
   LIVE=d; REP=JSON.parse(JSON.stringify(d));
   REP.months=(REP.months||[]).filter(m=>m.key<REP.current.key);
   if(REP.usa&&REP.usa.months&&REP.usa.current) REP.usa.months=REP.usa.months.filter(m=>m.key<REP.usa.current);
@@ -3243,14 +3244,16 @@ function divPage(){
     <td class="${r.np<0?'neg':''}"${npTip(r)}>${F(r.np)}</td><td>${BL(r.bud)}</td><td>${r.bud==null?'<span class="mut">–</span>':SG(r.np-r.bud)}</td>
     <td class="pill"><span class="st ${stc(r.np,r.bud,r.g2s)}">${PC(r.rogp)}</span></td><td>${r.g2s==null?'–':X(r.g2s)}</td></tr>`;
   const P=poolRec(ENT,ks), resid=P.pool-T.oh-P.unb;
+  const sk=DATA.seek||{}, skTo=(sk.asAt||'').slice(0,7), skMiss=skTo?ks.filter(k=>k>skTo):[];
+  const skFlag=skMiss.length?flag('No SEEK ad report loaded for '+skMiss.map(mShort).join(', '),'The SEEK ad usage report runs to '+esc(sk.asAt||'')+'. SEEK spend for later months is not yet in direct costs, so net profit for those months is overstated until the next report is added to the Seek_Ads_Manual tab.','hi'):'';
   const kp=(l,v,s,c)=>`<div class="kpi"><div class="lab">${l}</div><div class="val ${c||''}">${v}</div>${s?`<div class="sub">${s}</div>`:''}</div>`;
-  return `<div class="kpis">${kp('GP (billings)',F(T.gp),pn)}${kp('Net profit',F(T.np),'After overhead allocation',T.np<0?'neg':'')}${kp('ROGP',PC(T.gp?T.np/T.gp:null),'Net profit ÷ GP')}${kp('GP to salary',T.ppl?X(T.gp/T.ppl):'–','Break-even '+mm.be.toFixed(2)+'×'+(goal()?' · target '+mm.tg.toFixed(2)+'×':''))}</div>
+  return `${skFlag}<div class="kpis">${kp('GP (billings)',F(T.gp),pn)}${kp('Net profit',F(T.np),'After overhead allocation',T.np<0?'neg':'')}${kp('ROGP',PC(T.gp?T.np/T.gp:null),'Net profit ÷ GP')}${kp('GP to salary',T.ppl?X(T.gp/T.ppl):'–','Break-even '+mm.be.toFixed(2)+'×'+(goal()?' · target '+mm.tg.toFixed(2)+'×':''))}</div>
   <section class="blk"><div class="hd"><h2>Divisions, ${pn}${INFO('GP is billings from the sales sheet (the block a line sits in decides the department). Direct costs are fully loaded salaries (base pay, leave, allowances, super, payroll tax, WorkCover), commission accrued from the sales sheet and SEEK ads posted. Overhead is the pool below, allocated to each fee department in proportion to its fully loaded salaries. ROGP = net profit ÷ GP. Budget columns stay blank until a budget is loaded. * includes the month in progress (estimated cost).','Divisions')}</h2><div class="rt">${anyBud?'Budget loaded':'No budget loaded yet'}</div></div>
   <div class="tbl"><table class="v2"><thead><tr><th>Department</th><th>GP</th><th>Direct costs</th><th>OP</th><th>Overhead</th><th>NP</th><th>Budget NP</th><th>Variance</th><th>ROGP</th><th>GP to salary</th></tr></thead><tbody>
     ${rows.map(row).join('')}
     <tr class="tot"><td>Total</td><td>${F(T.gp)}</td><td${dcTip(T)}>${F(T.dc)}</td><td>${F(T.op)}</td><td>${F(T.oh)}</td><td class="${T.np<0?'neg':''}"${npTip(T)}>${F(T.np)}</td><td>${BL(anyBud?T.bud:null)}</td><td>${anyBud?SG(T.np-T.bud):'<span class="mut">–</span>'}</td><td>${PC(T.gp?T.np/T.gp:null)}</td><td>${T.ppl?X(T.gp/T.ppl):'–'}</td></tr>
   </tbody></table></div></section>
-  ${P.has?`<section class="blk"><div class="hd"><h2>Overhead pool, ${pn}${INFO('Everything that is not a fee department\'s own direct cost. Closed months come from Xero; months not yet closed carry the last closed month\'s Xero figures (the current month pro rata). People with no department and the non-fee departments are overhead (agreed 25 Nov 2026).','Overhead pool')}</h2><div class="rt">${P.carried.length?'Carried from the last closed month: '+P.carried.map(mShort).join(', '):'Closed months'}</div></div>
+  ${P.has?`<section class="blk"><div class="hd"><h2>Overhead pool, ${pn}${INFO('Everything that is not a fee department\'s own direct cost. Closed months come from Xero; months not yet closed carry the last closed month\'s Xero figures (the current month pro rata). People with no department and the non-fee departments are overhead (agreed 25 Nov 2026).','Overhead pool')}</h2><div class="rt">${P.carried.length?'Xero part estimated for '+P.carried.map(mShort).join(', ')+' (last closed month carried)':'Closed months, from Xero'}</div></div>
   <div class="tbl"><table class="v2"><thead><tr><th>Item</th><th>Amount</th></tr></thead><tbody>
     <tr><td>Non-payroll operating expenses (Xero)</td><td>${F(P.opex)}</td></tr>
     <tr><td>Cost of sales other than SEEK ads (Xero)</td><td>${F(P.cos)}</td></tr>
@@ -3608,7 +3611,7 @@ function monthPace(fee){
   const bill=kk=>fee.reduce((s,d)=>s+deptBill(d,[kk]),0);
   const pb=prev.map(kk=>({b:bill(kk),d:bDays(kk,1,dimK(kk))})), pB=pb.reduce((s,x)=>s+x.b,0), pD=pb.reduce((s,x)=>s+x.d,0), rate=pD?pB/pD:0;
   const done=bDays(k,1,c.day), all=bDays(k,1,c.days), rem=all-done, now=bill(k), proj=now+rate*rem;
-  const mm=M(), g=goal(), cost=DATA.emps.filter(e=>fee.some(d=>d.name===e.dept)).reduce((s,e)=>s+monthCost(e,k),0), full=cost*(g?mm.tg:mm.be), mtd=all?full*done/all:0;
+  const mm=M(), g=goal(), cost=DATA.emps.filter(e=>fee.some(d=>d.name===e.dept)).reduce((s,e)=>s+monthCost(e,k),0), full=cost*(g?mm.tg:mm.be), mtd=fee.reduce((t,d)=>{const a=deptAgg(d.name); return t+(g?a.tgt:a.bev);},0);   // cost to date x multiple, as the division and people bars
   return {now,proj,full,mtd,gap:now-mtd,pgap:proj-full,rem,done,all,g,word:g?'target':'break-even'};
 }
 function ownerHome(){
@@ -3619,7 +3622,7 @@ function ownerHome(){
   if(live){
     const P=monthPace(fee), dm=DATA.months.find(m=>m.key===DATA.current.key);
     cards=kpi('Billings to date',F(P.now),'Billings (GP) · '+esc(es),'lead')
-      +kpi('Gap to '+P.word+' to date',F(P.gap),'Against '+F(P.mtd)+' through '+DATA.current.day+' '+dm.label.split(' ')[0].slice(0,3),P.gap<0?'neg':'pos')
+      +kpi('Gap to '+P.word+' to date',F(P.gap),'Against '+F(P.mtd)+' to '+DATA.current.day+' '+dm.label.split(' ')[0].slice(0,3)+' (cost to date × '+(P.g?M().tg:M().be).toFixed(2)+')',P.gap<0?'neg':'pos')
       +kpi('Projected month-end',F(P.proj),'Run rate · '+P.rem+' business day'+(P.rem===1?'':'s')+' left')
       +kpi('Booked '+(fk?fk.label.split(' ')[0]:'next month'),F(fv),'Forward starts on the sales sheet');
     k1=P;
@@ -3689,6 +3692,48 @@ function leadHome(){
   return `<div class="kpis k4">${cards}</div>
     <div class="g2">${panel('Needs attention','Fee earners behind '+word()+', '+pn+'.',att,plink('tppl','Team people'))}${panel('Quarter to date','Against each person\'s target.',qBody)}</div>
     <div class="g2">${panel('Team workload',pn,wl,plink('dept:'+own[0].name,'Team detail'))}${panel('Upcoming starts','This month and the months ahead.',st,plink('fwd','Forward starts'))}</div>`;
+}
+
+/* ---------- Xero bridge, v2 basis: fee departments' NP after the salary-weighted overhead (26 Nov 2026) ---------- */
+function npBridge(en){
+  if(!en||en==='U'||en==='G'||!DATA.ents[en]) return '';
+  const ks=perMonths(), X=(DATA.xero||{})[en]||{}, miss=ks.filter(k=>!X[k]);
+  if(miss.length===ks.length) return '';
+  const sE=ENT; ENT=en; const ds=deptsOf(en).map(d=>({d,a:deptAgg(d.name)})); ENT=sE;
+  const fee=ds.filter(x=>x.d.fee), non=ds.filter(x=>!x.d.fee&&(x.a.c||x.a.b));
+  const sum=(arr,f)=>arr.reduce((t,x)=>t+f(x.a),0);
+  const B=sum(ds,a=>a.b), C=sum(ds,a=>a.c), CA=sum(ds,a=>a.ca), OH=sum(fee,a=>a.oh), AD=sum(ds,a=>a.ad);
+  const UA=ks.reduce((t,k)=>t+((((DATA.ovhPool||{})[en]||{})[k]||{}).ua||0),0);
+  const x={rev:0,cos:0,oth:0,opex:0,np:0,ppl:0,L:{rev:{},cos:{},oth:{},ppl:{},ovh:{}}};
+  ks.forEach(k=>{const r=X[k]; if(!r) return; ['rev','cos','oth','opex','np'].forEach(f=>x[f]+=r[f]||0);
+    const ln=r.lines||{}; ['rev','cos','oth'].forEach(g=>(ln[g]||[]).forEach(([l,v])=>{x.L[g][l]=(x.L[g][l]||0)+v;}));
+    (ln.opex||[]).forEach(([l,v])=>{const g=PEOPLE_RE.test(l)?'ppl':'ovh'; x.L[g][l]=(x.L[g][l]||0)+v; if(g==='ppl') x.ppl+=v;});});
+  const xOvh=x.opex-x.ppl, npFee=sum(fee,a=>a.ct), cNon=sum(non,a=>a.ct);
+  const TR=/temp|contract|labour hire/i, SR=/w\s*&\s*co\.?\s*search/i, tot=(o,re)=>Object.keys(o).filter(l=>re.test(l)).reduce((t,l)=>t+o[l],0);
+  const tRev=tot(x.L.rev,TR), tCos=tot(x.L.cos,TR), sRev=tot(x.L.rev,SR), sCos=tot(x.L.cos,SR);
+  const rest=(o)=>Object.keys(o).filter(l=>!TR.test(l)&&!SR.test(l)).map(l=>esc(l)+' '+F(o[l])).join('; ');
+  const pn=esc(perName());
+  const rows=[
+    ['Fee departments\' net profit (after overhead allocation)',npFee,BD('Fee departments\' net profit',pn,fee.map(z=>({l:z.d.label,v:z.a.ct})),{signed:true,total:npFee})],
+    ['Add back: overhead allocated to the fee departments',OH,CALC('Overhead allocated',pn,[['Salary-weighted overhead in the divisions',F(OH)]],'The pool: Xero non-payroll costs, cost of sales other than SEEK, people with no department and the non-fee departments.')],
+    ['Non-fee departments\' cost (dashboard)',cNon,non.length?BD('Non-fee departments',pn,non.map(z=>({l:z.d.label,v:z.a.ct})),{signed:true,total:cNon}):''],
+    ['People with no department (dashboard)',-UA,''],
+    ['Xero non-payroll operating expenses (incl. interest)',-xOvh,''],
+    ['Temp margin (Xero temp revenue less temp cost of sales)',tRev-tCos,CALC('Temp margin',pn,[['Temp revenue',F(tRev)],['Less temp cost of sales',F(-tCos)],['= Temp margin',SG(tRev-tCos),'s']],'Not in billings or in the overhead pool.')],
+    ['Other income (Xero)',x.oth,Object.keys(x.L.oth).length?BD('Other income','Xero, by account',Object.keys(x.L.oth).map(l=>({l,v:x.L.oth[l]})),{total:x.oth}):''],
+    ['Permanent fees: Xero against the sales sheet',x.rev-tRev-sRev-B,CALC('Permanent fees',pn,[['Xero revenue excluding temp and the Search recharge',F(x.rev-tRev-sRev)],['Less billings (GP), sales sheet',F(-B)],['= Difference',SG(x.rev-tRev-sRev-B),'s']],'Invoice timing against start-date crediting, credit notes and sales sheet errors. Xero: '+rest(x.L.rev)+'.')],
+    ['W&amp;Co Search recharge (income less cost, passed through)',sRev-sCos,''],
+    ['Cost of sales other than temp, Search and SEEK ads',-(x.cos-tCos-sCos)+AD,CALC('Other cost of sales',pn,[['Xero cost of sales excluding temp and Search',F(-(x.cos-tCos-sCos))],['Add back SEEK ads already in the divisions',F(AD)],['= Difference',SG(-(x.cos-tCos-sCos)+AD),'s']],'Xero: '+rest(x.L.cos)+'.')],
+    ['Wages and on-costs: dashboard against Xero',C+CA+UA-x.ppl,CALC('Wages and on-costs',pn,[['Cost of employment, all departments',F(C)],['People with no department',F(UA)],['Commission accrued (sales sheet)',F(CA)],['Less Xero wages, super, payroll tax, WorkCover and commission',F(-x.ppl)],['= Difference',SG(C+UA+CA-x.ppl),'s']],'Normalised pays and Settings rates against Xero as posted; commission accrued against commission paid.')]];
+  const total=rows.reduce((t,r)=>t+r[1],0), resid=x.np-total;
+  const info='Reconciles the fee departments\' net profit (the Divisions tab) to Xero net profit. Lines below the add-back are what the divisions do not carry: temp margin and other income are not credited to them, and the dashboard\'s payroll and billings differ from the ledger by timing.';
+  return `<section class="blk"><div class="hd"><h2>Divisions to Xero net profit${INFO(info)}</h2><div class="rt">${pn}</div></div>
+    ${miss.length?flag('Xero not synced for '+miss.map(mShort).join(', '),'Those months are left out of the Xero side.','hi'):''}
+    <div class="tbl"><table><thead><tr><th>Item</th><th>Amount</th></tr></thead><tbody>
+    ${rows.map(([l,v,t])=>`<tr><td>${l}</td><td class="${v<0?'neg':''}"${t||''}>${F(v)}</td></tr>`).join('')}
+    <tr class="tot"><td>Xero net profit${(ks.some(k=>X[k]&&X[k].below))?' (before income tax and dividends)':''}</td><td class="${x.np<0?'neg':''}">${F(x.np)}</td></tr>
+    <tr class="sub"><td>Remaining variance</td><td>${F(Math.abs(resid)<0.5?0:resid)}</td></tr>
+    </tbody></table></div></section>`;
 }
 
 start();
